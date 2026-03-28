@@ -1,0 +1,7 @@
+{
+  "name": "engineering",
+  "prefix": "eng",
+  "description": "Language-agnostic engineering practices — copywriting standards, logging patterns, and test strategy",
+  "skills": ["eng-copywriting", "eng-logging", "eng-testing"],
+  "specialists": ["test-coverage"]
+}
