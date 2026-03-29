@@ -23,18 +23,9 @@ Determine the PR number from:
 - Current branch: `gh pr view --json number,url,title,headRefOid`
 - If ambiguous, ask the user
 
-#### 1b. Extract owner/repo from git remote
+#### 1b. Get owner/repo and commit SHA
 
-Do not hardcode owner/repo values. Extract them dynamically:
-
-```bash
-# Get the remote URL and parse owner/repo
-REMOTE_URL=$(git remote get-url origin)
-# HTTPS: https://github.com/owner/repo.git -> owner/repo
-# SSH: git@github.com:owner/repo.git -> owner/repo
-```
-
-#### 1c. Get the commit SHA
+Extract owner/repo from `git remote get-url origin`. Use these in all `gh api` calls below.
 
 ```bash
 gh api repos/{owner}/{repo}/pulls/{PR_NUMBER} --jq '.head.sha'

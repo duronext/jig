@@ -75,13 +75,7 @@ Run these in parallel. You need REST comment IDs (for replying) and GraphQL thre
 gh pr view --json number,url,title,body
 ```
 
-**Extract owner/repo from git remote** (do not hardcode):
-
-```bash
-REMOTE_URL=$(git remote get-url origin)
-# HTTPS: https://github.com/owner/repo.git -> owner/repo
-# SSH: git@github.com:owner/repo.git -> owner/repo
-```
+Extract owner/repo from `git remote get-url origin`. Use in all `gh api` calls below.
 
 **Fetch PR comments (REST -- for replying):**
 
