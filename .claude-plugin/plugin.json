@@ -8,6 +8,7 @@
   },
   "repository": "https://github.com/duronext/jig",
   "license": "MIT",
+  "commands": "./commands/",
   "skills": [
     "./core/skills/jig-kickoff",
     "./core/skills/jig-brainstorm",
