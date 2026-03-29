@@ -1,0 +1,16 @@
+{
+  "name": "@jig-framework/core",
+  "version": "1.0.0",
+  "description": "The AI engineering workflow framework for teams",
+  "author": "Duro Labs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/duronext/jig.git"
+  },
+  "scripts": {
+    "bump": "node scripts/bump.js",
+    "bump:minor": "node scripts/bump.js minor",
+    "bump:major": "node scripts/bump.js major"
+  }
+}
