@@ -77,20 +77,69 @@ See [adapters/](adapters/) for platform-specific integration guides.
 
 ## How It Works
 
-Jig skills come from two sources:
+Jig ships as a plugin with 15 core skills, 3 agents, and 5 review specialists. Your team adds domain skills in `.claude/skills/` that wire into the framework automatically.
 
-```
-Plugin (Jig core)        Your project (.claude/skills/)
-├── kickoff              ├── be-database/
-├── brainstorm           ├── fe-react/
-├── plan                 ├── ops-feature-flags/
-├── team-dev             └── ... your domain skills
-├── review
-└── ... 15 total         Discovered automatically by
-                         tier, globs, and frontmatter
-```
+### Core Skills (the pipeline)
 
-Core skills come from the Jig plugin (auto-updated). Team skills live in your repo's `.claude/skills/` directory — they follow Jig's schema and wire into the framework's discovery, brainstorming, and review systems.
+| Command | Skill | What It Does |
+|---------|-------|-------------|
+| `/jig-kickoff` | Pipeline orchestrator | Classifies work (bug/feature/improvement/task) and routes through the appropriate pipeline stages. The entry point for all development work. |
+| `/jig-brainstorm` | Design exploration | One question at a time, 2-3 approaches with trade-offs, design approval gate. Surfaces your team's concerns checklist from `jig.config.md`. |
+| `/jig-prd` | Requirements capture | Structured PRD with enforceable acceptance checklists. Two tiers: Full (12 sections) for features, Light (5 sections) for bugs. Layer-tagged items (`[API]`, `[DATA]`, `[LOGIC]`, `[UI]`) feed directly into spec reviewers. |
+| `/jig-plan` | Implementation planning | Turns approved designs into bite-sized TDD tasks with exact file paths, code snippets, and verification steps. Output is executable by `/jig-team-dev` or `/jig-sdd`. |
+| `/jig-team-dev` | Parallel execution | Spawns agent teammates in split panes. Each implementer works independently; the lead orchestrates staggered spec compliance + code quality reviews as they finish. The killer feature. |
+| `/jig-sdd` | Serial execution | Fresh subagent per task with two-stage review (spec compliance then code quality). For tightly coupled tasks or when agent teams aren't available. |
+| `/jig-review` | Code review swarm | Dispatches parallel specialist reviewers (security, dead code, error handling, async safety, performance + your team's specialists). Filters by glob match, scores mechanically, produces unified report. |
+| `/jig-pr-create` | PR creation | Runs the review swarm first, then analyzes all commits, groups by theme, writes a clear description with test plan. No corporate speak. |
+| `/jig-pr-respond` | PR feedback | Fetches unresolved comments, analyzes each (valid fix vs false positive), implements fixes, commits, pushes, replies, and resolves threads. The full loop. |
+| `/jig-postmortem` | Retrospective | After merge, analyzes what reviewers caught to find gaps in skills and specialists. Diagnoses whether the swarm or logic reviewer should have caught it, then fixes the gap. |
+| `/jig-debug` | Systematic debugging | Iron law: no fixes without root cause investigation. Four phases — investigate, analyze patterns, test hypothesis, implement. Escalates to "question the architecture" after 3 failed fixes. |
+| `/jig-verify` | Verification gate | Evidence before assertions. Run the command, read the output, THEN claim it works. Prevents "should pass now" claims without proof. |
+| `/jig-tdd` | Test-driven development | Red-green-refactor. No production code without a failing test first. Wrote code before the test? Delete it. Start over. |
+| `/jig-finish` | Branch completion | Verifies tests pass, then presents 4 options: merge locally, create PR, keep branch as-is, or discard. Handles worktree cleanup. |
+| `/jig-extend` | Framework extension | The meta-skill. Interviews you about what you need, determines the right artifact (skill, specialist, agent, pack, or config change), scaffolds it with valid frontmatter, and wires it into discovery. |
+
+### Core Agents
+
+| Agent | Trigger | What It Does |
+|-------|---------|-------------|
+| `jig-commit` | "commit the work" | Conventional commits with hook awareness. Reads commitlint config, respects existing hooks, stages specific files. |
+| `jig-code-review` | "review my code" | Dispatches the full review swarm (`tier: all`) and delivers the confidence-scored report. |
+| `jig-pr-review` | "post review comments" | Posts inline PR comments with suggestion blocks. Validates every path and line number against the diff before posting. |
+
+### Core Specialists
+
+Dispatched by `/jig-review` as parallel subagents. Language-agnostic:
+
+| Specialist | Severity | What It Catches |
+|-----------|----------|----------------|
+| `security` | blocking | Injection, hardcoded secrets, auth gaps, data exposure |
+| `dead-code` | major | Unused exports, write-only variables, disconnected wiring, unreachable branches |
+| `error-handling` | major | Swallowed errors, missing handling, inconsistent patterns, context loss |
+| `async-safety` | major | Race conditions, premature state flags, resource leaks, error path divergence |
+| `performance` | minor | N+1 patterns, unbounded operations, unnecessary computation, over-fetching |
+
+Teams add their own specialists in `.claude/specialists/` (e.g., `typeorm.md`, `i18n.md`, `graphql-contracts.md`). The swarm discovers them automatically.
+
+### Engineering Starter Pack
+
+Ships with Jig. Three skills + one specialist for universal engineering practices:
+
+| Skill/Specialist | What It Does |
+|-----------------|-------------|
+| `eng-copywriting` | Sentence case for all user-facing text. Always loaded. |
+| `eng-logging` | When to error vs warn vs info vs debug. Structured logging. |
+| `eng-testing` | Test pyramid, arrange-act-assert, mocking strategy, flaky test policy. |
+| `test-coverage` (specialist) | Reviews changed code for missing test coverage during swarm review. |
+
+### Your Team Skills
+
+Your domain expertise lives in `.claude/skills/` in your project. These follow Jig's schema and wire into the framework:
+
+- **Glob-triggered**: edit a database entity file → `be-database` skill auto-loads
+- **Concerns checklist**: listed in `jig.config.md` → surfaces during `/jig-brainstorm`
+- **Review swarm**: team specialists in `.claude/specialists/` → dispatched by `/jig-review`
+- **Created with**: `/jig-extend` scaffolds new skills with valid frontmatter
 
 ### Configuration
 
