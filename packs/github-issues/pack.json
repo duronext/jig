@@ -1,0 +1,7 @@
+{
+  "name": "github-issues",
+  "prefix": "gh",
+  "description": "GitHub Issues integration — ticket creation via gh CLI",
+  "skills": [],
+  "specialists": []
+}

@@ -25,6 +25,7 @@
     "./core/skills/verify",
     "./core/skills/tdd",
     "./core/skills/finish",
+    "./core/skills/ticket",
     "./core/skills/extend",
     "./packs/engineering/skills/eng-copywriting",
     "./packs/engineering/skills/eng-logging",

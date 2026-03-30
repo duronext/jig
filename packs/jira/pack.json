@@ -1,0 +1,7 @@
+{
+  "name": "jira",
+  "prefix": "jira",
+  "description": "Jira integration — ticket creation via Jira MCP or REST API",
+  "skills": [],
+  "specialists": []
+}
