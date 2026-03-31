@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1200px;
+      height: 630px;
+      background: #08080d;
+      background-image: radial-gradient(circle at 1px 1px, hsla(0,0%,100%,.015) 1px, transparent 0);
+      background-size: 32px 32px;
+      font-family: 'Inter', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .content {
+      padding: 0 80px;
+      position: relative;
+      z-index: 1;
+    }
+    .wordmark {
+      font-size: 96px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: #e4e4ed;
+      text-shadow: 0 0 60px rgba(99,102,241,0.50), 0 0 120px rgba(99,102,241,0.19);
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+    .tagline {
+      font-size: 28px;
+      font-weight: 400;
+      color: #8888a0;
+      margin-bottom: 28px;
+    }
+    .pipeline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .stage {
+      font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: 6px 12px;
+      border: 1px solid rgba(99,102,241,0.40);
+      border-radius: 4px;
+      color: #6366f1;
+      background: rgba(99,102,241,0.13);
+    }
+    .arrow {
+      color: #555570;
+      font-size: 12px;
+    }
+
+    /* Schematic ghost in background */
+    .schematic {
+      position: absolute;
+      top: 20px;
+      right: 160px;
+      width: 620px;
+      height: 560px;
+      opacity: 1;
+      -webkit-mask-image: radial-gradient(ellipse 65% 65% at 55% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+      mask-image: radial-gradient(ellipse 65% 65% at 55% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+    }
+    .schematic svg { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div class="schematic">
+    <svg viewBox="0 0 520 480" fill="none">
+      <rect x="80" y="70" width="340" height="300" rx="6" stroke="rgba(99,102,241,0.29)" stroke-width=".75"/>
+      <line x1="40" y1="220" x2="460" y2="220" stroke="rgba(99,102,241,0.16)" stroke-width=".5" stroke-dasharray="16 4 4 4"/>
+      <line x1="250" y1="30" x2="250" y2="410" stroke="rgba(99,102,241,0.16)" stroke-width=".5" stroke-dasharray="16 4 4 4"/>
+      <rect x="130" y="110" width="220" height="220" rx="2" stroke="rgba(99,102,241,0.19)" stroke-width=".75" stroke-dasharray="8 4"/>
+      <circle cx="140" cy="120" r="7" stroke="rgba(99,102,241,0.35)" stroke-width=".75"/>
+      <circle cx="140" cy="120" r="2.5" stroke="rgba(99,102,241,0.26)" stroke-width=".5"/>
+      <circle cx="340" cy="120" r="7" stroke="rgba(99,102,241,0.35)" stroke-width=".75"/>
+      <circle cx="340" cy="120" r="2.5" stroke="rgba(99,102,241,0.26)" stroke-width=".5"/>
+      <circle cx="140" cy="320" r="7" stroke="rgba(99,102,241,0.35)" stroke-width=".75"/>
+      <circle cx="140" cy="320" r="2.5" stroke="rgba(99,102,241,0.26)" stroke-width=".5"/>
+      <circle cx="210" cy="190" r="10" stroke="rgba(99,102,241,0.26)" stroke-width=".75"/>
+      <circle cx="210" cy="190" r="4" stroke="rgba(99,102,241,0.19)" stroke-width=".5"/>
+      <circle cx="290" cy="250" r="10" stroke="rgba(99,102,241,0.26)" stroke-width=".75"/>
+      <circle cx="290" cy="250" r="4" stroke="rgba(99,102,241,0.19)" stroke-width=".5"/>
+      <circle cx="210" cy="190" r="22" stroke="rgba(99,102,241,0.16)" stroke-width=".5" stroke-dasharray="3 2"/>
+      <line x1="226" y1="174" x2="265" y2="148" stroke="rgba(99,102,241,0.16)" stroke-width=".5"/>
+      <circle cx="275" cy="140" r="11" stroke="rgba(99,102,241,0.19)" stroke-width=".5"/>
+      <text x="275" y="143" text-anchor="middle" font-family="SF Mono, Fira Code, monospace" font-size="8" fill="rgba(99,102,241,0.29)">A</text>
+      <line x1="80" y1="48" x2="420" y2="48" stroke="rgba(99,102,241,0.19)" stroke-width=".5"/>
+      <text x="250" y="44" text-anchor="middle" font-family="SF Mono, Fira Code, monospace" font-size="7" fill="rgba(99,102,241,0.26)">340.00</text>
+      <line x1="445" y1="70" x2="445" y2="370" stroke="rgba(99,102,241,0.19)" stroke-width=".5"/>
+      <text x="455" y="224" font-family="SF Mono, Fira Code, monospace" font-size="7" fill="rgba(99,102,241,0.26)" transform="rotate(90 455 224)">300.00</text>
+      <rect x="370" y="395" width="110" height="50" rx="1" stroke="rgba(99,102,241,0.13)" stroke-width=".5"/>
+      <text x="425" y="408" text-anchor="middle" font-family="SF Mono, Fira Code, monospace" font-size="5.5" fill="rgba(99,102,241,0.19)">JIG-001 REV C</text>
+    </svg>
+  </div>
+
+  <div class="content">
+    <div class="wordmark">Jig</div>
+    <div class="tagline">The AI engineering workflow framework for teams.</div>
+    <div class="pipeline">
+      <span class="stage">DISCOVER</span>
+      <span class="arrow">&rarr;</span>
+      <span class="stage">BRAINSTORM</span>
+      <span class="arrow">&rarr;</span>
+      <span class="stage">PLAN</span>
+      <span class="arrow">&rarr;</span>
+      <span class="stage">EXECUTE</span>
+      <span class="arrow">&rarr;</span>
+      <span class="stage">REVIEW</span>
+      <span class="arrow">&rarr;</span>
+      <span class="stage">SHIP</span>
+      <span class="arrow">&rarr;</span>
+      <span class="stage">LEARN</span>
+    </div>
+  </div>
+</body>
+</html>
