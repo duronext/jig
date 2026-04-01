@@ -11,7 +11,9 @@ alwaysApply: false
 
 # Jig Development Pipeline
 
-**PURPOSE**: The pipeline orchestrator. Ensures every task — bug, feature, improvement, or chore — flows through a predictable sequence of stages with quality checks at each transition.
+**PURPOSE**: The pipeline orchestrator. Routes work through stages and checks gates at each transition. **Kickoff does NOT execute stages itself** — it invokes the downstream skill for each stage using the Skill tool.
+
+**ORCHESTRATOR RULE**: At every stage transition, you MUST invoke the downstream skill using the Skill tool (e.g., `Skill: jig:brainstorm`). Do NOT attempt to execute the stage inline by following kickoff's summary of what the stage does. The downstream skill has the full process — kickoff only knows enough to route and check gates.
 
 **CONFIGURATION**: Reads `jig.config.md` for pipeline stages, work type overrides, ticket system, branching format, and concerns checklist.
 
@@ -119,7 +121,7 @@ Before proceeding, confirm:
 
 For **features** and **large improvements**, prompt: "Want to capture requirements first with `/prd`?"
 
-If yes, invoke `prd` to produce a structured PRD with enforceable acceptance checklists. The PRD becomes the input to brainstorming — it defines *what* needs to be built so brainstorming can focus on *how*.
+If yes: **INVOKE `jig:prd` using the Skill tool.** Do not write the PRD inline — the `prd` skill has the full process (tier selection, 12-section structure, acceptance checklist format). Wait for it to complete before proceeding.
 
 For **bugs**, **tasks**, and **small improvements**: skip this step. Users can still invoke `/prd` manually if needed.
 
@@ -134,60 +136,18 @@ For **bugs**, **tasks**, and **small improvements**: skip this step. Users can s
 
 **Gate**: A design is approved by the user.
 
-### For Bugs (light)
+**Routing by work type:**
 
-Focus on:
-1. **Root cause**: What's actually broken and why?
-2. **Fix approach**: What's the minimal change that fixes it?
-3. **Regression risk**: What could this fix break?
-4. **Test plan**: How do we verify the fix and prevent regression?
+| Work Type | Brainstorm Depth | Action |
+|-----------|-----------------|--------|
+| Bug | Light | Invoke `jig:brainstorm` — focuses on root cause and fix approach |
+| Improvement | Medium | Invoke `jig:brainstorm` — explores approaches with concerns checklist |
+| Feature | Full | Invoke `jig:brainstorm` — full design exploration with concerns checklist |
+| Task/Chore | Skip | Move directly to Step 4: PLAN |
 
-### For Improvements (medium)
+**INVOKE `jig:brainstorm` using the Skill tool.** Do not brainstorm inline — the `brainstorm` skill has the full interview process, approach generation, concerns checklist integration, and design approval flow. Kickoff's job is to tell the skill what depth to use (light/medium/full) based on the work type classification from Step 1.
 
-Run `brainstorm` with these additions:
-1. **Existing patterns**: How does the current implementation work?
-2. **2-3 approaches**: What are the options with trade-offs?
-3. **Concerns checklist**: Run the configurable checklist (see below).
-
-### For Features (full)
-
-```mermaid
-graph TD
-  explore["Explore project context<br/>(files, docs, commits)"]
-  questions["Ask clarifying questions<br/>(one at a time)"]
-  approaches["Propose 2-3 approaches<br/>with trade-offs"]
-  design["Present design sections<br/>(get approval per section)"]
-  checklist["Concerns Checklist<br/>(from jig.config.md)"]
-  approve{"User approves?"}
-  save["Save design doc<br/>docs/plans/YYYY-MM-DD-*-design.md"]
-  plan["Transition to PLAN stage"]
-
-  explore --> questions --> approaches --> design --> checklist --> approve
-  approve -->|revise| design
-  approve -->|approved| save --> plan
-```
-
-Run `brainstorm` with the project's Concerns Checklist:
-
-#### Concerns Checklist (Configurable)
-
-Read the `## Concerns Checklist` section from `jig.config.md`. Walk through each concern defined there. Mark N/A if it doesn't apply — but **explicitly mark it**, don't skip silently.
-
-For each concern:
-- If marked **Yes** and mapped to a skill → load that skill for guidance
-- If marked **Yes** and mapped to `manual` → flag for human review
-- If marked **No** or **N/A** → record the decision
-
-Present the checklist results to the user as part of the design review. Each "Yes" adds scope to the plan — the user should explicitly approve.
-
-**If no concerns checklist is configured**, use the minimal defaults:
-- Error handling
-- Security
-- Test strategy
-
-### For Tasks/Chores
-
-Skip brainstorming. Move directly to Plan.
+Pass the work type context when invoking: "This is a {work type}. Run {depth} brainstorming."
 
 ### Gate Check
 
@@ -202,28 +162,9 @@ Before proceeding, confirm:
 
 **Gate**: A numbered plan exists with tasks, files, and verification steps.
 
-Invoke `plan` to produce the implementation plan.
+**INVOKE `jig:plan` using the Skill tool.** Do not write the plan inline — the `plan` skill handles task decomposition, file path identification, dependency mapping, verification steps, and TDD orientation. It saves the plan to `docs/plans/`.
 
-### Plan Requirements
-
-Every plan must include:
-- **Numbered tasks** scoped to 2-5 minutes each
-- **File paths** per task (create vs modify)
-- **Skill references** per task (which domain/feature skills apply)
-- **Dependency relationships** (`blockedBy` for sequential tasks)
-- **Verification steps** per task (how to confirm it works)
-- **Commit message** per task (following the project's commit convention)
-
-### Plan Output
-
-Save to: `docs/plans/YYYY-MM-DD-<topic>-plan.md`
-
-The plan header should include:
-
-> **PRD:** docs/plans/YYYY-MM-DD-&lt;topic&gt;-prd.md *(include if a PRD exists)*
-> **For Claude:** Use `build` to execute this plan (auto-selects parallel or serial).
-
-The `> **PRD:**` line is how downstream spec reviewers find the acceptance checklist. Always include it when a PRD was created in the REQUIREMENTS step.
+If a PRD was created in Step 2b, mention it when invoking: "PRD is at docs/plans/YYYY-MM-DD-<topic>-prd.md."
 
 ### Gate Check
 
@@ -239,13 +180,7 @@ Before proceeding, confirm:
 
 **Gate**: All tasks implemented, tested, and committed.
 
-Invoke `build` with the plan. It analyzes the task graph and automatically picks the right execution strategy:
-
-- **Parallel** (`team-dev`) — when 3+ independent tasks touch different files and agent teams are available
-- **Serial** (`sdd`) — when tasks are coupled, share files, or agent teams aren't available
-- **Direct** — for 1-2 simple tasks, no orchestrator needed
-
-You don't need to choose. `build` reads `jig.config.md` for `parallel-threshold` and `default-strategy`, inspects the plan, and routes accordingly.
+**INVOKE `jig:build` using the Skill tool.** Pass the plan path: "Execute the plan at docs/plans/YYYY-MM-DD-<topic>-plan.md." The `build` skill analyzes the task graph and auto-selects parallel (`team-dev`) or serial (`sdd`) execution. Do not choose the strategy yourself.
 
 ### Gate Check
 
@@ -261,30 +196,7 @@ Before proceeding, confirm:
 
 **Gate**: Code passes self-audit and automated review.
 
-```mermaid
-graph LR
-  self["Self-audit<br/>review"] --> agent["Automated analysis<br/>code-review agent"]
-  agent --> fix["Fix Critical<br/>& Major issues"]
-  fix --> pr["Create PR<br/>pr-create"]
-  pr --> inline["Inline comments<br/>pr-review agent"]
-  inline --> respond["Address feedback<br/>pr-respond"]
-```
-
-### Self-Audit First
-
-Run the pre-commit review via `review`. This dispatches the specialist swarm to catch common issues:
-- Dead code and unused references
-- Security vulnerabilities
-- Error handling gaps
-- Async safety issues
-- Performance problems
-- Plus any team-specific specialists
-
-### Automated Review
-
-1. Run `code-review` agent — produces a review report with severity ratings
-2. Fix any Critical or Major issues identified
-3. After PR creation, run `pr-review` agent for inline comments
+**INVOKE `jig:review` using the Skill tool.** The `review` skill dispatches the specialist swarm (security, dead code, error handling, async safety, performance + team specialists), scores findings, and produces a unified report. Fix any Critical or Major issues before proceeding.
 
 ### Gate Check
 
@@ -299,9 +211,9 @@ Before proceeding, confirm:
 
 **Gate**: PR created and merged.
 
-1. **Commit**: use the `commit` agent
-2. **Create PR**: `/pr-create` — analyzes branch, writes description, creates PR
-3. **Address feedback**: `/pr-respond` for any reviewer comments
+1. **Commit**: Invoke the `jig:commit` agent (Agent tool with `subagent_type: "jig:commit"`)
+2. **Create PR**: **INVOKE `jig:pr-create` using the Skill tool.** It runs the review swarm, analyzes commits, and creates the PR.
+3. **Address feedback**: **INVOKE `jig:pr-respond` using the Skill tool** for any reviewer comments.
 4. **Merge**: After approval
 
 ### Gate Check
@@ -315,12 +227,7 @@ Before proceeding, confirm:
 
 ## Step 8: LEARN (features only, optional for others)
 
-After merge, invoke `/postmortem` to:
-- Analyze reviewer comments for patterns
-- Identify gaps in existing skills
-- Update skills or review configs based on findings
-
-This closes the feedback loop. Skills improve over time.
+**INVOKE `jig:postmortem` using the Skill tool.** It analyzes reviewer comments for patterns, identifies gaps in skills, and updates skills or configs. This closes the feedback loop.
 
 ---
 
@@ -374,14 +281,14 @@ When looping back, update the plan document to reflect changes.
 
 ## Quick Reference
 
-| Stage | Invoke | Output |
-|-------|--------|--------|
-| Classify | (automatic in this skill) | Work type determined |
-| Discover | Ticket system integration | Ticket + branch |
-| Requirements | `prd` (optional) | PRD with acceptance checklist |
-| Brainstorm | `brainstorm` + concerns checklist | Approved design |
-| Plan | `plan` | `docs/plans/*.md` |
-| Execute | `build` (routes to `team-dev` or `sdd`) | Implemented + tested code |
-| Review | `review` → `code-review` agent | Audited code |
-| Ship | `commit` → `pr-create` | Merged PR |
-| Learn | `postmortem` | Updated skills |
+| Stage | Skill Tool Invocation | Output |
+|-------|----------------------|--------|
+| Classify | (kickoff handles directly) | Work type determined |
+| Discover | (kickoff handles directly) | Ticket + branch |
+| Requirements | `Skill: jig:prd` | PRD with acceptance checklist |
+| Brainstorm | `Skill: jig:brainstorm` | Approved design |
+| Plan | `Skill: jig:plan` | `docs/plans/*.md` |
+| Execute | `Skill: jig:build` | Implemented + tested code |
+| Review | `Skill: jig:review` | Audited code |
+| Ship | `Skill: jig:pr-create` | Merged PR |
+| Learn | `Skill: jig:postmortem` | Updated skills |
