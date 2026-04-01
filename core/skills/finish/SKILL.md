@@ -190,6 +190,14 @@ git worktree list
 ```
 
 If the current directory is a worktree (not the main working tree):
+
+**Preferred:** Use the `worktree` skill for safe removal — it handles
+uncommitted change warnings and branch cleanup:
+```
+/jig:worktree remove <worktree-dir-name>
+```
+
+**Fallback** (if worktree skill is not available):
 ```bash
 # Navigate out of the worktree first
 cd <main-working-tree-path>
@@ -197,8 +205,6 @@ cd <main-working-tree-path>
 # Remove the worktree
 git worktree remove <worktree-path>
 ```
-
-If the project uses a worktree management command (check `jig.config.md` or project scripts), use that instead.
 
 **For Option 3:** Keep the worktree intact.
 

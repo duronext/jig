@@ -68,6 +68,15 @@ default-strategy: team-dev
 teammate-mode: tmux
 ```
 
+## Worktree
+
+```yaml
+# naming: branch           # ticket | ticket-branch | branch
+# sync:
+#   - .env*                # always included regardless
+# post-create: []          # auto-detects install if omitted
+```
+
 ## Commit
 
 ```yaml

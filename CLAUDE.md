@@ -41,7 +41,7 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 
 ## Inventory
 
-### Core Skills (16)
+### Core Skills (17)
 
 | Skill | Purpose |
 |-------|---------|
@@ -60,6 +60,7 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 | `verify` | Evidence before assertions — run it before claiming it works |
 | `tdd` | Red-green-refactor discipline |
 | `finish` | Branch completion — merge, PR, keep, or discard |
+| `worktree` | Create/remove provisioned worktrees for parallel dev |
 | `extend` | Framework extension assistant — scaffolds new skills, specialists, packs |
 
 ### Core Agents (3)
@@ -95,7 +96,7 @@ When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/
 jig/
 ├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters)
 ├── core/
-│   ├── skills/          15 pipeline skills
+│   ├── skills/          17 pipeline skills
 │   ├── agents/          3 agents (commit, code-review, pr-review)
 │   └── specialists/     5 review specialists
 ├── packs/

@@ -367,6 +367,35 @@
     }
     .footer-text a:hover { color: var(--accent); }
 
+    /* ── Skip Link ─────────────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      z-index: 100;
+      padding: 0.75rem 1.25rem;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      border-radius: 4px;
+      border-bottom: none;
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      top: 1rem;
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Focus Styles ──────────────────────────────────────── */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     /* ── Animations ────────────────────────────────────────── */
     .fade-in {
       opacity: 0;
@@ -426,13 +455,16 @@
   </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
   <!-- ── Header ─────────────────────────────────────────── -->
   <div class="container">
     <header class="site-header">
-      <a href="./" class="back-link">&larr; Jig</a>
+      <a href="./" class="back-link"><span aria-hidden="true">&larr;</span> Jig</a>
     </header>
   </div>
+
+  <main id="main-content">
 
   <!-- ── Article Header ─────────────────────────────────── -->
   <div class="container">
@@ -547,16 +579,16 @@
 
         <p>But here's what nobody puts in the LinkedIn post (weird, right?): Google's <a href="https://dora.dev/research/2025/dora-report/">2025 DORA Report</a> confirmed that AI adoption has a negative relationship with software delivery stability. And <a href="https://www.faros.ai/blog/key-takeaways-from-the-dora-report-2025">Faros AI's telemetry</a> across 10,000+ developers put hard numbers on the problem.</p>
 
-        <div class="stat-grid">
-          <div class="stat-card">
+        <div class="stat-grid" role="list">
+          <div class="stat-card" role="listitem">
             <div class="stat-number">+9%</div>
             <div class="stat-label">increase in<br>bug rates</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" role="listitem">
             <div class="stat-number">+91%</div>
             <div class="stat-label">increase in<br>review time</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" role="listitem">
             <div class="stat-number">+154%</div>
             <div class="stat-label">increase in<br>PR size</div>
           </div>
@@ -686,7 +718,7 @@
 
       <!-- ── Sources ─────────────────────────────────────── -->
       <div class="sources fade-in">
-        <div class="sources-label" id="sources"><a href="#sources" class="heading-anchor">Sources</a></div>
+        <h2 class="sources-label" id="sources"><a href="#sources" class="heading-anchor">Sources</a></h2>
         <ol>
           <li><a href="https://dora.dev/research/2025/dora-report/">2025 DORA State of AI-Assisted Software Development</a> — Google</li>
           <li><a href="https://www.faros.ai/blog/key-takeaways-from-the-dora-report-2025">DORA Report 2025 Key Takeaways: AI Impact on Dev Metrics</a> — Faros AI</li>
@@ -710,19 +742,21 @@
       <p class="cta-text">Jig is the AI engineering workflow framework for teams.<br>Full lifecycle. Quality gates at every stage. Open source.</p>
       <div class="cta-links">
         <a href="https://github.com/duronext/jig" class="cta-link">GitHub</a>
-        <span style="color: var(--text-tertiary); opacity: .3;">/</span>
+        <span style="color: var(--text-tertiary); opacity: .3;" aria-hidden="true">/</span>
         <a href="./" class="cta-link">Homepage</a>
-        <span style="color: var(--text-tertiary); opacity: .3;">/</span>
+        <span style="color: var(--text-tertiary); opacity: .3;" aria-hidden="true">/</span>
         <a href="./#start" class="cta-link">Get Started</a>
       </div>
     </div>
   </div>
 
+  </main>
+
   <!-- ── Footer ─────────────────────────────────────────── -->
   <footer class="container">
     <div class="footer">
       <div class="footer-text">
-        <a href="https://github.com/duronext/jig">Jig</a> &middot; MIT License &middot; Built by the <a href="https://www.duro.us">Duro</a> engineering team
+        <a href="https://github.com/duronext/jig">Jig</a> &middot; MIT License &middot; WCAG 2.1 AA &middot; Built by the <a href="https://www.duro.us">Duro</a> engineering team
       </div>
     </div>
   </footer>

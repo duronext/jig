@@ -719,6 +719,35 @@
     .step-title .icon { margin-right: 0.35rem; }
     .cta-link .icon { margin-right: 0.3rem; vertical-align: -3px; opacity: .6; }
 
+    /* ── Skip Link ─────────────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      z-index: 100;
+      padding: 0.75rem 1.25rem;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      border-radius: 4px;
+      border-bottom: none;
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      top: 1rem;
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Focus Styles ──────────────────────────────────────── */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     /* ── Animations ────────────────────────────────────────── */
     .fade-in {
       opacity: 0;
@@ -762,6 +791,7 @@
   </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="container">
 
@@ -914,13 +944,14 @@
     </div>
   </header>
 
+  <main id="main-content">
 
   <!-- ════════════════════════════════════════════════════════
        QUICK INSTALL
        ════════════════════════════════════════════════════════ -->
   <section class="quick-install">
     <div class="fade-in">
-      <p class="install-label">Quick start</p>
+      <h2 class="install-label">Quick start</h2>
       <div class="code-block"><pre><span class="comment"># Add the Jig marketplace (one-time per user)</span>
 <span class="t-prompt">$</span> <span class="cmd">/plugin marketplace add</span> <span class="str">duronext/jig</span>
 
@@ -938,7 +969,7 @@
        ════════════════════════════════════════════════════════ -->
   <section class="section" id="problem">
     <div class="fade-in">
-      <p class="section-label">The Problem</p>
+      <h2 class="section-label">The Problem</h2>
     </div>
     <div class="fade-in">
       <p class="body-text">AI made every engineer 10x faster. It also made
@@ -975,22 +1006,22 @@
        ════════════════════════════════════════════════════════ -->
   <section class="section" id="pipeline">
     <div class="fade-in">
-      <p class="section-label">The Pipeline</p>
+      <h2 class="section-label">The Pipeline</h2>
     </div>
     <div class="fade-in">
       <div class="pipeline">
         <span class="stage-pill">DISCOVER</span>
-        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">BRAINSTORM</span>
-        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">PLAN</span>
-        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">EXECUTE</span>
-        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">REVIEW</span>
-        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">SHIP</span>
-        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">LEARN</span>
       </div>
     </div>
@@ -1011,14 +1042,14 @@
        ════════════════════════════════════════════════════════ -->
   <section class="skills-band fade-in" id="skills">
     <div class="skills-band-label">
-      <p class="section-label">Core Skills</p>
+      <h2 class="section-label">Core Skills</h2>
     </div>
 
-    <div class="skills-scroll-wrap">
+    <div class="skills-scroll-wrap" role="region" aria-label="Core skills by pipeline stage" tabindex="0">
       <div class="skills-scroll">
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Discover</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Discover</div>
           <div class="skill-item">
             <div class="skill-name">kickoff</div>
             <div class="skill-desc">Classifies work, routes through the pipeline</div>
@@ -1026,7 +1057,7 @@
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 4 12.9V17H8v-2.1A7 7 0 0 1 12 2z"/></svg></span>Brainstorm</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 4 12.9V17H8v-2.1A7 7 0 0 1 12 2z"/></svg></span>Brainstorm</div>
           <div class="skill-item">
             <div class="skill-name">brainstorm</div>
             <div class="skill-desc">Design exploration with concerns checklist</div>
@@ -1038,7 +1069,7 @@
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Plan</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Plan</div>
           <div class="skill-item">
             <div class="skill-name">plan</div>
             <div class="skill-desc">Designs to bite-sized TDD tasks</div>
@@ -1046,7 +1077,7 @@
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>Execute</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>Execute</div>
           <div class="skill-item">
             <div class="skill-name">build</div>
             <div class="skill-desc">Picks parallel or serial, runs the plan</div>
@@ -1066,7 +1097,7 @@
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>Review</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>Review</div>
           <div class="skill-item">
             <div class="skill-name">review</div>
             <div class="skill-desc">Specialist swarm, parallel reviewers</div>
@@ -1082,7 +1113,7 @@
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>Ship</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>Ship</div>
           <div class="skill-item">
             <div class="skill-name">pr-create</div>
             <div class="skill-desc">PR with description and test plan</div>
@@ -1098,7 +1129,7 @@
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>Learn</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>Learn</div>
           <div class="skill-item">
             <div class="skill-name">postmortem</div>
             <div class="skill-desc">Extracts lessons, improves skills</div>
@@ -1106,7 +1137,7 @@
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>Meta</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>Meta</div>
           <div class="skill-item">
             <div class="skill-name">extend</div>
             <div class="skill-desc">Scaffolds new skills, specialists, packs</div>
@@ -1123,16 +1154,20 @@
     <div class="fade-in">
       <div class="skills-extras">
         <div class="extras-item">
-          <span class="extras-label"><span class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>Agents</span>
+          <span class="extras-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>Agents</span>
           <span class="extras-desc">commit &middot; code-review &middot; pr-review</span>
         </div>
         <div class="extras-item">
-          <span class="extras-label"><span class="icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Specialists</span>
+          <span class="extras-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Specialists</span>
           <span class="extras-desc">security &middot; dead-code &middot; error-handling &middot; async-safety &middot; performance</span>
         </div>
         <div class="extras-item">
-          <span class="extras-label"><span class="icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>Starter pack</span>
+          <span class="extras-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>Starter pack</span>
           <span class="extras-desc">copywriting &middot; logging &middot; testing &middot; test-coverage</span>
+        </div>
+        <div class="extras-item">
+          <span class="extras-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>DevEx</span>
+          <span class="extras-desc">worktree</span>
         </div>
       </div>
     </div>
@@ -1146,14 +1181,14 @@
        ════════════════════════════════════════════════════════ -->
   <section class="section" id="how">
     <div class="fade-in">
-      <p class="section-label">How It Works</p>
+      <h2 class="section-label">How It Works</h2>
     </div>
 
     <div class="steps">
       <div class="step fade-in">
         <div class="step-number">1</div>
         <div>
-          <div class="step-title"><span class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>Install</div>
+          <div class="step-title"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>Install</div>
           <p class="step-text">Add one JSON snippet to your project's
             <code>.claude/settings.json</code>. Every teammate gets the full
             framework on clone. 16 skills, 3 agents, 5 specialists &mdash;
@@ -1163,7 +1198,7 @@
       <div class="step fade-in">
         <div class="step-number">2</div>
         <div>
-          <div class="step-title"><span class="icon"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>Configure</div>
+          <div class="step-title"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>Configure</div>
           <p class="step-text"><code>jig.config.md</code> tunes the pipeline to
             your team. Map your engineering concerns to skills. Set review policies.
             Choose your ticket system. Override only what differs &mdash; sensible
@@ -1173,7 +1208,7 @@
       <div class="step fade-in">
         <div class="step-number">3</div>
         <div>
-          <div class="step-title"><span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Extend</div>
+          <div class="step-title"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>Extend</div>
           <p class="step-text">Add domain skills, custom specialists, team agents.
             Drop them in the right directory &mdash; Jig discovers them automatically.
             <code>/jig:extend</code> scaffolds new artifacts with valid frontmatter
@@ -1191,7 +1226,7 @@
        ════════════════════════════════════════════════════════ -->
   <section class="section" id="origin">
     <div class="fade-in">
-      <p class="section-label">Origin</p>
+      <h2 class="section-label">Origin</h2>
     </div>
     <div class="fade-in">
       <p class="origin-text">Jig was born inside
@@ -1225,15 +1260,15 @@
        ════════════════════════════════════════════════════════ -->
   <section class="section" id="walkthrough">
     <div class="fade-in">
-      <p class="section-label">See It In Action</p>
+      <h2 class="section-label">See It In Action</h2>
     </div>
     <div class="fade-in">
       <p class="body-text" style="margin-bottom: 2rem;">A feature, from idea
         to shipped &mdash; guided by Jig at every step.</p>
     </div>
     <div class="fade-in">
-      <div class="terminal">
-        <div class="terminal-titlebar">
+      <div class="terminal" aria-label="Terminal showing a Jig workflow from kickoff to review">
+        <div class="terminal-titlebar" aria-hidden="true">
           <div class="terminal-dots">
             <span class="terminal-dot-red"></span>
             <span class="terminal-dot-yellow"></span>
@@ -1424,7 +1459,7 @@
        ════════════════════════════════════════════════════════ -->
   <section class="cta-section" id="start">
     <div class="fade-in">
-      <p class="section-label" style="text-align: center;">Get Started</p>
+      <h2 class="section-label" style="text-align: center;">Get Started</h2>
     </div>
     <div class="fade-in">
       <p class="cta-heading">Your team's AI workflow, unified.</p>
@@ -1435,8 +1470,8 @@
     </div>
     <div class="fade-in">
       <div class="cta-links">
-        <a href="https://github.com/duronext/jig" class="cta-link"><span class="icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></span>GitHub</a>
-        <a href="https://github.com/duronext/jig#quick-start" class="cta-link"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Install Guide</a>
+        <a href="https://github.com/duronext/jig" class="cta-link"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></span>GitHub</a>
+        <a href="https://github.com/duronext/jig#quick-start" class="cta-link"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Install Guide</a>
       </div>
     </div>
   </section>
@@ -1450,7 +1485,7 @@
        ════════════════════════════════════════════════════════ -->
   <section class="team-section">
     <div class="fade-in">
-      <p class="team-label">Built by the Duro engineering team</p>
+      <h2 class="team-label">Built by the Duro engineering team</h2>
     </div>
     <div class="fade-in">
       <div class="team-avatars">
@@ -1472,9 +1507,12 @@
     </div>
   </section>
 
+  </main>
+
   <footer class="footer">
     <p class="footer-text">MIT License &middot;
-      <a href="https://github.com/duronext/jig">duronext/jig</a></p>
+      <a href="https://github.com/duronext/jig">duronext/jig</a> &middot;
+      WCAG 2.1 AA</p>
   </footer>
   </div>
 

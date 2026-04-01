@@ -27,6 +27,7 @@
     "./core/skills/finish",
     "./core/skills/ticket",
     "./core/skills/extend",
+    "./core/skills/worktree",
     "./packs/engineering/skills/eng-copywriting",
     "./packs/engineering/skills/eng-logging",
     "./packs/engineering/skills/eng-testing"
