@@ -185,8 +185,13 @@ Create the team directory structure:
 - `team/skills/.gitkeep` (empty file)
 - `team/specialists/.gitkeep` (empty file)
 - `team/agents/.gitkeep` (empty file)
-- `team/README.md` — read from `scaffold/team/README.md` in the Jig
-  plugin directory and write to the project root
+- `team/README.md` — locate the Jig plugin's `scaffold/team/README.md`
+  by globbing for `**/jig/**/scaffold/team/README.md` in the plugin
+  cache (typically `~/.claude/plugins/`), read it, and write to the
+  project root. If the scaffold file can't be found, generate a
+  README explaining the team extension model (skills/, specialists/,
+  agents/ subdirectories, how they wire into discovery, and how to
+  create them with `/jig:extend`).
 
 Handle CLAUDE.md per `reference/existing-project.md`.
 

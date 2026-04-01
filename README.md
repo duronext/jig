@@ -49,7 +49,7 @@ Add this to your project's `.claude/settings.json` — every teammate gets Jig a
 }
 ```
 
-Commit that file. Done. The entire team gets 15 pipeline skills, 3 agents, 5 review specialists, and an engineering starter pack — zero manual setup.
+Commit that file. Done. Every teammate gets the full framework on clone — pipeline skills, review specialists, agents, and an engineering starter pack.
 
 ### Option B: Install via CLI
 
@@ -66,12 +66,12 @@ If you prefer the interactive approach:
 ### First Use
 
 ```bash
+/jig:init       # Set up your project — guided interview, generates jig.config.md
 /jig:kickoff    # Start working on a task — guides you through the full pipeline
-/jig:brainstorm # Design a feature before building it
 /jig:extend     # Add your first team skill
 ```
 
-Type `/jig:` to see all available commands. See [docs/init-experience.md](docs/init-experience.md) for the interactive setup flow that generates your `jig.config.md`.
+`/jig:init` auto-detects your git host, branch, and commit conventions, then walks you through five questions to generate your `jig.config.md` and team directory structure. Type `/jig:` to see all available commands.
 
 ### Other Platforms (Gemini, Codex)
 
@@ -85,13 +85,14 @@ See [adapters/](adapters/) for platform-specific integration guides.
 
 ## How It Works
 
-Jig ships as a plugin with 16 core skills, 3 agents, and 5 review specialists. Your team adds domain skills in `.claude/skills/` that wire into the framework automatically.
+Jig ships as a plugin with core skills, agents, and review specialists. Your team adds domain skills in `.claude/skills/` that wire into the framework automatically.
 
-### Core Skills (the pipeline)
+### Core Skills
 
 | Command | Skill | What It Does |
 |---------|-------|-------------|
 | `kickoff` | Pipeline orchestrator | Classifies work (bug/feature/improvement/task) and routes through the appropriate pipeline stages. The entry point for all development work. |
+| `init` | First-run setup | Auto-detects your project environment, conducts a back-and-forth interview, and generates `jig.config.md`, team directory structure, and CLAUDE.md declaration. |
 | `brainstorm` | Design exploration | One question at a time, 2-3 approaches with trade-offs, design approval gate. Surfaces your team's concerns checklist from `jig.config.md`. |
 | `prd` | Requirements capture | Structured PRD with enforceable acceptance checklists. Two tiers: Full (12 sections) for features, Light (5 sections) for bugs. Layer-tagged items (`[API]`, `[DATA]`, `[LOGIC]`, `[UI]`) feed directly into spec reviewers. |
 | `plan` | Implementation planning | Turns approved designs into bite-sized TDD tasks with exact file paths, code snippets, and verification steps. |

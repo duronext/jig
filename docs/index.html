@@ -748,6 +748,125 @@
       border-radius: 2px;
     }
 
+    /* ── Table of Contents ─────────────────────────────────── */
+    .toc {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      right: calc((100vw - var(--max-width)) / 2 - 200px);
+      width: 160px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .toc.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .toc-list {
+      list-style: none;
+      border-left: 1px solid rgba(99,102,241, .1);
+      padding-left: 0;
+    }
+    .toc-link {
+      display: block;
+      padding: 0.35rem 0 0.35rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.02em;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      border: none;
+      border-left: 2px solid transparent;
+      margin-left: -1.5px;
+      transition: color 0.25s ease, border-color 0.25s ease;
+    }
+    .toc-link:hover {
+      color: var(--text-secondary);
+      border-bottom: none;
+    }
+    .toc-link.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+
+    /* ToC mobile toggle */
+    .toc-toggle {
+      display: none;
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 200;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid rgba(99,102,241, .2);
+      background: rgba(8,8,13, .9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--text-secondary);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.25s ease;
+    }
+    .toc-toggle:hover {
+      border-color: rgba(99,102,241, .4);
+    }
+    .toc-toggle svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    /* ToC mobile drawer */
+    .toc-mobile {
+      display: none;
+      position: fixed;
+      bottom: 4.5rem;
+      right: 1.5rem;
+      z-index: 199;
+      width: 180px;
+      background: rgba(8,8,13, .95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(99,102,241, .15);
+      border-radius: 12px;
+      padding: 0.75rem 0;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .toc-mobile.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .toc-mobile .toc-list {
+      border-left: none;
+    }
+    .toc-mobile .toc-link {
+      padding: 0.4rem 1rem;
+      font-size: 0.7rem;
+      border-left: none;
+      margin-left: 0;
+    }
+    .toc-mobile .toc-link.active {
+      color: var(--accent);
+      border-left: none;
+    }
+
+    @media (max-width: 1280px) {
+      .toc { display: none; }
+      .toc-toggle { display: flex; }
+      .toc-mobile { display: block; }
+    }
+
     /* ── Animations ────────────────────────────────────────── */
     .fade-in {
       opacity: 0;
@@ -792,6 +911,34 @@
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ── Table of Contents (desktop: right margin, mobile: FAB drawer) ── -->
+<nav class="toc" aria-label="Table of contents">
+  <ul class="toc-list">
+    <li><a href="#problem" class="toc-link">The Problem</a></li>
+    <li><a href="#pipeline" class="toc-link">The Pipeline</a></li>
+    <li><a href="#skills" class="toc-link">Core Skills</a></li>
+    <li><a href="#how" class="toc-link">How It Works</a></li>
+    <li><a href="#origin" class="toc-link">Origin</a></li>
+    <li><a href="#walkthrough" class="toc-link">See It In Action</a></li>
+    <li><a href="#start" class="toc-link">Get Started</a></li>
+  </ul>
+</nav>
+
+<button class="toc-toggle" aria-label="Table of contents" aria-expanded="false">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="toc-mobile" aria-label="Table of contents">
+  <ul class="toc-list">
+    <li><a href="#problem" class="toc-link">The Problem</a></li>
+    <li><a href="#pipeline" class="toc-link">The Pipeline</a></li>
+    <li><a href="#skills" class="toc-link">Core Skills</a></li>
+    <li><a href="#how" class="toc-link">How It Works</a></li>
+    <li><a href="#origin" class="toc-link">Origin</a></li>
+    <li><a href="#walkthrough" class="toc-link">See It In Action</a></li>
+    <li><a href="#start" class="toc-link">Get Started</a></li>
+  </ul>
+</div>
 
 <div class="container">
 
@@ -956,8 +1103,11 @@
 <span class="t-prompt">$</span> <span class="cmd">/plugin marketplace add</span> <span class="str">duronext/jig</span>
 
 <span class="comment"># Install for your whole team</span>
-<span class="t-prompt">$</span> <span class="cmd">/plugin install</span> <span class="str">jig@duronext-jig</span> <span class="punc">--scope project</span></pre></div>
-      <p class="install-note">Two commands. Every teammate gets Jig on clone.</p>
+<span class="t-prompt">$</span> <span class="cmd">/plugin install</span> <span class="str">jig@duronext-jig</span> <span class="punc">--scope project</span>
+
+<span class="comment"># Set up your project</span>
+<span class="t-prompt">$</span> <span class="cmd">/jig:init</span></pre></div>
+      <p class="install-note">Three commands. Jig walks you through the rest.</p>
     </div>
   </section>
 
@@ -1191,18 +1341,19 @@
           <div class="step-title"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>Install</div>
           <p class="step-text">Add one JSON snippet to your project's
             <code>.claude/settings.json</code>. Every teammate gets the full
-            framework on clone. 16 skills, 3 agents, 5 specialists &mdash;
-            zero manual setup.</p>
+            framework on clone &mdash; pipeline skills, review specialists,
+            and agents. Zero manual setup.</p>
         </div>
       </div>
       <div class="step fade-in">
         <div class="step-number">2</div>
         <div>
           <div class="step-title"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>Configure</div>
-          <p class="step-text"><code>jig.config.md</code> tunes the pipeline to
-            your team. Map your engineering concerns to skills. Set review policies.
-            Choose your ticket system. Override only what differs &mdash; sensible
-            defaults handle the rest.</p>
+          <p class="step-text">Run <code>/jig:init</code> and answer five questions.
+            Jig auto-detects your git host, branch, and commit conventions, then
+            walks you through team name, ticket system, and engineering concerns.
+            It generates your <code>jig.config.md</code> and team directory
+            &mdash; ready to go in two minutes.</p>
         </div>
       </div>
       <div class="step fade-in">
@@ -1465,8 +1616,8 @@
       <p class="cta-heading">Your team's AI workflow, unified.</p>
     </div>
     <div class="fade-in">
-      <p class="cta-sub">Add the plugin to your project settings, then type
-        <code>/jig:kickoff</code> to start your first task.</p>
+      <p class="cta-sub">Add the plugin, run <code>/jig:init</code> to set up,
+        then <code>/jig:kickoff</code> to start your first task.</p>
     </div>
     <div class="fade-in">
       <div class="cta-links">
@@ -1538,6 +1689,103 @@
     if (el.closest('.hero') || el.closest('.quick-install')) return;
     observer.observe(el);
   });
+
+  // ── Table of Contents ──────────────────────────────────
+  (() => {
+    const toc = document.querySelector('.toc');
+    const tocToggle = document.querySelector('.toc-toggle');
+    const tocMobile = document.querySelector('.toc-mobile');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const sections = [];
+
+    // Collect sections that the ToC points to
+    tocLinks.forEach(link => {
+      const id = link.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) sections.push({ id, el });
+    });
+
+    // Show/hide desktop ToC based on scroll past hero
+    let pastHero = false;
+    let skillsBandVisible = false;
+
+    const updateTocVisibility = () => {
+      toc.classList.toggle('visible', pastHero && !skillsBandVisible);
+    };
+
+    const heroEnd = document.querySelector('.quick-install');
+    const tocShowObs = new IntersectionObserver(
+      ([entry]) => {
+        pastHero = !entry.isIntersecting;
+        updateTocVisibility();
+      },
+      { threshold: 0 }
+    );
+    if (heroEnd) tocShowObs.observe(heroEnd);
+
+    // Hide ToC when full-width skills band is in view
+    const skillsBand = document.querySelector('.skills-band');
+    const skillsBandObs = new IntersectionObserver(
+      ([entry]) => {
+        skillsBandVisible = entry.isIntersecting;
+        updateTocVisibility();
+      },
+      { threshold: 0 }
+    );
+    if (skillsBand) skillsBandObs.observe(skillsBand);
+
+    // Active link tracking via IntersectionObserver
+    const setActive = (id) => {
+      tocLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    };
+
+    const sectionObs = new IntersectionObserver(
+      (entries) => {
+        // Find the topmost visible section
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length > 0) {
+          setActive(visible[0].target.id);
+        }
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
+    );
+
+    sections.forEach(({ el }) => sectionObs.observe(el));
+
+    // Smooth scroll on click
+    tocLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = link.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.replaceState(null, '', '#' + id);
+        }
+        // Close mobile drawer if open
+        tocMobile.classList.remove('open');
+        tocToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Mobile toggle
+    tocToggle.addEventListener('click', () => {
+      const open = tocMobile.classList.toggle('open');
+      tocToggle.setAttribute('aria-expanded', String(open));
+    });
+
+    // Close mobile drawer on outside click
+    document.addEventListener('click', (e) => {
+      if (!tocMobile.contains(e.target) && !tocToggle.contains(e.target)) {
+        tocMobile.classList.remove('open');
+        tocToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
 
   // Terminal animation — play once on scroll
   // Delay observer setup so it doesn't fire on page load for already-visible elements

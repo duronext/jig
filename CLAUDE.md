@@ -41,11 +41,12 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 
 ## Inventory
 
-### Core Skills (17)
+### Core Skills
 
 | Skill | Purpose |
 |-------|---------|
 | `kickoff` | Pipeline orchestrator — classifies work, routes through stages |
+| `init` | First-run setup — auto-detects environment, interviews, generates config |
 | `brainstorm` | Collaborative design exploration with configurable concerns checklist |
 | `prd` | PRD creation with enforceable acceptance checklists (feeds into spec reviewer) |
 | `plan` | Spec → implementation plan with bite-sized TDD tasks |
@@ -63,7 +64,7 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 | `worktree` | Create/remove provisioned worktrees for parallel dev |
 | `extend` | Framework extension assistant — scaffolds new skills, specialists, packs |
 
-### Core Agents (3)
+### Core Agents
 
 | Agent | Purpose |
 |-------|---------|
@@ -71,7 +72,7 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 | `code-review` | Dispatches review swarm, delivers scored report |
 | `pr-review` | Posts inline PR comments with suggestion blocks |
 
-### Core Specialists (5)
+### Core Specialists
 
 `security`, `dead-code`, `error-handling`, `async-safety`, `performance` — language-agnostic code review specialists dispatched by `review`.
 
