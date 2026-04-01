@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The 10x Trap — Jig</title>
+  <meta name="description" content="What nobody tells you about scaling AI-assisted development. A micro white paper on quality gates, specialist agents, and why frameworks beat skill collections.">
+  <meta name="theme-color" content="#08080d">
+  <meta property="og:title" content="The 10x Trap — What Nobody Tells You About Scaling AI Development">
+  <meta property="og:description" content="More code, faster, with more bugs, that takes longer to review. That's not 10x. That's 10x output with 0.5x quality — and the math on that is ugly.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://duronext.github.io/jig/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://duronext.github.io/jig/og-image.png">
+  <meta name="author" content="Dustin Diaz">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { scroll-behavior: smooth; overflow-x: hidden; }
+
+    /* ── Custom Properties ─────────────────────────────────── */
+    :root {
+      --bg: #08080d;
+      --text-primary: #e4e4ed;
+      --text-secondary: #8888a0;
+      --text-tertiary: #555570;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-rgb: 99, 102, 241;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace;
+      --max-width: 680px;
+    }
+
+    /* ── Base ──────────────────────────────────────────────── */
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(circle at 1px 1px, hsla(0,0%,100%,.015) 1px, transparent 0);
+      background-size: 32px 32px;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+
+    ::selection {
+      background: rgba(99,102,241, .3);
+      color: #fff;
+    }
+
+    /* ── Layout ────────────────────────────────────────────── */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .site-header {
+      padding: 2rem 0;
+    }
+    .back-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      border-bottom: none;
+      letter-spacing: 0.04em;
+      transition: color 0.3s ease;
+    }
+    .back-link:hover {
+      color: var(--accent);
+      border-bottom: none;
+    }
+
+    /* ── Article Header ────────────────────────────────────── */
+    .article-header {
+      padding: 4rem 0 3rem;
+    }
+    .article-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: rgba(99,102,241, .5);
+      margin-bottom: 2rem;
+    }
+    .article-title {
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      text-shadow:
+        0 0 60px rgba(99,102,241, .15),
+        0 0 120px rgba(99,102,241, .05);
+    }
+    .article-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .article-meta {
+      margin-top: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(99,102,241, .15);
+      object-fit: cover;
+      filter: grayscale(30%);
+      opacity: .85;
+    }
+    .meta-text {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+    .meta-text strong {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ── Article Body ──────────────────────────────────────── */
+    .article-body {
+      padding-bottom: 4rem;
+    }
+    .article-body p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.85;
+      margin-bottom: 1.5rem;
+    }
+    .article-body p em {
+      color: var(--text-primary);
+      font-style: italic;
+    }
+    .article-body p strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .article-body p code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      opacity: .8;
+    }
+
+    /* ── Links ─────────────────────────────────────────────── */
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(99,102,241, .15);
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    a:hover {
+      color: var(--accent-hover);
+      border-bottom-color: rgba(99,102,241, .4);
+    }
+
+    /* ── Section Headers ───────────────────────────────────── */
+    .section-break {
+      height: 1px;
+      border: none;
+      background: linear-gradient(90deg, rgba(99,102,241, .25), transparent 70%);
+      margin: 3.5rem 0;
+    }
+    .article-body h2,
+    .sources-label {
+      position: relative;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      line-height: 1.35;
+    }
+    a.heading-anchor {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: none;
+    }
+    a.heading-anchor:hover {
+      color: inherit;
+      border-bottom: none;
+    }
+    a.heading-anchor::before {
+      content: '#';
+      position: absolute;
+      right: 100%;
+      padding-right: 0.5rem;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      font-weight: 400;
+    }
+    .article-body h2:hover a.heading-anchor::before,
+    .sources-label:hover a.heading-anchor::before {
+      opacity: 0.4;
+    }
+
+    /* ── Pull Quotes ───────────────────────────────────────── */
+    .pull-quote {
+      border-left: 2px solid rgba(99,102,241, .4);
+      padding: 1.25rem 0 1.25rem 1.5rem;
+      margin: 2rem 0 2.5rem;
+      background: rgba(99,102,241, .03);
+      border-radius: 0 6px 6px 0;
+    }
+    .pull-quote p {
+      font-size: 0.95rem !important;
+      color: var(--text-primary) !important;
+      font-weight: 400;
+      line-height: 1.75 !important;
+      margin-bottom: 0 !important;
+    }
+    .pull-quote .pull-source {
+      font-size: 0.75rem !important;
+      color: var(--text-tertiary) !important;
+      margin-top: 0.75rem !important;
+      font-family: var(--font-mono);
+    }
+
+    /* ── Stat Callout ──────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin: 2rem 0 2.5rem;
+    }
+    .stat-card {
+      padding: 1.25rem;
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, .3);
+      text-align: center;
+    }
+    .stat-number {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+
+    /* ── Emphasis Card ─────────────────────────────────────── */
+    .emphasis-card {
+      padding: 1.5rem 1.75rem;
+      margin: 2rem 0 2.5rem;
+      background: rgba(99,102,241, .04);
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      box-shadow: 0 0 32px rgba(99,102,241, .03);
+    }
+    .emphasis-card p {
+      font-size: 1.05rem !important;
+      color: var(--text-primary) !important;
+      font-weight: 400;
+      line-height: 1.8 !important;
+      margin-bottom: 0 !important;
+    }
+
+    /* ── Postscript ────────────────────────────────────────── */
+    .postscript {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      font-style: italic;
+      border-top: 1px solid rgba(99,102,241, .1);
+      padding-top: 2rem;
+      margin-top: 1rem;
+      line-height: 1.75;
+    }
+    .postscript strong {
+      font-style: normal;
+      color: var(--text-secondary);
+    }
+
+    /* ── Sources ───────────────────────────────────────────── */
+    .sources {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(99,102,241, .08);
+    }
+    .sources-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-tertiary);
+      margin-bottom: 1rem;
+    }
+    .sources ol {
+      padding-left: 1.25rem;
+    }
+    .sources li {
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      line-height: 1.7;
+      margin-bottom: 0.25rem;
+    }
+    .sources li a {
+      color: rgba(99,102,241, .55);
+      border-bottom-color: rgba(99,102,241, .15);
+    }
+    .sources li a:hover {
+      color: var(--accent);
+    }
+
+    /* ── CTA ───────────────────────────────────────────────── */
+    .article-cta {
+      text-align: center;
+      padding: 4rem 0 2rem;
+    }
+    .cta-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+    .cta-links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      align-items: center;
+    }
+    .cta-link {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    .footer {
+      padding: 3rem 0 4rem;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      opacity: .6;
+    }
+    .footer-text a {
+      color: var(--text-tertiary);
+      border-bottom-color: rgba(255, 255, 255, .08);
+    }
+    .footer-text a:hover { color: var(--accent); }
+
+    /* ── Animations ────────────────────────────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity 0.7s cubic-bezier(.25, .1, .25, 1),
+        transform 0.7s cubic-bezier(.25, .1, .25, 1);
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .article-header .fade-in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── Schematic ─────────────────────────────────────────── */
+    .schematic {
+      position: absolute;
+      top: -6rem;
+      right: -10rem;
+      width: 800px;
+      height: 740px;
+      pointer-events: none;
+      z-index: 0;
+      -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+      mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+    }
+    .schematic svg { width: 100%; height: 100%; }
+    .article-header {
+      position: relative;
+      overflow: hidden;
+    }
+    .article-header .fade-in {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .container { padding: 0 1.5rem; }
+      .article-header { padding: 2.5rem 0 2rem; }
+      .schematic, .schematic-bottom { display: none; }
+      .stat-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-align: left;
+      }
+      .stat-number { margin-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <div class="container">
+    <header class="site-header">
+      <a href="./" class="back-link">&larr; Jig</a>
+    </header>
+  </div>
+
+  <!-- ── Article Header ─────────────────────────────────── -->
+  <div class="container">
+    <div class="article-header">
+      <div class="schematic" aria-hidden="true">
+        <svg viewBox="0 0 520 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+              <path d="M0,0 L6,2 L0,4" fill="none" stroke="rgba(99,102,241,0.55)" stroke-width=".75"/>
+            </marker>
+            <marker id="arr-r" markerWidth="6" markerHeight="4" refX="1" refY="2" orient="auto-start-reverse">
+              <path d="M6,0 L0,2 L6,4" fill="none" stroke="rgba(99,102,241,0.55)" stroke-width=".75"/>
+            </marker>
+          </defs>
+          <rect x="80" y="70" width="340" height="300" rx="6" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <line x1="40" y1="220" x2="460" y2="220" stroke="rgba(99,102,241,0.25)" stroke-width=".5" stroke-dasharray="16 4 4 4"/>
+          <line x1="250" y1="30" x2="250" y2="410" stroke="rgba(99,102,241,0.25)" stroke-width=".5" stroke-dasharray="16 4 4 4"/>
+          <rect x="130" y="110" width="220" height="220" rx="2" stroke="rgba(99,102,241,0.29)" stroke-width=".75" stroke-dasharray="8 4"/>
+          <circle cx="140" cy="120" r="7" stroke="rgba(99,102,241,0.49)" stroke-width=".75"/>
+          <circle cx="140" cy="120" r="2.5" stroke="rgba(99,102,241,0.39)" stroke-width=".5"/>
+          <line x1="128" y1="120" x2="152" y2="120" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="140" y1="108" x2="140" y2="132" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <circle cx="340" cy="120" r="7" stroke="rgba(99,102,241,0.49)" stroke-width=".75"/>
+          <circle cx="340" cy="120" r="2.5" stroke="rgba(99,102,241,0.39)" stroke-width=".5"/>
+          <line x1="328" y1="120" x2="352" y2="120" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="340" y1="108" x2="340" y2="132" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <circle cx="140" cy="320" r="7" stroke="rgba(99,102,241,0.49)" stroke-width=".75"/>
+          <circle cx="140" cy="320" r="2.5" stroke="rgba(99,102,241,0.39)" stroke-width=".5"/>
+          <line x1="128" y1="320" x2="152" y2="320" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="140" y1="308" x2="140" y2="332" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <path d="M320,300 L350,300 L350,340 L320,340 Z" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <path d="M335,300 L335,285 M330,285 L340,285" stroke="rgba(99,102,241,0.35)" stroke-width=".75"/>
+          <circle cx="335" cy="320" r="4" stroke="rgba(99,102,241,0.35)" stroke-width=".5"/>
+          <circle cx="210" cy="190" r="10" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <circle cx="210" cy="190" r="4" stroke="rgba(99,102,241,0.29)" stroke-width=".5"/>
+          <line x1="195" y1="190" x2="225" y2="190" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <line x1="210" y1="175" x2="210" y2="205" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <circle cx="290" cy="250" r="10" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <circle cx="290" cy="250" r="4" stroke="rgba(99,102,241,0.29)" stroke-width=".5"/>
+          <line x1="275" y1="250" x2="305" y2="250" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <line x1="290" y1="235" x2="290" y2="265" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <line x1="80" y1="48" x2="420" y2="48" stroke="rgba(99,102,241,0.35)" stroke-width=".5" marker-start="url(#arr-r)" marker-end="url(#arr)"/>
+          <line x1="80" y1="56" x2="80" y2="68" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="420" y1="56" x2="420" y2="68" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <text x="250" y="44" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="rgba(99,102,241,0.49)">340.00</text>
+          <line x1="445" y1="70" x2="445" y2="370" stroke="rgba(99,102,241,0.35)" stroke-width=".5" marker-start="url(#arr-r)" marker-end="url(#arr)"/>
+          <line x1="422" y1="70" x2="438" y2="70" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="422" y1="370" x2="438" y2="370" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <text x="455" y="224" font-family="var(--font-mono)" font-size="7" fill="rgba(99,102,241,0.49)" transform="rotate(90 455 224)">300.00</text>
+          <circle cx="210" cy="190" r="22" stroke="rgba(99,102,241,0.29)" stroke-width=".5" stroke-dasharray="3 2"/>
+          <line x1="226" y1="174" x2="265" y2="148" stroke="rgba(99,102,241,0.29)" stroke-width=".5"/>
+          <circle cx="275" cy="140" r="11" stroke="rgba(99,102,241,0.35)" stroke-width=".5"/>
+          <text x="275" y="143" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="rgba(99,102,241,0.49)">A</text>
+          <polyline points="80,78 88,78 88,70" stroke="rgba(99,102,241,0.29)" stroke-width=".5" fill="none"/>
+          <polyline points="412,370 412,362 420,362" stroke="rgba(99,102,241,0.29)" stroke-width=".5" fill="none"/>
+          <g stroke="rgba(99,102,241,0.20)" stroke-width=".3">
+            <line x1="322" y1="302" x2="328" y2="308"/><line x1="326" y1="302" x2="332" y2="308"/>
+            <line x1="330" y1="302" x2="336" y2="308"/><line x1="334" y1="302" x2="340" y2="308"/>
+            <line x1="338" y1="302" x2="344" y2="308"/><line x1="342" y1="302" x2="348" y2="308"/>
+          </g>
+          <rect x="370" y="395" width="110" height="50" rx="1" stroke="rgba(99,102,241,0.25)" stroke-width=".5"/>
+          <line x1="370" y1="412" x2="480" y2="412" stroke="rgba(99,102,241,0.20)" stroke-width=".4"/>
+          <line x1="370" y1="428" x2="480" y2="428" stroke="rgba(99,102,241,0.20)" stroke-width=".4"/>
+          <text x="425" y="408" text-anchor="middle" font-family="var(--font-mono)" font-size="5.5" fill="rgba(99,102,241,0.35)">JIG-001 REV C</text>
+          <text x="425" y="423" text-anchor="middle" font-family="var(--font-mono)" font-size="4.5" fill="rgba(99,102,241,0.25)">FIXTURE ASSY</text>
+          <text x="425" y="440" text-anchor="middle" font-family="var(--font-mono)" font-size="4" fill="rgba(99,102,241,0.20)">SCALE 1:1</text>
+        </svg>
+      </div>
+      <div class="fade-in">
+        <div class="article-label">White Paper</div>
+        <h1 class="article-title">The 10x Trap</h1>
+        <p class="article-subtitle">What nobody tells you about scaling AI-assisted development</p>
+        <div class="article-meta">
+          <img src="avatars/dustin.jpg" alt="Dustin Diaz" class="author-avatar">
+          <div class="meta-text">
+            <strong>Dustin Diaz</strong><br>
+            March 2026 &middot; 8 min read
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <hr class="section-break">
+  </div>
+
+  <!-- ── Article Body ───────────────────────────────────── -->
+  <div class="container">
+    <article class="article-body">
+
+      <div class="fade-in">
+        <p>We had four AI code reviewers running on every pull request. Cursor bot, Sentry bot, GitHub Copilot's bugbot, and Claude's code reviewer. Each one would unleash a wall of comments — sometimes 150+ on a single 1,000-line PR.</p>
+
+        <p>So we built a skill to triage them. It would read every unresolved comment, determine if the finding was valid, and respond accordingly. Roughly 25% were real. The other 75% were false positives. Noise.</p>
+
+        <p>But the real insight came from the postmortem. We'd built a skill that runs post-merge — goes back through everything that was caught across all those review passes and asks: what patterns are we actually seeing? What should we learn from this?</p>
+
+        <p>Turns out, 67% of the valid issues were nuanced logic errors. Not style violations. Not best-practice gaps. Actual bugs — a function consuming data it shouldn't trust, a state update that doesn't account for a race condition, a mutation that silently breaks a downstream consumer. The kind of thing you only catch by tracing inputs upstream and outputs downstream, like a skeptical staff engineer tugging on every seam.</p>
+
+        <p>None of our reviewers were built for that. They were built to know <em>everything</em> — and they were rigorous about <em>nothing</em>.</p>
+
+        <p>That was the moment I realized we had the wrong model entirely. Not the language model — the mental model.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <h2 id="cost"><a href="#cost" class="heading-anchor">The speed is real. So is the cost.</a></h2>
+
+        <p>Everyone's chasing 10x. We got there. Our team — a small engineering group at <a href="https://www.duro.us">Duro</a> — was shipping features that previously took weeks in a matter of hours. Agent teams running in parallel. TDD-first pipelines. Automated spec compliance. The velocity was genuinely transformative.</p>
+
+        <p>But here's what nobody puts in the LinkedIn post (weird, right?): Google's <a href="https://dora.dev/research/2025/dora-report/">2025 DORA Report</a> confirmed that AI adoption has a negative relationship with software delivery stability. And <a href="https://www.faros.ai/blog/key-takeaways-from-the-dora-report-2025">Faros AI's telemetry</a> across 10,000+ developers put hard numbers on the problem.</p>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-number">+9%</div>
+            <div class="stat-label">increase in<br>bug rates</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">+91%</div>
+            <div class="stat-label">increase in<br>review time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">+154%</div>
+            <div class="stat-label">increase in<br>PR size</div>
+          </div>
+        </div>
+
+        <p>More code, faster, with more bugs, that takes longer to review. That's not 10x. That's 10x output with 0.5x quality — and the math on that is ugly.</p>
+
+        <p>You can ship 10x faster <em>and</em> 10x worse. That's not a win. That's a liability wearing a velocity metric as a disguise.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <h2 id="spec"><a href="#spec" class="heading-anchor">The spec is the product</a></h2>
+
+        <p>When one developer gets a vague requirement, they make one interpretation. That interpretation might be wrong — but at least it's <em>consistently</em> wrong. You can fix it in one place.</p>
+
+        <p>When five parallel agents get a vague requirement, they make five different interpretations. Each one is internally coherent. Together, they're chaos.</p>
+
+        <div class="pull-quote">
+          <p>"A precise spec multiplies into precise implementations everywhere. A vague spec multiplies errors across parallel runs."</p>
+          <p class="pull-source">— Addy Osmani, The Code Agent Orchestra</p>
+        </div>
+
+        <p>The spec isn't overhead. The spec <em>is the product</em>. The code is a byproduct — a deterministic output of a well-defined input. Get the input right, and you can run it through as many agents as you want. Get the input wrong, and you've just multiplied your mistakes at the speed of inference.</p>
+
+        <p>This is why "just assign it to AI" doesn't work. Not because the AI is incapable — but because the input to the AI is sloppy. Garbage in, garbage out, at five times the throughput. This is why vibe coding only works for prototypes (which I love too, when appropriate).</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <h2 id="specialists"><a href="#specialists" class="heading-anchor">Specialists beat generalists (we learned this the hard way)</a></h2>
+
+        <p>Back to our postmortem findings. We knew that 67% of real issues were logic errors — things only caught by tracing data flow, not checking style guides. So we stopped trying to build one reviewer that catches everything. Instead, we built reviewers that each catch <em>one thing</em> exceptionally well.</p>
+
+        <p>Five specialists — security, dead-code, error-handling, async-safety, performance — each running in isolation, each with a narrow scope and deep focus. And a logic reviewer built to do what our postmortem told us mattered most: trace the inputs upstream, trace the outputs downstream, and ask "who calls this? who consumes this? what breaks if this is wrong?" And we may even take this further in the event a specialist gets too large (or not, if the models get smarter. who knows).</p>
+
+        <p>The improvement was immediate. Not incremental — <em>categorical</em>.</p>
+
+        <p>Turns out Stripe arrived at the same conclusion independently. Their <a href="https://blog.bytebytego.com/p/how-stripes-minions-ship-1300-prs">Minions system</a> exposes roughly 500 tools via MCP through an internal server called Toolshed — but each agent gets a curated subset of about 15. Their engineering team put it simply: "Agents perform best with a carefully curated subset relevant to their task."</p>
+
+        <p>Focused context dramatically outperforms comprehensive context. Every time.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <h2 id="team-size"><a href="#team-size" class="heading-anchor">3&ndash;5 agents, not 50</a></h2>
+
+        <p>The "AI swarm" narrative sounds incredible in a conference talk. Fifty agents descending on your codebase like a cloud of productivity. Ship everything. Ship it now.</p>
+
+        <p>In practice — it's a mess.</p>
+
+        <p>The <a href="https://addyosmani.com/blog/code-agent-orchestra/">research</a> is converging on a different number: 3&ndash;5 specialized agents per team. That's it. Frontend, backend, testing. Or API, database, integration. Small, focused, domain-specific teams where each agent owns a clear slice of the problem.</p>
+
+        <p>Stripe's 1,300 PRs per week don't come from one massive swarm. They come from many small, focused agent runs — each scoped to a single task in an isolated cloud environment. The impressive scale comes from <em>concurrency</em>, not swarm size.</p>
+
+        <p>The "thousands of PRs" headline is real. The "massive swarm" mental model behind it is not.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <h2 id="humans"><a href="#humans" class="heading-anchor">Humans aren't going anywhere. They're getting promoted.</a></h2>
+
+        <p>Here's the part where I'm supposed to tell you that AI is replacing developers. I won't — because it's not true, and I'm tired of reading that take from people who don't ship software for a living.</p>
+
+        <p>What <em>is</em> happening is a role shift. The value moved upstream. Way upstream.</p>
+
+        <p>At Stripe, human review didn't disappear when Minions started shipping 1,300 PRs a week. It <em>shifted</em> — from writing code to evaluating code. From generation to verification. The humans are still there. They're just doing different work.</p>
+
+        <p>Think about what that means for your day. You're not the bricklayer anymore. You're the architect, the inspector, and the one who decides what gets built in the first place. That's not a demotion. That's a promotion — and it requires a different muscle.</p>
+
+        <p>Writing great specs. Making architectural judgments under ambiguity. Recognizing when agent output is <em>almost right</em> — which is the most dangerous kind of wrong, because it passes a casual glance. These are senior engineering skills, and they've never been more valuable than they are right now.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <h2 id="framework"><a href="#framework" class="heading-anchor">A bag of skills is not a workflow</a></h2>
+
+        <p>I've watched teams assemble impressive skill collections. A skill for Jira integration. A skill for code review. A skill for generating tests. A skill for writing PR descriptions. They share them in Slack like recipe cards. They demo beautifully.</p>
+
+        <p>And they fall apart at the seams.</p>
+
+        <p>Because a bag of skills is not a workflow. Without pipeline discipline — without enforced handoffs, quality gates between stages, and a framework that has <em>opinions</em> about how work flows from idea to production — you're just vibe coding with extra steps.</p>
+
+        <p>(Yeah. I've been avoiding that comparison for a while now. But it fits.)</p>
+
+        <div class="emphasis-card">
+          <p>The difference between a framework and a skill collection is the difference between a manufacturing line and a workbench full of nice tools. Both can produce things. Only one produces them consistently, at quality, at scale.</p>
+        </div>
+
+        <p>A framework encodes your team's engineering standards into something enforceable. It decides when specs get reviewed, when code gets tested, when PRs get specialist scrutiny — and it does this every single time, not just when someone remembers. The framework is the nervous system. The skills are organs. Without the nervous system, the organs don't coordinate. They just twitch independently.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <h2 id="future"><a href="#future" class="heading-anchor">Where this goes</a></h2>
+
+        <p>The next leap isn't faster models. It's three things:</p>
+
+        <p><strong>Cloud execution.</strong> Agents shouldn't need your laptop. Isolated environments that spin up in seconds, work autonomously, and deliver finished PRs. Stripe's already there with pre-warmed devboxes. Claude Code now supports remote sessions. The infrastructure is arriving — and when it does, your local machine stops being the bottleneck.</p>
+
+        <p><strong>Continuous autonomy.</strong> For pre-approved work types — migrations, dependency bumps, well-scoped bug fixes — the pipeline should run without a human trigger. A planner agent watches your backlog and pre-decomposes issues. When you approve, workers execute. The human becomes the approver, not the initiator.</p>
+
+        <p><strong>Trust tiers.</strong> Not all work needs the same level of oversight. A dependency bump auto-merges after CI passes. A dead code cleanup needs a quick scan. A new API endpoint needs human architecture review. The system should know the difference — and calibrate its quality gates accordingly.</p>
+
+        <p>But here's the thing about all three — none of them work without quality infrastructure underneath. You don't scale speed. You scale <em>trust</em>. You build the quality gates first. Then you open the floodgates.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+        <p>We built <a href="./">Jig</a> because we needed it. Our team was moving fast — genuinely fast — and nothing in the ecosystem was keeping up with the standard we held ourselves to. Not because the AI wasn't capable. Because nothing was holding it accountable.</p>
+
+        <p>Every stage has a skill. Every handoff has a quality gate. Every shortcut has a guardrail.</p>
+
+        <p>10x was never the goal. Shipping with confidence — at any speed — was always the goal.</p>
+      </div>
+
+      <div class="postscript">
+        <p><strong>p.s.</strong> Stripe's secret wasn't their AI model. It was the devbox infrastructure they built for <em>human</em> engineers years before LLMs existed. Same pattern everywhere — the companies winning the AI transition aren't the ones bolting on the cleverest features. They're the ones who invested in boring fundamentals: great APIs, structured workflows, comprehensive test suites. The AI just plugs in. Back to basics is the dark horse.</p>
+      </div>
+
+      <!-- ── Sources ─────────────────────────────────────── -->
+      <div class="sources fade-in">
+        <div class="sources-label" id="sources"><a href="#sources" class="heading-anchor">Sources</a></div>
+        <ol>
+          <li><a href="https://dora.dev/research/2025/dora-report/">2025 DORA State of AI-Assisted Software Development</a> — Google</li>
+          <li><a href="https://www.faros.ai/blog/key-takeaways-from-the-dora-report-2025">DORA Report 2025 Key Takeaways: AI Impact on Dev Metrics</a> — Faros AI</li>
+          <li><a href="https://blog.bytebytego.com/p/how-stripes-minions-ship-1300-prs">How Stripe's Minions Ship 1,300 PRs a Week</a> — ByteByteGo</li>
+          <li><a href="https://www.mindstudio.ai/blog/stripe-minions-blueprint-architecture-deterministic-agentic-nodes">Stripe Minions Blueprint Architecture</a> — MindStudio</li>
+          <li><a href="https://addyosmani.com/blog/code-agent-orchestra/">The Code Agent Orchestra</a> — Addy Osmani</li>
+          <li><a href="https://mikemason.ca/writing/ai-coding-agents-jan-2026/">AI Coding Agents: Coherence Through Orchestration</a> — Mike Mason</li>
+          <li><a href="https://humanwhocodes.com/blog/2026/01/coder-orchestrator-future-software-engineering/">From Coder to Orchestrator</a> — Nicholas Zakas</li>
+          <li><a href="https://www.infoq.com/news/2026/03/stripe-autonomous-coding-agents/">Stripe Engineers Deploy Autonomous Coding Agents</a> — InfoQ</li>
+          <li><a href="https://newsletter.pragmaticengineer.com/p/how-ai-is-changing-software-engineering">How AI is Changing Engineering at Shopify</a> — The Pragmatic Engineer</li>
+          <li><a href="https://coder.com/blog/building-for-2026-why-anthropic-engineers-are-running-claude-code-remotely-with-c">Anthropic Engineers Running Claude Code Remotely</a> — Coder</li>
+        </ol>
+      </div>
+
+    </article>
+  </div>
+
+  <!-- ── CTA ────────────────────────────────────────────── -->
+  <div class="container">
+    <div class="article-cta fade-in">
+      <p class="cta-text">Jig is the AI engineering workflow framework for teams.<br>Full lifecycle. Quality gates at every stage. Open source.</p>
+      <div class="cta-links">
+        <a href="https://github.com/duronext/jig" class="cta-link">GitHub</a>
+        <span style="color: var(--text-tertiary); opacity: .3;">/</span>
+        <a href="./" class="cta-link">Homepage</a>
+        <span style="color: var(--text-tertiary); opacity: .3;">/</span>
+        <a href="./#start" class="cta-link">Get Started</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Footer ─────────────────────────────────────────── -->
+  <footer class="container">
+    <div class="footer">
+      <div class="footer-text">
+        <a href="https://github.com/duronext/jig">Jig</a> &middot; MIT License &middot; Built by the <a href="https://www.duro.us">Duro</a> engineering team
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Scroll Animations ──────────────────────────────── -->
+  <script>
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { rootMargin: '-60px' }
+    );
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

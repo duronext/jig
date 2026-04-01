@@ -514,8 +514,55 @@
     .t-value { color: var(--text-primary); opacity: .85; }
     .t-success { color: #4ade80; }
     .t-muted { color: var(--text-tertiary); }
-    .t-bar { color: var(--accent); opacity: .6; }
     .t-break { display: block; height: 0.8rem; }
+
+    /* ── Progress Bars ─────────────────────────────────────── */
+    .t-progress {
+      display: inline-block;
+      width: 72px;
+      height: 8px;
+      background: rgba(99,102,241, .12);
+      border-radius: 2px;
+      overflow: hidden;
+      vertical-align: middle;
+      margin: 0 0.4rem;
+    }
+    .t-progress-fill {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      opacity: .6;
+      border-radius: 2px;
+    }
+    .terminal.playing .t-progress-fill {
+      width: 100%;
+      transition: width 0.6s cubic-bezier(.25, .1, .25, 1);
+    }
+
+    /* ── Terminal Line Animation ────────────────────────────── */
+    .t-line {
+      opacity: 0;
+    }
+    .terminal.playing .t-line {
+      opacity: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    /* ── Blinking Cursor ───────────────────────────────────── */
+    @keyframes cursor-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .t-cursor {
+      color: var(--text-secondary);
+      opacity: 0;
+    }
+    .terminal.playing .t-cursor {
+      opacity: 1;
+      transition: opacity 0.01s;
+      animation: cursor-blink 1s step-end infinite;
+    }
 
     /* ── CTA ───────────────────────────────────────────────── */
     .cta-section {
@@ -894,11 +941,17 @@
       <p class="section-label">The Problem</p>
     </div>
     <div class="fade-in">
-      <p class="body-text">Without a shared framework, AI-assisted development
-        is the wild west. Every engineer invents their own workflow. Some
-        brainstorm before coding; others jump straight to implementation.
-        Code review depth varies by who happens to review. Skills sit in
-        scattered files no one remembers to use.</p>
+      <p class="body-text">AI made every engineer 10x faster. It also made
+        every mistake 10x faster. Teams with high AI adoption are seeing
+        <span class="accent-text">more bugs, larger PRs, and longer review
+        cycles</span> &mdash; not because the AI is bad, but because nothing
+        is holding it accountable.</p>
+    </div>
+    <div class="fade-in">
+      <p class="body-text">Without a shared framework, every engineer invents
+        their own workflow. Skills sit in scattered files no one remembers to
+        use. Code review depth varies by who happens to review. A bag of
+        skills is not a workflow &mdash; it's vibe coding with extra steps.</p>
     </div>
     <div class="fade-in">
       <p class="body-text">The best frameworks don't just hand you tools &mdash;
@@ -909,7 +962,8 @@
         quality gates, the same patterns.</p>
     </div>
     <div class="fade-in">
-      <p class="body-text">Jig brings that discipline to AI engineering.</p>
+      <p class="body-text">Jig brings that discipline to AI engineering.
+        <a href="10x-trap.html" style="font-family: var(--font-mono); font-size: 0.8rem; margin-left: 0.25rem;">Read the research &rarr;</a></p>
     </div>
   </section>
 
@@ -1192,37 +1246,38 @@
           </div>
         </div>
         <div class="terminal-body">
-<pre><span class="t-prompt">$</span> <span class="t-cmd">/jig:kickoff</span>
-<span class="t-label">  ▸ Work type:</span> <span class="t-value">feature</span>
-<span class="t-label">  ▸ Summary:</span>  <span class="t-value">Add user notification preferences</span>
-<span class="t-label">  ▸ Pipeline:</span> <span class="t-muted">discover → brainstorm → prd → build → review → ship</span>
+<pre><span class="t-line" style="transition-delay:0ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:kickoff</span></span>
+<span class="t-line" style="transition-delay:80ms"><span class="t-label">  ▸ Work type:</span> <span class="t-value">feature</span></span>
+<span class="t-line" style="transition-delay:160ms"><span class="t-label">  ▸ Summary:</span>  <span class="t-value">Add user notification preferences</span></span>
+<span class="t-line" style="transition-delay:240ms"><span class="t-label">  ▸ Pipeline:</span> <span class="t-muted">discover → brainstorm → prd → build → review → ship</span></span>
 <span class="t-break"></span>
-<span class="t-prompt">$</span> <span class="t-cmd">/jig:brainstorm</span>
-<span class="t-label">  ▸ What problem does this solve for users?</span>
-<span class="t-label">  ▸ Approach A:</span> <span class="t-value">Per-channel toggles with sensible defaults</span>
-<span class="t-label">  ▸ Approach B:</span> <span class="t-value">Smart digest with frequency control</span>
-<span class="t-label">  ▸ Design approved</span> <span class="t-success">✓</span>
+<span class="t-line" style="transition-delay:500ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:brainstorm</span></span>
+<span class="t-line" style="transition-delay:600ms"><span class="t-label">  ▸ What problem does this solve for users?</span></span>
+<span class="t-line" style="transition-delay:700ms"><span class="t-label">  ▸ Approach A:</span> <span class="t-value">Per-channel toggles with sensible defaults</span></span>
+<span class="t-line" style="transition-delay:800ms"><span class="t-label">  ▸ Approach B:</span> <span class="t-value">Smart digest with frequency control</span></span>
+<span class="t-line" style="transition-delay:900ms"><span class="t-label">  ▸ Design approved</span> <span class="t-success">✓</span></span>
 <span class="t-break"></span>
-<span class="t-prompt">$</span> <span class="t-cmd">/jig:prd</span>
-<span class="t-label">  ▸ PRD:</span> <span class="t-value">User Notification Preferences</span>
-<span class="t-label">  ▸ 12 acceptance criteria defined</span>
-<span class="t-label">  ▸ Layer tags:</span> <span class="t-muted">[API] [DATA] [UI]</span>
-<span class="t-label">  ▸ Approved</span> <span class="t-success">✓</span>
+<span class="t-line" style="transition-delay:1150ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:prd</span></span>
+<span class="t-line" style="transition-delay:1250ms"><span class="t-label">  ▸ PRD:</span> <span class="t-value">User Notification Preferences</span></span>
+<span class="t-line" style="transition-delay:1350ms"><span class="t-label">  ▸ 12 acceptance criteria defined</span></span>
+<span class="t-line" style="transition-delay:1450ms"><span class="t-label">  ▸ Layer tags:</span> <span class="t-muted">[API] [DATA] [UI]</span></span>
+<span class="t-line" style="transition-delay:1550ms"><span class="t-label">  ▸ Approved</span> <span class="t-success">✓</span></span>
 <span class="t-break"></span>
-<span class="t-prompt">$</span> <span class="t-cmd">/jig:build</span>
-<span class="t-label">  ▸ Strategy:</span> <span class="t-value">parallel (4 tasks, 3 agents)</span>
-<span class="t-label">  ▸ Agent 1: Data model + migrations</span>  <span class="t-bar">████████</span> <span class="t-success">done</span>
-<span class="t-label">  ▸ Agent 2: API endpoints</span>           <span class="t-bar">████████</span> <span class="t-success">done</span>
-<span class="t-label">  ▸ Agent 3: UI components</span>           <span class="t-bar">████████</span> <span class="t-success">done</span>
-<span class="t-label">  ▸ Spec compliance:</span> <span class="t-success">passed ✓</span>
-<span class="t-label">  ▸ Code quality:</span> <span class="t-success">passed ✓</span>
+<span class="t-line" style="transition-delay:1800ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:build</span></span>
+<span class="t-line" style="transition-delay:1900ms"><span class="t-label">  ▸ Strategy:</span> <span class="t-value">parallel (4 tasks, 3 agents)</span></span>
+<span class="t-line" style="transition-delay:2050ms"><span class="t-label">  ▸ Agent 1: Data model + migrations  </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2050ms"></span></span> <span class="t-success">done</span></span>
+<span class="t-line" style="transition-delay:2200ms"><span class="t-label">  ▸ Agent 2: API endpoints            </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2200ms"></span></span> <span class="t-success">done</span></span>
+<span class="t-line" style="transition-delay:2350ms"><span class="t-label">  ▸ Agent 3: UI components            </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2350ms"></span></span> <span class="t-success">done</span></span>
+<span class="t-line" style="transition-delay:2600ms"><span class="t-label">  ▸ Spec compliance:</span> <span class="t-success">passed ✓</span></span>
+<span class="t-line" style="transition-delay:2700ms"><span class="t-label">  ▸ Code quality:</span> <span class="t-success">passed ✓</span></span>
 <span class="t-break"></span>
-<span class="t-prompt">$</span> <span class="t-cmd">/jig:review</span>
-<span class="t-label">  ▸ Dispatching 7 specialists...</span>
-<span class="t-label">  ▸ security:</span> <span class="t-success">passed</span>
-<span class="t-label">  ▸ async-safety:</span> <span class="t-success">passed</span>
-<span class="t-label">  ▸ error-handling:</span> <span class="t-value">1 suggestion (minor)</span>
-<span class="t-label">  ▸ Confidence:</span> <span class="t-success">94%</span> <span class="t-muted">— ready to ship</span></pre>
+<span class="t-line" style="transition-delay:2950ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:review</span></span>
+<span class="t-line" style="transition-delay:3050ms"><span class="t-label">  ▸ Dispatching 7 specialists...</span></span>
+<span class="t-line" style="transition-delay:3200ms"><span class="t-label">  ▸ security:</span> <span class="t-success">passed</span></span>
+<span class="t-line" style="transition-delay:3300ms"><span class="t-label">  ▸ async-safety:</span> <span class="t-success">passed</span></span>
+<span class="t-line" style="transition-delay:3400ms"><span class="t-label">  ▸ error-handling:</span> <span class="t-value">1 suggestion (minor)</span></span>
+<span class="t-line" style="transition-delay:3550ms"><span class="t-label">  ▸ Confidence:</span> <span class="t-success">94%</span> <span class="t-muted">— ready to ship</span></span>
+<span class="t-cursor" style="transition-delay:3700ms">▌</span></pre>
         </div>
       </div>
     </div>
@@ -1444,6 +1499,23 @@
     // Skip hero and quick-install (above the fold)
     if (el.closest('.hero') || el.closest('.quick-install')) return;
     observer.observe(el);
+  });
+
+  // Terminal animation — play once on scroll
+  // Delay observer setup so it doesn't fire on page load for already-visible elements
+  requestAnimationFrame(() => {
+    const terminalObs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('playing');
+            terminalObs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    document.querySelectorAll('.terminal').forEach((el) => terminalObs.observe(el));
   });
 </script>
 
