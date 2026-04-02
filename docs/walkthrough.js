@@ -53,6 +53,8 @@
     resume() {
       this.paused = false;
       this.lastFrame = performance.now();
+      // Restart rAF loop if it was killed (e.g. after nav while paused)
+      if (!this.rafId) this.tick(this.lastFrame);
     },
 
     reset() {
@@ -456,7 +458,7 @@
       tabs: ['\u2217 Team Lead \u2318\u0031', '\u2192 frontend \u2318\u0032', '\u2192 backend \u2318\u0033', '\u2192 tests \u2318\u0034'],
       frames: [
         // Pane 0: Team Lead
-        { t: 0,    type: 'split-line', pane: 0, html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:build</span>', typing: true },
+        { t: 0,    type: 'split-line', pane: 0, html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:build</span>' },
         { t: 800,  type: 'split-line', pane: 0, html: '<span class="wt-label">  \u25B8 Strategy:</span> <span class="wt-value">team-dev (parallel)</span>' },
         { t: 1200, type: 'split-line', pane: 0, html: '<span class="wt-label">  \u25B8 Dispatching 3 agents...</span>' },
         { t: 1700, type: 'split-line', pane: 0, html: '<span class="wt-break"> </span>' },
@@ -876,6 +878,13 @@
         } else if (event === 'nav_to') {
           state = SECTION_TRANSITION;
           engine.resumeAfterTransition = true;
+          // Clean up replay button before transitioning
+          if (controlsBar) {
+            const rb = controlsBar.querySelector('.wt-ctrl-replay');
+            if (rb) rb.remove();
+            const pp = controlsBar.querySelector('.wt-ctrl-playpause');
+            if (pp) pp.style.display = '';
+          }
           performTransition(payload);
         }
         break;
