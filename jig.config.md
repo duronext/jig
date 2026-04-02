@@ -60,6 +60,24 @@ deep-review-model: opus
 specialist-model-default: haiku
 ```
 
+## PRD Review
+
+```yaml
+prd-swarm-tiers:
+  fast-pass: [data-dependency, ui-conflict, blast-radius, state-completeness]
+  full: all
+```
+
+## Plan Review
+
+```yaml
+plan-swarm-tiers:
+  fast-pass: [task-dependency, migration-safety, blast-radius, state-completeness]
+  full: all
+plan-deep-review-model: opus
+design-review-model: sonnet
+```
+
 ## Execution
 
 ```yaml

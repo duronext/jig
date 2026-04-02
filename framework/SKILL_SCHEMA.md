@@ -89,9 +89,17 @@ name: string              # Specialist identifier
 description: string       # What this specialist reviews
 model: enum               # haiku | sonnet | opus — cost/capability tradeoff
 tier: enum                # fast-pass | full-only — when to dispatch
+stage: enum               # Optional. prd | plan | both — pipeline stage filter.
+                          # Absent = code review only (backward compatible).
 globs: string[]           # File patterns this specialist cares about
 severity: enum            # blocking | major | minor — how findings are weighted
 ---
 ```
+
+- **stage:** Optional. Controls which review swarm discovers this specialist.
+  `prd` = PRD review only. `plan` = PLAN review only. `both` = PRD and PLAN
+  reviews. Absent = code review only (existing behavior, backward compatible).
+  Specialists with a `stage` field are excluded from code review swarms.
+  Specialists without a `stage` field are excluded from PRD/PLAN swarms.
 
 The markdown body below the frontmatter IS the specialist's prompt. It defines what to check, what to ignore, and how to report findings.

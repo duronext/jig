@@ -81,6 +81,24 @@ Produce a **complete PRD draft** in one pass:
 
 **Draft quality bar**: The draft should be good enough that the user is refining and correcting, not writing from scratch. Leverage what you learned in Step 1.
 
+### Step 3b: PRD Review Swarm
+
+After producing the draft, invoke the review swarm to scrutinize the requirements before the user refines them.
+
+**Automatic dispatch**: Run the swarm for all medium-to-large features and improvements. Skip only for clearly trivial work (config change, single-line fix, chore with obvious scope).
+
+**INVOKE `jig:review` using the Skill tool with mode: prd.** Pass the PRD document path. The review skill discovers PRD specialists (stage: prd or both), dispatches them in parallel with the full document + section hints + codebase access, scores findings, and returns a unified report.
+
+Present the swarm findings to the user **alongside the draft**:
+
+> "Here's the PRD draft. Before we refine, the review swarm found these concerns:"
+>
+> {swarm report}
+>
+> "Let's address these during refinement, or flag any you want to defer."
+
+The user then refines the draft (Step 4) informed by both their own review and the specialist findings.
+
 ### Step 4: Refine
 
 Walk through the draft with the user:
