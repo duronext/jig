@@ -125,14 +125,15 @@ Agent tool:
     {filtered diff}             <- only the files matching this specialist's globs
 ```
 
-#### Mode: prd or plan
+#### Mode: prd
 
 For each specialist with a matching stage, spawn a parallel subagent:
 
 ```
 Agent tool:
   description: "Review: {specialist.name}"
-  model: {specialist.model from frontmatter, or design-review-model from config as fallback}
+  model: {specialist.model from frontmatter, or design-review-model
+          from config as fallback}
   prompt: |
     {specialist body}
 
@@ -140,15 +141,38 @@ Agent tool:
 
     ## Document to Review
 
-    {full document content}
+    {full PRD content}
+
+    ## Section Hints
+
+    {computed section hints for this specialist}
+```
+
+#### Mode: plan
+
+For each specialist with a matching stage, spawn a parallel subagent:
+
+```
+Agent tool:
+  description: "Review: {specialist.name}"
+  model: {specialist.model from frontmatter, or design-review-model
+          from config as fallback}
+  prompt: |
+    {specialist body}
+
+    ---
+
+    ## Document to Review
+
+    {full plan content}
 
     ## Section Hints
 
     {computed section hints for this specialist}
 
-    ## PRD (for plan mode, if available)
+    ## PRD Reference
 
-    {PRD content, or "No PRD available" if absent}
+    {PRD content if available, or "No PRD available"}
 ```
 
 All specialists in prd/plan modes receive codebase access tools: Read, Grep, Glob.
@@ -213,10 +237,17 @@ Apply mechanical scoring based on the highest severity finding. All findings are
 
 No exceptions, no bumps for positives.
 
-Deduplication:
+Deduplication (mode-aware):
+
+**Mode: code:**
 - If multiple specialists flag the same `file:line` → merge into one finding, use the higher severity, note all specialists
 - If the logic reviewer flags the same `file:line` as a specialist → drop the logic reviewer's finding (specialist caught it first)
 - If the logic reviewer flags a different `file:line` but same root cause as a specialist → keep both, note the connection
+
+**Mode: prd or plan:**
+- If multiple specialists flag the same document section → merge into one finding, use the higher severity, note all specialists
+- If the plan logic reviewer flags the same task/section as a specialist → drop the logic reviewer's finding (specialist caught it first)
+- If a specialist flags something already in the document's Open Questions section → skip (author already knows)
 
 ### Stage 7: REPORT
 
