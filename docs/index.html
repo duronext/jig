@@ -1024,12 +1024,10 @@
     }
 
     .wt-body {
-      flex: 1;
       padding: 1.25rem;
       overflow-y: auto;
       overflow-x: hidden;
-      min-height: 300px;
-      max-height: 60vh;
+      height: 480px;
       transition: opacity 0.2s ease;
     }
     .wt-body.wt-fade-out { opacity: 0; }
@@ -1205,13 +1203,13 @@
 
     @media (max-width: 768px) {
       .wt-modal { max-height: 100vh; margin: 0; border-radius: 0; }
-      .wt-body { min-height: 250px; max-height: 50vh; }
+      .wt-body { height: 400px; }
       .wt-body.wt-split { grid-template-columns: 1fr; }
       .wt-pane-right { grid-template-rows: auto; }
       .wt-nav-item { font-size: 0.55rem; padding: 0.3rem 0.5rem; }
     }
     @media (max-width: 480px) {
-      .wt-body { min-height: 200px; padding: 0.75rem; }
+      .wt-body { height: 350px; padding: 0.75rem; }
       .wt-body pre { font-size: 0.68rem; }
       .wt-controls { padding: 0.5rem 0.75rem; gap: 0.5rem; }
     }

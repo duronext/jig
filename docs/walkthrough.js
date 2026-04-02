@@ -735,11 +735,19 @@
     document.body.style.position = '';
     document.body.style.width = '';
     document.body.style.top = '';
-    window.scrollTo(0, savedScrollY);
 
-    // Return focus to play button
+    // Restore scroll position without smooth animation
+    const html = document.documentElement;
+    const prevBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+    window.scrollTo(0, savedScrollY);
+    html.style.scrollBehavior = prevBehavior;
+
+    // Return focus without triggering scroll
     const playBtn = document.querySelector('.wt-play-btn');
-    if (playBtn) playBtn.focus();
+    if (playBtn) {
+      playBtn.focus({ preventScroll: true });
+    }
 
     // Restore ToC FAB
     const tocToggle = document.querySelector('.toc-toggle');
@@ -749,6 +757,31 @@
 
     // Clear terminal
     if (terminalPre) terminalPre.innerHTML = '';
+
+    // Clean up replay button if present
+    if (controlsBar) {
+      const replayBtn = controlsBar.querySelector('.wt-ctrl-replay');
+      if (replayBtn) replayBtn.remove();
+      const ppBtn = controlsBar.querySelector('.wt-ctrl-playpause');
+      if (ppBtn) ppBtn.style.display = '';
+    }
+
+    // Reset nav bar
+    if (navBar) {
+      navBar.querySelectorAll('.wt-nav-item').forEach((item, i) => {
+        item.classList.remove('active', 'completed');
+        if (i === 0) item.classList.add('active');
+        item.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+      });
+    }
+
+    // Reset controls label and progress
+    if (controlsBar) {
+      const label = controlsBar.querySelector('.wt-section-label');
+      if (label) label.textContent = '1 / 8 \u2014 Kickoff';
+      const fill = controlsBar.querySelector('.wt-overall-fill');
+      if (fill) fill.style.width = '0%';
+    }
   }
 
   // ── State Transitions ─────────────────────────────────────
@@ -843,7 +876,8 @@
     const btn = controlsBar ? controlsBar.querySelector('.wt-ctrl-playpause') : null;
     if (!btn) return;
 
-    if (state === PLAYING) {
+    // Treat SECTION_TRANSITION as "playing" for icon purposes
+    if (state === PLAYING || state === SECTION_TRANSITION) {
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
       btn.setAttribute('aria-label', 'Pause');
     } else {
