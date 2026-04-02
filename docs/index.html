@@ -2115,7 +2115,7 @@
       },
       { threshold: 0.15 }
     );
-    document.querySelectorAll('.terminal').forEach((el) => terminalObs.observe(el));
+    document.querySelectorAll('.terminal:not(.wt-terminal)').forEach((el) => terminalObs.observe(el));
   });
 </script>
 

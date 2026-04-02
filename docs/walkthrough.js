@@ -682,6 +682,12 @@
     modal.appendChild(controlsBar);
     backdrop.appendChild(modal);
     document.body.appendChild(backdrop);
+
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) {
+        transition('close');
+      }
+    });
   }
 
   // ── Modal Open / Close ────────────────────────────────────
@@ -952,9 +958,14 @@
     }
   }
 
-  // ── Nav handler (placeholder — wired fully in Task 7) ─────
+  // ── Nav handler ───────────────────────────────────────────
   function handleNavClick(i) {
-    // Will be implemented in Task 7
+    if (i === engine.sectionIndex && state !== COMPLETE) return;
+    if (state === SECTION_TRANSITION) return; // debounce during transitions
+
+    if (state === PLAYING || state === PAUSED || state === COMPLETE) {
+      transition('nav_to', i);
+    }
   }
 
   // ── Keyboard Listener ─────────────────────────────────────
@@ -993,6 +1004,11 @@
     const playBtn = document.querySelector('.wt-play-btn');
     if (playBtn) {
       playBtn.addEventListener('click', () => transition('play'));
+    }
+
+    // Auto-open on ?walkthrough query param
+    if (window.location.search.indexOf('walkthrough') !== -1) {
+      setTimeout(() => transition('play'), 500);
     }
   }
 
