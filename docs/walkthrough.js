@@ -11,6 +11,8 @@
   let state = IDLE;
   let savedScrollY = 0;
 
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // DOM references (set after createModal)
   let backdrop = null;
   let modal = null;
@@ -178,6 +180,13 @@
           duration: 600,
           cursorEl: typeCursor
         };
+
+        if (prefersReducedMotion) {
+          // Instant reveal
+          chars.forEach(c => c.classList.add('visible'));
+          if (typeCursor) typeCursor.remove();
+          activeTyping = null;
+        }
       } else {
         div.innerHTML = frame.html;
       }
@@ -592,6 +601,9 @@
 
     modal = document.createElement('div');
     modal.className = 'wt-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Jig pipeline walkthrough');
 
     // Close button
     const closeBtn = document.createElement('button');
@@ -604,11 +616,15 @@
     // Nav bar
     navBar = document.createElement('nav');
     navBar.className = 'wt-nav';
+    navBar.setAttribute('role', 'tablist');
+    navBar.setAttribute('aria-label', 'Walkthrough sections');
     const sectionLabels = ['Kickoff', 'Brainstorm', 'PRD', 'Plan', 'Execute', 'Review', 'Ship', 'Learn'];
     sectionLabels.forEach((label, i) => {
       const btn = document.createElement('button');
       btn.className = 'wt-nav-item' + (i === 0 ? ' active' : '');
       btn.textContent = label;
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
       btn.addEventListener('click', () => handleNavClick(i));
       navBar.appendChild(btn);
     });
@@ -644,6 +660,8 @@
     // Body
     terminalBody = document.createElement('div');
     terminalBody.className = 'wt-body';
+    terminalBody.setAttribute('aria-live', 'polite');
+    terminalBody.setAttribute('aria-label', 'Terminal output');
     terminalPre = document.createElement('pre');
     terminalBody.appendChild(terminalPre);
     terminal.appendChild(terminalBody);
@@ -700,6 +718,10 @@
     document.body.style.top = -savedScrollY + 'px';
     backdrop.classList.add('open');
 
+    // Focus play/pause button on open
+    const ppBtn = controlsBar ? controlsBar.querySelector('.wt-ctrl-playpause') : null;
+    if (ppBtn) ppBtn.focus();
+
     // Hide ToC FAB
     const tocToggle = document.querySelector('.toc-toggle');
     const tocMobile = document.querySelector('.toc-mobile');
@@ -714,6 +736,10 @@
     document.body.style.width = '';
     document.body.style.top = '';
     window.scrollTo(0, savedScrollY);
+
+    // Return focus to play button
+    const playBtn = document.querySelector('.wt-play-btn');
+    if (playBtn) playBtn.focus();
 
     // Restore ToC FAB
     const tocToggle = document.querySelector('.toc-toggle');
@@ -852,7 +878,9 @@
   function performTransition(targetIndex) {
     engine.stop();
 
-    // Phase 1: Fade out (200ms)
+    const transitionDelay = prefersReducedMotion ? 50 : 200;
+
+    // Phase 1: Fade out
     if (terminalBody) terminalBody.classList.add('wt-fade-out');
 
     setTimeout(() => {
@@ -883,7 +911,7 @@
       // Update nav bar
       updateNav(targetIndex);
 
-      // Phase 3: Fade in (200ms)
+      // Phase 3: Fade in
       if (terminalBody) terminalBody.classList.remove('wt-fade-out');
 
       setTimeout(() => {
@@ -895,8 +923,8 @@
           state = PAUSED;
           engine.paused = true;
         }
-      }, 200);
-    }, 200);
+      }, transitionDelay);
+    }, transitionDelay);
   }
 
   function updateTabs(sectionIndex) {
@@ -919,6 +947,7 @@
     const items = navBar.querySelectorAll('.wt-nav-item');
     items.forEach((item, i) => {
       item.classList.remove('active', 'completed');
+      item.setAttribute('aria-selected', i === sectionIndex ? 'true' : 'false');
       if (i === sectionIndex) {
         item.classList.add('active');
       } else if (i < sectionIndex) {
@@ -994,10 +1023,36 @@
       if (prev !== engine.sectionIndex) {
         transition('nav_to', prev);
       }
+    } else if (e.key === 'Tab' && state !== IDLE) {
+      // Simple focus trap within modal
+      if (!modal) return;
+      const focusable = modal.querySelectorAll('button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     }
   }
 
   document.addEventListener('keydown', handleKeydown);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state === PLAYING) {
+      transition('pause');
+    }
+  });
 
   // ── Init ──────────────────────────────────────────────────
   function init() {
