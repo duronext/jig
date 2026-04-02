@@ -203,6 +203,26 @@ If you find issues, fix them inline. No need to re-review -- just fix and move o
 
 ---
 
+## Plan Review Swarm
+
+After self-review, invoke the review swarm to scrutinize the implementation plan before the user approves it.
+
+**Automatic dispatch**: Run the swarm for all medium-to-large features and improvements. Skip only for clearly trivial work.
+
+**INVOKE `jig:review` using the Skill tool with mode: plan.** Pass the plan document path. The review skill discovers PLAN specialists (stage: plan or both), dispatches them in parallel with the full plan + PRD + section hints + codebase access. After the specialist swarm, a plan logic reviewer (Opus) performs deep correctness analysis. Findings are scored and returned as a unified report.
+
+Present the swarm findings to the user **before asking for approval**:
+
+> "Plan written and self-reviewed. The review swarm found these concerns:"
+>
+> {swarm report — including plan logic reviewer findings}
+>
+> "Want to address any of these before approving the plan?"
+
+If the user requests changes based on findings, update the plan and re-run the self-review checklist. Do not re-run the swarm unless the changes are substantial.
+
+---
+
 ## Plan Output
 
 Save to: `docs/plans/YYYY-MM-DD-<feature-name>-plan.md`
