@@ -833,6 +833,7 @@
           state = COMPLETE;
           engine.stop();
           showReplayButton();
+          updateControls();
         }
         break;
 
