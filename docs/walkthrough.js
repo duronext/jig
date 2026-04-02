@@ -10,6 +10,7 @@
 
   let state = IDLE;
   let savedScrollY = 0;
+  let transitionTimers = []; // setTimeout IDs for performTransition
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -207,14 +208,21 @@
   }
 
   function renderCursor() {
-    // Remove any existing cursor first
-    const existing = terminalPre ? terminalPre.querySelector('.wt-cursor') : null;
+    // Remove any existing cursor
+    const existing = terminalBody ? terminalBody.querySelector('.wt-cursor') : null;
     if (existing) existing.remove();
 
     const span = document.createElement('span');
     span.className = 'wt-cursor';
     span.textContent = '\u258C';
-    if (terminalPre) terminalPre.appendChild(span);
+
+    // In split-pane mode, append to team lead pane (pane 0)
+    if (terminalPre) {
+      terminalPre.appendChild(span);
+    } else if (terminalBody) {
+      const leadPre = terminalBody.querySelector('[data-pane="0"] pre');
+      if (leadPre) leadPre.appendChild(span);
+    }
   }
 
   function renderProgress(frame) {
@@ -845,8 +853,10 @@
       case SECTION_TRANSITION:
         if (event === 'close') {
           state = IDLE;
+          clearTransitionTimers();
           engine.stop();
           engine.reset();
+          if (terminalBody) terminalBody.classList.remove('wt-fade-out');
           closeModal();
         }
         break;
@@ -856,7 +866,9 @@
           state = PLAYING;
           if (terminalPre) terminalPre.innerHTML = '';
           engine.reset();
-          switchLayout('single'); // S1 is always single
+          switchLayout('single');
+          updateNav(0);
+          updateTabs(0);
           engine.start();
         } else if (event === 'close') {
           state = IDLE;
@@ -909,15 +921,21 @@
   }
 
   // ── Section Transition ────────────────────────────────────
+  function clearTransitionTimers() {
+    transitionTimers.forEach(id => clearTimeout(id));
+    transitionTimers = [];
+  }
+
   function performTransition(targetIndex) {
     engine.stop();
+    clearTransitionTimers();
 
     const transitionDelay = prefersReducedMotion ? 50 : 200;
 
     // Phase 1: Fade out
     if (terminalBody) terminalBody.classList.add('wt-fade-out');
 
-    setTimeout(() => {
+    transitionTimers.push(setTimeout(() => {
       // Phase 2: Clear and set up new section
       if (terminalPre) terminalPre.innerHTML = '';
 
@@ -948,8 +966,9 @@
       // Phase 3: Fade in
       if (terminalBody) terminalBody.classList.remove('wt-fade-out');
 
-      setTimeout(() => {
+      transitionTimers.push(setTimeout(() => {
         // Phase 4: Resume or stay paused
+        if (state !== SECTION_TRANSITION) return; // bail if closed during transition
         if (engine.resumeAfterTransition) {
           state = PLAYING;
           engine.start();
@@ -957,8 +976,9 @@
           state = PAUSED;
           engine.paused = true;
         }
-      }, transitionDelay);
-    }, transitionDelay);
+        updatePlayPauseIcon();
+      }, transitionDelay));
+    }), transitionDelay);
   }
 
   function updateTabs(sectionIndex) {
