@@ -46,7 +46,7 @@ For each meaningful change in the diff, apply these 7 reasoning patterns. You do
 - Line them up condition by condition
 - Verify the negative handles ALL cases the positive handles
 
-**What breaks**: Asymmetric handling where the negative path is a subset of the positive. One path handles 3 cases, the inverse only handles 2.
+**What breaks**: Asymmetric handling where the negative path is a subset of the positive. One path handles 3 cases, the inverse only handles 2. State machines where each state has multiple exit events but cleanup/teardown only runs on some of them — every exit from a state must undo the same setup.
 
 ### 3. Question the Default
 
@@ -96,7 +96,7 @@ For each meaningful change in the diff, apply these 7 reasoning patterns. You do
 - Are resources released on BOTH success AND failure paths?
 - Do cached values hold references that should be fresh?
 
-**What breaks**: State persisting across context changes. Resources not cleaned up on error path. Infinite polling because cleanup runs on a condition that never re-triggers. Memory leaks from unsubscribed listeners.
+**What breaks**: State persisting across context changes. Resources not cleaned up on error path. Infinite polling because cleanup runs on a condition that never re-triggers. Memory leaks from unsubscribed listeners. Deferred callbacks (timers, rAF, promises) that fire after the owning context has been torn down — the callback mutates state that was already reset, corrupting the system.
 
 ### 7. Test the Stated Goal
 
