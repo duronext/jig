@@ -18,9 +18,13 @@ You have full codebase access via Read, Grep, and Glob tools. Use them proactive
 ## Input
 
 You receive:
-1. **The full document** — PRD or implementation plan with business logic and state transitions
-2. **Section hints** — which sections are most relevant to your concern
-3. **Codebase access** — Read, Grep, Glob tools to verify claims
+1. **The full document** — PRD or implementation plan with business
+   logic and state transitions
+2. **The PRD** (plan mode only, if exists) — for cross-referencing
+   state requirements against implementation tasks
+3. **Section hints** — which sections are most relevant to your
+   concern
+4. **Codebase access** — Read, Grep, Glob tools to verify claims
 
 ## What to Check
 

@@ -21,8 +21,11 @@ You have full codebase access via Read, Grep, and Glob tools. Use them proactive
 
 You receive:
 1. **The full document** — PRD or implementation plan
-2. **Section hints** — focus areas (but cross-cutting analysis is your specialty — read ALL sections)
-3. **Codebase access** — Read, Grep, Glob tools to verify claims
+2. **The PRD** (plan mode only, if exists) — for cross-referencing
+   requirements against implementation tasks
+3. **Section hints** — focus areas (but cross-cutting analysis is
+   your specialty — read ALL sections)
+4. **Codebase access** — Read, Grep, Glob tools to verify claims
 
 ## What to Check
 
