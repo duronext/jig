@@ -83,6 +83,8 @@
             this.frameIndex++;
           }
 
+          updateControls();
+
           // Check if section is done
           if (this.frameIndex >= section.frames.length && this.clock >= section.duration) {
             if (this.sectionIndex < SECTIONS.length - 1) {
@@ -419,8 +421,12 @@
           closeModal();
         } else if (event === 'section_end') {
           state = SECTION_TRANSITION;
+          engine.resumeAfterTransition = true;
+          performTransition(engine.sectionIndex + 1);
         } else if (event === 'nav_to') {
           state = SECTION_TRANSITION;
+          engine.resumeAfterTransition = true;
+          performTransition(payload);
         } else if (event === 'complete') {
           state = COMPLETE;
           engine.stop();
@@ -438,13 +444,13 @@
           closeModal();
         } else if (event === 'nav_to') {
           state = SECTION_TRANSITION;
+          engine.resumeAfterTransition = false;
+          performTransition(payload);
         }
         break;
 
       case SECTION_TRANSITION:
-        if (event === 'transition_done') {
-          state = PLAYING;
-        } else if (event === 'close') {
+        if (event === 'close') {
           state = IDLE;
           engine.stop();
           engine.reset();
@@ -463,8 +469,104 @@
           closeModal();
         } else if (event === 'nav_to') {
           state = SECTION_TRANSITION;
+          engine.resumeAfterTransition = true;
+          performTransition(payload);
         }
         break;
+    }
+  }
+
+  // ── Section Transition ────────────────────────────────────
+  function performTransition(targetIndex) {
+    engine.stop();
+
+    // Phase 1: Fade out (200ms)
+    if (terminalBody) terminalBody.classList.add('wt-fade-out');
+
+    setTimeout(() => {
+      // Phase 2: Clear and set up new section
+      if (terminalPre) terminalPre.innerHTML = '';
+
+      // Remove any cursor
+      const cursor = terminalBody ? terminalBody.querySelector('.wt-cursor') : null;
+      if (cursor) cursor.remove();
+
+      // Advance to target section
+      engine.sectionIndex = targetIndex;
+      engine.clock = 0;
+      engine.frameIndex = 0;
+      activeTyping = null;
+
+      // Update tabs for new section
+      updateTabs(targetIndex);
+
+      // Update nav bar
+      updateNav(targetIndex);
+
+      // Phase 3: Fade in (200ms)
+      if (terminalBody) terminalBody.classList.remove('wt-fade-out');
+
+      setTimeout(() => {
+        // Phase 4: Resume or stay paused
+        if (engine.resumeAfterTransition) {
+          state = PLAYING;
+          engine.start();
+        } else {
+          state = PAUSED;
+          engine.paused = true;
+        }
+      }, 200);
+    }, 200);
+  }
+
+  function updateTabs(sectionIndex) {
+    if (!tabsContainer || SECTIONS.length === 0) return;
+    const section = SECTIONS[sectionIndex];
+    if (!section) return;
+
+    tabsContainer.innerHTML = '';
+    const tabs = section.tabs || ['\u2217 Claude Code: Jig \u2318\u0031'];
+    tabs.forEach((text, i) => {
+      const tab = document.createElement('span');
+      tab.className = 'wt-tab' + (i === 0 ? ' active' : '');
+      tab.textContent = text;
+      tabsContainer.appendChild(tab);
+    });
+  }
+
+  function updateNav(sectionIndex) {
+    if (!navBar) return;
+    const items = navBar.querySelectorAll('.wt-nav-item');
+    items.forEach((item, i) => {
+      item.classList.remove('active', 'completed');
+      if (i === sectionIndex) {
+        item.classList.add('active');
+      } else if (i < sectionIndex) {
+        item.classList.add('completed');
+      }
+    });
+  }
+
+  function updateControls() {
+    if (!controlsBar) return;
+
+    const label = controlsBar.querySelector('.wt-section-label');
+    if (label && SECTIONS.length > 0) {
+      const section = SECTIONS[engine.sectionIndex];
+      label.textContent = (engine.sectionIndex + 1) + ' / ' + SECTIONS.length + ' \u2014 ' + (section ? section.label : '');
+    }
+
+    const fill = controlsBar.querySelector('.wt-overall-fill');
+    if (fill && SECTIONS.length > 0) {
+      // Calculate total elapsed across all sections
+      let elapsed = 0;
+      for (let i = 0; i < engine.sectionIndex; i++) {
+        elapsed += SECTIONS[i].duration;
+      }
+      elapsed += Math.min(engine.clock, SECTIONS[engine.sectionIndex].duration);
+
+      const total = SECTIONS.reduce((sum, s) => sum + s.duration, 0);
+      fill.style.width = ((elapsed / total) * 100) + '%';
     }
   }
 
