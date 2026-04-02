@@ -232,20 +232,105 @@
       div.appendChild(suf);
     }
 
-    if (terminalPre) terminalPre.appendChild(div);
-
     // Trigger animation on next frame
     requestAnimationFrame(() => fill.classList.add('active'));
 
-    if (terminalBody) terminalBody.scrollTop = terminalBody.scrollHeight;
+    if (frame.pane !== undefined) {
+      const paneEl = terminalBody ? terminalBody.querySelector('[data-pane="' + frame.pane + '"]') : null;
+      const pre = paneEl ? paneEl.querySelector('pre') : null;
+      if (pre) {
+        pre.appendChild(div);
+        paneEl.scrollTop = paneEl.scrollHeight;
+      }
+    } else {
+      if (terminalPre) terminalPre.appendChild(div);
+      if (terminalBody) terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
   }
 
   function renderSplitLine(frame) {
-    // Implemented in Task 6
+    if (!terminalBody) return;
+
+    const paneEl = terminalBody.querySelector('[data-pane="' + frame.pane + '"]');
+    if (!paneEl) return;
+
+    const pre = paneEl.querySelector('pre');
+    if (!pre) return;
+
+    const div = document.createElement('div');
+    div.className = 'wt-line';
+    div.innerHTML = frame.html;
+    pre.appendChild(div);
+
+    // Auto-scroll pane
+    paneEl.scrollTop = paneEl.scrollHeight;
   }
 
   function clearPane(frame) {
-    // Implemented in Task 6
+    if (!terminalBody) return;
+    const paneEl = terminalBody.querySelector('[data-pane="' + frame.pane + '"]');
+    if (!paneEl) return;
+    const pre = paneEl.querySelector('pre');
+    if (pre) pre.innerHTML = '';
+  }
+
+  function switchLayout(layout) {
+    if (!terminalBody) return;
+
+    if (layout === 'split') {
+      terminalBody.classList.add('wt-split');
+      terminalBody.innerHTML = '';
+
+      // Left pane (team lead)
+      const leftPane = document.createElement('div');
+      leftPane.className = 'wt-pane wt-pane-lead';
+      leftPane.dataset.pane = '0';
+
+      const leftHeader = document.createElement('div');
+      leftHeader.className = 'wt-pane-header';
+      leftHeader.textContent = 'Team Lead';
+      leftPane.appendChild(leftHeader);
+
+      const leftPre = document.createElement('pre');
+      leftPane.appendChild(leftPre);
+      terminalBody.appendChild(leftPane);
+
+      // Right column (3 agent panes)
+      const rightCol = document.createElement('div');
+      rightCol.className = 'wt-pane-right';
+
+      const agents = [
+        { name: 'frontend-agent', label: 'Frontend' },
+        { name: 'backend-agent', label: 'Backend' },
+        { name: 'test-writer', label: 'Tests' }
+      ];
+
+      agents.forEach((agent, i) => {
+        const pane = document.createElement('div');
+        pane.className = 'wt-pane wt-pane-agent';
+        pane.dataset.pane = String(i + 1);
+
+        const header = document.createElement('div');
+        header.className = 'wt-pane-header';
+        header.textContent = agent.label;
+        pane.appendChild(header);
+
+        const pre = document.createElement('pre');
+        pane.appendChild(pre);
+        rightCol.appendChild(pane);
+      });
+
+      terminalBody.appendChild(rightCol);
+
+      // Update the terminalPre reference to null (no single pre in split mode)
+      terminalPre = null;
+    } else {
+      // Single pane
+      terminalBody.classList.remove('wt-split');
+      terminalBody.innerHTML = '';
+      terminalPre = document.createElement('pre');
+      terminalBody.appendChild(terminalPre);
+    }
   }
 
   // ── Content Data ──────────────────────────────────────────
@@ -642,6 +727,12 @@
           state = PLAYING;
           openModal();
           engine.reset();
+          // Set initial layout
+          if (SECTIONS.length > 0 && SECTIONS[0].layout === 'split') {
+            switchLayout('split');
+          } else {
+            switchLayout('single');
+          }
           engine.start();
         }
         break;
@@ -700,6 +791,7 @@
           state = PLAYING;
           if (terminalPre) terminalPre.innerHTML = '';
           engine.reset();
+          switchLayout('single'); // S1 is always single
           engine.start();
         } else if (event === 'close') {
           state = IDLE;
@@ -764,6 +856,14 @@
       // Remove any cursor
       const cursor = terminalBody ? terminalBody.querySelector('.wt-cursor') : null;
       if (cursor) cursor.remove();
+
+      // Switch layout if needed
+      const targetSection = SECTIONS[targetIndex];
+      if (targetSection && targetSection.layout === 'split') {
+        switchLayout('split');
+      } else {
+        switchLayout('single');
+      }
 
       // Advance to target section
       engine.sectionIndex = targetIndex;
