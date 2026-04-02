@@ -573,6 +573,13 @@
     playPauseBtn.className = 'wt-ctrl-btn wt-ctrl-playpause';
     playPauseBtn.setAttribute('aria-label', 'Pause');
     playPauseBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    playPauseBtn.addEventListener('click', () => {
+      if (state === PLAYING) {
+        transition('pause');
+      } else if (state === PAUSED) {
+        transition('play');
+      }
+    });
     controlsBar.appendChild(playPauseBtn);
 
     const progressWrap = document.createElement('div');
@@ -659,6 +666,7 @@
         } else if (event === 'complete') {
           state = COMPLETE;
           engine.stop();
+          showReplayButton();
         }
         break;
 
@@ -703,6 +711,43 @@
         }
         break;
     }
+    updatePlayPauseIcon();
+  }
+
+  // ── Play/Pause Icon ───────────────────────────────────────
+  function updatePlayPauseIcon() {
+    const btn = controlsBar ? controlsBar.querySelector('.wt-ctrl-playpause') : null;
+    if (!btn) return;
+
+    if (state === PLAYING) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+      btn.setAttribute('aria-label', 'Pause');
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>';
+      btn.setAttribute('aria-label', 'Play');
+    }
+  }
+
+  // ── Replay Button ─────────────────────────────────────────
+  function showReplayButton() {
+    if (!controlsBar) return;
+
+    // Hide play/pause, show replay
+    const ppBtn = controlsBar.querySelector('.wt-ctrl-playpause');
+    if (ppBtn) ppBtn.style.display = 'none';
+
+    const replayBtn = document.createElement('button');
+    replayBtn.className = 'wt-ctrl-btn wt-ctrl-replay';
+    replayBtn.setAttribute('aria-label', 'Replay walkthrough');
+    replayBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
+    replayBtn.addEventListener('click', () => {
+      // Remove replay button, restore play/pause
+      replayBtn.remove();
+      if (ppBtn) ppBtn.style.display = '';
+      transition('replay');
+    });
+
+    controlsBar.insertBefore(replayBtn, controlsBar.firstChild);
   }
 
   // ── Section Transition ────────────────────────────────────
@@ -779,6 +824,14 @@
   function updateControls() {
     if (!controlsBar) return;
 
+    if (state === COMPLETE) {
+      const label = controlsBar.querySelector('.wt-section-label');
+      if (label) label.textContent = 'Complete \u2014 replay?';
+      const fill = controlsBar.querySelector('.wt-overall-fill');
+      if (fill) fill.style.width = '100%';
+      return;
+    }
+
     const label = controlsBar.querySelector('.wt-section-label');
     if (label && SECTIONS.length > 0) {
       const section = SECTIONS[engine.sectionIndex];
@@ -807,9 +860,29 @@
   // ── Keyboard Listener ─────────────────────────────────────
   function handleKeydown(e) {
     if (state === IDLE) return;
+
     if (e.key === 'Escape') {
       e.preventDefault();
       transition('close');
+    } else if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      if (state === PLAYING) {
+        transition('pause');
+      } else if (state === PAUSED) {
+        transition('play');
+      }
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const next = Math.min(engine.sectionIndex + 1, SECTIONS.length - 1);
+      if (next !== engine.sectionIndex) {
+        transition('nav_to', next);
+      }
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev = Math.max(engine.sectionIndex - 1, 0);
+      if (prev !== engine.sectionIndex) {
+        transition('nav_to', prev);
+      }
     }
   }
 
