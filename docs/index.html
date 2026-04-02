@@ -907,6 +907,314 @@
       .step { grid-template-columns: 1fr; }
       .step-number { font-size: 1rem; }
     }
+
+    /* ── Walkthrough Modal ─── */
+    .wt-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, .85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .wt-backdrop.open { display: flex; align-items: center; justify-content: center; }
+
+    .wt-modal {
+      position: relative;
+      z-index: 1001;
+      width: 100%;
+      max-width: var(--max-width);
+      max-height: 90vh;
+      margin: 1rem;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0d0d14;
+      border: 1px solid rgba(99,102,241, .12);
+      box-shadow: 0 8px 48px rgba(0, 0, 0, .5), 0 0 64px rgba(99,102,241, .06);
+      display: flex;
+      flex-direction: column;
+      animation: wt-modal-in 0.25s cubic-bezier(.25, .1, .25, 1);
+    }
+    @keyframes wt-modal-in {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .wt-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.75rem;
+      z-index: 10;
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 0.25rem;
+      font-size: 1.1rem;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .wt-close:hover { color: var(--text-primary); }
+
+    .wt-nav {
+      display: flex;
+      gap: 2px;
+      padding: 0.5rem 0.75rem;
+      overflow-x: auto;
+      border-bottom: 1px solid rgba(99,102,241, .08);
+      scrollbar-width: none;
+    }
+    .wt-nav::-webkit-scrollbar { display: none; }
+    .wt-nav-item {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 4px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      white-space: nowrap;
+      border: none;
+      background: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .wt-nav-item:hover { color: var(--text-secondary); background: rgba(255,255,255,.04); }
+    .wt-nav-item.active { color: var(--accent); background: rgba(99,102,241,.1); }
+    .wt-nav-item.completed { color: var(--text-tertiary); }
+    .wt-nav-item.completed::before { content: '✓ '; color: #4ade80; }
+
+    .wt-terminal {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .wt-titlebar {
+      padding: 0.6rem 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, .03);
+    }
+    .wt-dots {
+      display: flex;
+      gap: 6px;
+      margin-right: 0.5rem;
+    }
+    .wt-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .wt-dot-red { background: #ff5f57; }
+    .wt-dot-yellow { background: #febc2e; }
+    .wt-dot-green { background: #28c840; }
+    .wt-tabs {
+      display: flex;
+      gap: 2px;
+      flex: 1;
+    }
+    .wt-tab {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+    .wt-tab.active {
+      background: rgba(255, 255, 255, .06);
+      color: var(--text-secondary);
+    }
+
+    .wt-body {
+      flex: 1;
+      padding: 1.25rem;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 300px;
+      max-height: 60vh;
+      transition: opacity 0.2s ease;
+    }
+    .wt-body.wt-fade-out { opacity: 0; }
+    .wt-body pre {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      line-height: 1.8;
+      color: var(--text-tertiary);
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    .wt-line { opacity: 0; animation: wt-line-in 0.15s ease forwards; }
+    @keyframes wt-line-in { to { opacity: 1; } }
+
+    .wt-prompt { color: var(--text-tertiary); }
+    .wt-cmd { color: var(--accent); font-weight: 500; }
+    .wt-label { color: var(--text-secondary); }
+    .wt-value { color: var(--text-primary); opacity: .85; }
+    .wt-success { color: #4ade80; }
+    .wt-muted { color: var(--text-tertiary); }
+    .wt-break { display: block; height: 0.8rem; }
+
+    .wt-cursor {
+      color: var(--text-secondary);
+      animation: wt-blink 1s step-end infinite;
+    }
+    @keyframes wt-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .wt-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      border-top: 1px solid rgba(99,102,241, .1);
+    }
+    .wt-ctrl-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .wt-ctrl-btn:hover { color: var(--text-primary); background: rgba(255,255,255,.06); }
+    .wt-ctrl-btn svg { width: 14px; height: 14px; }
+
+    .wt-overall-progress {
+      flex: 1;
+      height: 3px;
+      background: rgba(99,102,241, .12);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .wt-overall-fill {
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.3s linear;
+    }
+    .wt-section-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    .wt-progress {
+      display: inline-block;
+      width: 72px;
+      height: 8px;
+      background: rgba(99,102,241, .12);
+      border-radius: 2px;
+      overflow: hidden;
+      vertical-align: middle;
+      margin: 0 0.4rem;
+    }
+    .wt-progress-fill {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      opacity: .6;
+      border-radius: 2px;
+    }
+    .wt-progress-fill.active {
+      width: 100%;
+      transition: width var(--wt-dur, 2s) cubic-bezier(.25,.1,.25,1);
+    }
+
+    .wt-play-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.5rem auto 0;
+      padding: 0.75rem 1.5rem;
+      background: rgba(99,102,241, .08);
+      border: 1px solid rgba(99,102,241, .15);
+      border-radius: 8px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.02em;
+    }
+    .wt-play-btn:hover {
+      background: rgba(99,102,241, .14);
+      border-color: rgba(99,102,241, .3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(99,102,241, .12);
+    }
+    .wt-play-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .wt-play-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .wt-body.wt-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: rgba(99,102,241, .06);
+      padding: 0;
+      min-height: 300px;
+    }
+    .wt-pane {
+      background: #0d0d14;
+      padding: 0.75rem;
+      overflow-y: auto;
+    }
+    .wt-pane pre {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      line-height: 1.7;
+      color: var(--text-tertiary);
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .wt-pane-right {
+      display: grid;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 1px;
+      background: rgba(99,102,241, .06);
+    }
+    .wt-pane-header {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(99,102,241, .06);
+    }
+
+    .wt-char { opacity: 0; transition: opacity 0.02s; }
+    .wt-char.visible { opacity: 1; }
+    .wt-typing-cursor {
+      color: var(--accent);
+      animation: wt-blink 0.7s step-end infinite;
+    }
+
+    @media (max-width: 768px) {
+      .wt-modal { max-height: 100vh; margin: 0; border-radius: 0; }
+      .wt-body { min-height: 250px; max-height: 50vh; }
+      .wt-body.wt-split { grid-template-columns: 1fr; }
+      .wt-pane-right { grid-template-rows: auto; }
+      .wt-nav-item { font-size: 0.55rem; padding: 0.3rem 0.5rem; }
+    }
+    @media (max-width: 480px) {
+      .wt-body { min-height: 200px; padding: 0.75rem; }
+      .wt-body pre { font-size: 0.68rem; }
+      .wt-controls { padding: 0.5rem 0.75rem; gap: 0.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -1467,6 +1775,12 @@
         </div>
       </div>
     </div>
+    <div class="fade-in">
+      <button class="wt-play-btn" aria-label="Play full pipeline walkthrough">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        <span>Watch the full pipeline</span>
+      </button>
+    </div>
   </section>
 
   <hr class="divider">
@@ -1669,7 +1983,7 @@
 
 </div>
 
-
+<script src="walkthrough.js"></script>
 <script>
   // Intersection Observer for scroll-triggered fade-ins
   const observer = new IntersectionObserver(
