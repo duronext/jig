@@ -357,7 +357,7 @@
     {
       id: 'kickoff',
       label: 'Kickoff',
-      duration: 5000,
+      duration: 7000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
@@ -374,7 +374,7 @@
     {
       id: 'brainstorm',
       label: 'Brainstorm',
-      duration: 12000,
+      duration: 18500,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
@@ -399,7 +399,7 @@
     {
       id: 'prd',
       label: 'PRD',
-      duration: 10000,
+      duration: 16000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
@@ -424,7 +424,7 @@
     {
       id: 'plan',
       label: 'Plan',
-      duration: 10000,
+      duration: 14000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
@@ -453,7 +453,7 @@
     {
       id: 'execute',
       label: 'Execute',
-      duration: 20000,
+      duration: 26000,
       layout: 'split',
       tabs: ['\u2217 Team Lead \u2318\u0031', '\u2192 frontend \u2318\u0032', '\u2192 backend \u2318\u0033', '\u2192 tests \u2318\u0034'],
       frames: [
@@ -523,7 +523,7 @@
     {
       id: 'review',
       label: 'Review',
-      duration: 12000,
+      duration: 13000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
@@ -551,7 +551,7 @@
     {
       id: 'ship',
       label: 'Ship',
-      duration: 12000,
+      duration: 14500,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
@@ -580,7 +580,7 @@
     {
       id: 'learn',
       label: 'Learn',
-      duration: 8000,
+      duration: 10500,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
@@ -602,6 +602,83 @@
       ]
     },
   ];
+
+  // ── Voiceover Audio ───────────────────────────────────────
+  let voiceovers = [];
+  let voiceMuted = false;
+  let audioUnlocked = false;
+
+  function preloadVoiceovers() {
+    voiceovers = SECTIONS.map((_, i) => {
+      const audio = new Audio('audio/voiceover-' + (i + 1) + '.mp3');
+      audio.preload = 'auto';
+      return audio;
+    });
+  }
+
+  function playVoiceover(index) {
+    stopAllVoiceovers();
+    if (voiceMuted) return;
+    const v = voiceovers[index];
+    if (v) {
+      v.currentTime = 0;
+      v.play().then(() => {
+        audioUnlocked = true;
+      }).catch(() => {
+        // Autoplay blocked (no user gesture yet) — unlock on first interaction
+        if (!audioUnlocked) setupAudioUnlock();
+      });
+    }
+  }
+
+  function setupAudioUnlock() {
+    const unlock = () => {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+      // Play current section's audio now that we have a gesture
+      if (state === PLAYING && !voiceMuted && voiceovers.length > 0) {
+        const v = voiceovers[engine.sectionIndex];
+        if (v) {
+          v.currentTime = 0;
+          v.play().catch(() => {});
+        }
+      }
+      document.removeEventListener('click', unlock, true);
+      document.removeEventListener('keydown', unlock, true);
+      document.removeEventListener('touchstart', unlock, true);
+    };
+    document.addEventListener('click', unlock, true);
+    document.addEventListener('keydown', unlock, true);
+    document.addEventListener('touchstart', unlock, true);
+  }
+
+  function pauseVoiceover() {
+    voiceovers.forEach(v => { if (!v.paused) v.pause(); });
+  }
+
+  function resumeVoiceover() {
+    if (voiceMuted) return;
+    const v = voiceovers[engine.sectionIndex];
+    if (v && v.paused && !v.ended) {
+      v.play().catch(() => {});
+    }
+  }
+
+  function stopAllVoiceovers() {
+    voiceovers.forEach(v => { v.pause(); v.currentTime = 0; });
+  }
+
+  function updateMuteIcon() {
+    const btn = controlsBar ? controlsBar.querySelector('.wt-ctrl-mute') : null;
+    if (!btn) return;
+    if (voiceMuted) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><line x1="18" y1="9" x2="24" y2="15" stroke="currentColor" stroke-width="2"/><line x1="24" y1="9" x2="18" y2="15" stroke="currentColor" stroke-width="2"/></svg>';
+      btn.setAttribute('aria-label', 'Unmute');
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M14 9.64c.94.55 1.5 1.37 1.5 2.36s-.56 1.81-1.5 2.36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M16.5 7.28c1.53.97 2.5 2.56 2.5 4.72s-.97 3.75-2.5 4.72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+      btn.setAttribute('aria-label', 'Mute');
+    }
+  }
 
   // ── Modal DOM Builder ─────────────────────────────────────
   function createModal() {
@@ -695,6 +772,21 @@
     });
     controlsBar.appendChild(playPauseBtn);
 
+    const muteBtn = document.createElement('button');
+    muteBtn.className = 'wt-ctrl-btn wt-ctrl-mute';
+    muteBtn.setAttribute('aria-label', 'Mute');
+    muteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M14 9.64c.94.55 1.5 1.37 1.5 2.36s-.56 1.81-1.5 2.36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M16.5 7.28c1.53.97 2.5 2.56 2.5 4.72s-.97 3.75-2.5 4.72" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    muteBtn.addEventListener('click', () => {
+      voiceMuted = !voiceMuted;
+      updateMuteIcon();
+      if (voiceMuted) {
+        pauseVoiceover();
+      } else if (state === PLAYING) {
+        resumeVoiceover();
+      }
+    });
+    controlsBar.appendChild(muteBtn);
+
     const progressWrap = document.createElement('div');
     progressWrap.className = 'wt-overall-progress';
     const progressFill = document.createElement('div');
@@ -716,6 +808,9 @@
         transition('close');
       }
     });
+
+    // Preload voiceover audio
+    preloadVoiceovers();
   }
 
   // ── Modal Open / Close ────────────────────────────────────
@@ -809,6 +904,7 @@
             switchLayout('single');
           }
           engine.start();
+          playVoiceover(0);
         }
         break;
 
@@ -816,10 +912,12 @@
         if (event === 'pause') {
           state = PAUSED;
           engine.pause();
+          pauseVoiceover();
         } else if (event === 'close') {
           state = IDLE;
           engine.stop();
           engine.reset();
+          stopAllVoiceovers();
           closeModal();
         } else if (event === 'section_end') {
           state = SECTION_TRANSITION;
@@ -832,6 +930,7 @@
         } else if (event === 'complete') {
           state = COMPLETE;
           engine.stop();
+          stopAllVoiceovers();
           showReplayButton();
           updateControls();
         }
@@ -841,10 +940,12 @@
         if (event === 'play') {
           state = PLAYING;
           engine.resume();
+          resumeVoiceover();
         } else if (event === 'close') {
           state = IDLE;
           engine.stop();
           engine.reset();
+          stopAllVoiceovers();
           closeModal();
         } else if (event === 'nav_to') {
           state = SECTION_TRANSITION;
@@ -859,6 +960,7 @@
           clearTransitionTimers();
           engine.stop();
           engine.reset();
+          stopAllVoiceovers();
           if (terminalBody) terminalBody.classList.remove('wt-fade-out');
           closeModal();
         }
@@ -873,8 +975,10 @@
           updateNav(0);
           updateTabs(0);
           engine.start();
+          playVoiceover(0);
         } else if (event === 'close') {
           state = IDLE;
+          stopAllVoiceovers();
           closeModal();
         } else if (event === 'nav_to') {
           state = SECTION_TRANSITION;
@@ -939,6 +1043,7 @@
   function performTransition(targetIndex) {
     engine.stop();
     clearTransitionTimers();
+    stopAllVoiceovers();
 
     const transitionDelay = prefersReducedMotion ? 50 : 200;
 
@@ -982,6 +1087,7 @@
         if (engine.resumeAfterTransition) {
           state = PLAYING;
           engine.start();
+          playVoiceover(targetIndex);
         } else {
           state = PAUSED;
           engine.paused = true;
@@ -1074,6 +1180,15 @@
         transition('pause');
       } else if (state === PAUSED) {
         transition('play');
+      }
+    } else if (e.key === 'm' || e.key === 'M') {
+      e.preventDefault();
+      voiceMuted = !voiceMuted;
+      updateMuteIcon();
+      if (voiceMuted) {
+        pauseVoiceover();
+      } else if (state === PLAYING) {
+        resumeVoiceover();
       }
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
