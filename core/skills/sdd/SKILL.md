@@ -92,6 +92,7 @@ Spawn a fresh subagent with:
 - Relevant project context (architecture, conventions, related files)
 - Reference to `tdd` for TDD discipline
 - Clear instructions to implement, test, and commit
+- **Explicit instruction to derive test cases from the task requirements, not from the implementation.** Each requirement in the task spec becomes a test. If the spec says "X is NOT copied," there must be a test asserting X is absent. Tests that only exercise code paths without tracing back to a spec requirement are insufficient.
 
 **Model selection guidance:**
 
