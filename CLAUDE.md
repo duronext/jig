@@ -170,7 +170,8 @@ Commit conventions (format, types, scopes, co-author rules) are defined in `jig.
 2. Read `framework/TIER_SYSTEM.md` to choose the right tier
 3. Create `core/skills/{name}/SKILL.md`
 4. Add to the `skills` array in `.claude-plugin/plugin.json`
-5. If the skill should surface during brainstorming, add it to the concerns checklist in `jig.config.md`
+5. Add a command file in `commands/{name}.md` for `/jig:` namespace browsing
+6. If the skill should surface during brainstorming, add it to the concerns checklist in `jig.config.md`
 
 ### How consumers install Jig
 Teams add this to their project's `.claude/settings.json`:
