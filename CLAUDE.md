@@ -43,10 +43,13 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 
 ### Core Skills
 
+Run `find core/skills -name SKILL.md` for the current list; this table summarizes purpose.
+
 | Skill | Purpose |
 |-------|---------|
 | `kickoff` | Pipeline orchestrator — classifies work, routes through stages |
 | `init` | First-run setup — auto-detects environment, interviews, generates config |
+| `ticket` | Ticket creation — routes to the configured ticket-system pack (Linear/Jira/GitHub) |
 | `brainstorm` | Collaborative design exploration with configurable concerns checklist |
 | `prd` | PRD creation with enforceable acceptance checklists (feeds into spec reviewer) |
 | `plan` | Spec → implementation plan with bite-sized TDD tasks |
@@ -74,11 +77,23 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 
 ### Core Specialists
 
-`security`, `dead-code`, `error-handling`, `async-safety`, `performance` — language-agnostic code review specialists dispatched by `review`.
+Core specialists live in `core/specialists/`. They fall into four groups:
 
-### Engineering Pack
+- **Code review** — universal code-quality reviewers dispatched by `review` in code mode (e.g., `security`, `dead-code`, `error-handling`).
+- **PRD review** — dispatched by `review` in prd mode against design docs (e.g., `data-dependency`, `ui-conflict`).
+- **Plan review** — dispatched by `review` in plan mode against plan docs (e.g., `task-dependency`, `migration-safety`).
+- **Cross-stage** — apply across modes (e.g., `blast-radius`, `state-completeness`).
 
-`eng-copywriting` (sentence case standards), `eng-logging` (level guidance), `eng-testing` (test strategy), `test-coverage` (specialist).
+Run `ls core/specialists/` for the current list.
+
+### Packs
+
+Packs live in `packs/`. Each ships a `pack.json` declaring its skills and specialists. Two current kinds:
+
+- **Content packs** (e.g., `engineering`) — ship domain skills and specialists that a team can adopt wholesale.
+- **Integration packs** (e.g., `linear`, `jira`, `github-issues`) — teach the core `ticket` skill how to talk to a specific platform, keyed by `ticket-system` in `jig.config.md`.
+
+See each pack's `pack.json` and `README.md` for what it ships.
 
 ## Self-Hosting Model
 
@@ -97,16 +112,20 @@ When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/
 jig/
 ├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters)
 ├── core/
-│   ├── skills/          17 pipeline skills
-│   ├── agents/          3 agents (commit, code-review, pr-review)
-│   └── specialists/     5 review specialists
-├── packs/
-│   └── engineering/     Starter pack (3 skills + 1 specialist)
+│   ├── skills/          Pipeline skills (one dir per skill)
+│   ├── agents/          Core agents
+│   └── specialists/     Review specialists (one file per specialist)
+├── packs/               Starter and integration packs (see each pack's pack.json)
 ├── adapters/            Platform integration (claude/, gemini/, codex/)
 ├── scaffold/            jig init templates (config, team dir, skill template)
+├── commands/            Slash-command files for the /jig: namespace
 ├── docs/                Specs and documentation
-├── team/                Jig's own extensions (for developing Jig itself)
+├── team/                (optional, not in this repo) Team's extensions — highest-priority discovery layer
 ├── .claude/             Plugin self-install (settings.json)
+├── .claude-plugin/      Plugin manifest (plugin.json) and marketplace definition
+├── package.json         npm metadata
+├── scripts/             Maintenance and release scripts
+├── assets/              Static assets (logos, images)
 ├── CLAUDE.md            This file
 ├── jig.config.md        Jig's own pipeline configuration
 └── README.md            Public-facing README
@@ -127,18 +146,16 @@ jig/
 
 - Markdown: 80 char line width where practical
 - YAML frontmatter: 2 space indent
-- Skill names: lowercase with hyphens (`eng-` prefix for engineering pack, no prefix for core)
+- Skill names: lowercase with hyphens. Core skills have no prefix; pack skills use the pack's declared `prefix` (see `pack.json`).
 - Descriptions: MUST start with "Use when..."
 - SKILL.md: under 500 lines. Heavy content goes in `reference/` subdirectory.
 - No language-specific references in core skills (TypeScript, Python, etc.) — core is stack-agnostic
 
 ## Commit Conventions
 
-- Conventional commits: `type(scope): message`
-- Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
-- Scopes: `core`, `framework`, `packs`, `adapters`, `scaffold`, `docs`, `agents`, `specialists`
+Commit conventions (format, types, scopes, co-author rules) are defined in `jig.config.md` under `## Commit`. The commit agent at `core/agents/commit.md` reads that config.
+
 - **Never commit or push without explicit user approval**
-- Use the commit agent at `.claude/agents/commit.md`
 
 ## Contributing to Jig
 
@@ -152,9 +169,8 @@ jig/
 1. Read `framework/SKILL_SCHEMA.md` for the frontmatter spec
 2. Read `framework/TIER_SYSTEM.md` to choose the right tier
 3. Create `core/skills/{name}/SKILL.md`
-4. Create symlink: `ln -s ../../core/skills/{name} .claude/skills/{name}`
-5. Add to the `skills` array in `.claude-plugin/plugin.json`
-6. If the skill should surface during brainstorming, add it to the concerns checklist in `jig.config.md`
+4. Add to the `skills` array in `.claude-plugin/plugin.json`
+5. If the skill should surface during brainstorming, add it to the concerns checklist in `jig.config.md`
 
 ### How consumers install Jig
 Teams add this to their project's `.claude/settings.json`:
@@ -184,6 +200,6 @@ This gives every teammate on the project the full Jig framework on clone — no 
 
 ## Git Workflow
 
-- Main branch: `main`
-- Branch naming: `{username}/jig-{number}-{kebab-title}`
+Main branch and branch naming format are defined in `jig.config.md` under `## Branching`.
+
 - **Never commit or push without explicit user approval**
