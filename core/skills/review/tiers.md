@@ -53,6 +53,7 @@ These ship with Jig. Teams add their own in `team/specialists/`.
 | security | sonnet | blocking | fast-pass | Injection, secrets, auth, data exposure |
 | dead-code | haiku | major | fast-pass | Unused code, disconnected wiring |
 | error-handling | haiku | major | fast-pass | Swallowed errors, missing handling |
+| cli-invocation | haiku | major | fast-pass | External CLI flag semantics, path quoting, silent failures |
 | async-safety | sonnet | major | full-only | Race conditions, premature state, resource leaks |
 | performance | haiku | minor | full-only | Algorithmic issues, unbounded operations |
 
