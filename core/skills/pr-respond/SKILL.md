@@ -162,6 +162,27 @@ Bots make assertions about code structure ("this entity doesn't have field X", "
 
 **The cost of a false fix is higher than the cost of extra verification.** A wrong "fix" introduces a real bug where none existed.
 
+### Two failure modes that look like verification but aren't
+
+These patterns have burned maintainers. Recognize them so you don't skip the actual verification step.
+
+**1. Elaborate reasoning is NOT evidence.**
+
+Some reviewers (especially LLM-based ones) provide step-by-step proofs, "Extended reasoning" blocks, or multi-paragraph justifications. A confident, detailed argument for a factual claim still needs primary-source verification. Reasoning quality and correctness are not correlated — a wrong claim dressed in careful logic is *more* dangerous than a wrong claim stated flatly, because the elaboration lowers your skepticism instead of raising it.
+
+- For CLI flag claims: run `<tool> --help` and read the flag description yourself. Don't trust the reviewer's summary of what the flag does.
+- For library API claims: read the library source, official docs, or type definitions. Don't trust the reviewer's description of the signature.
+- For database/schema claims: read the actual entity/migration/schema file.
+- In your reply, cite the primary source you checked — `"ran 'gh api --help': -F = typed, -f = raw-field"` is worth more than any amount of reasoning.
+
+**2. Conflicting reviewers → verify, don't average.**
+
+When two reviewers give opposing factual claims (e.g., Bot A says "the correct flag is `-F`", Bot B says "the correct flag is `-f`"), the resolution is **primary-source verification**, not "pick the one with better reasoning" or "go with the majority." Treat a disagreement as a strong signal that verification is mandatory, not optional.
+
+- Do not accept either reviewer's claim until you've checked the authoritative source.
+- If verification confirms one reviewer and contradicts the other, reply with the cited evidence on both threads. The wrong reviewer's thread gets a polite correction with the cite; the right reviewer's thread gets a confirmation.
+- Never "compromise" between two factual claims — facts don't average.
+
 ### Human Comments (Usually Actionable)
 
 | Pattern | Example | Response |
