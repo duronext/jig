@@ -21,6 +21,7 @@
     "./core/skills/pr-create",
     "./core/skills/pr-respond",
     "./core/skills/postmortem",
+    "./core/skills/premortem",
     "./core/skills/debug",
     "./core/skills/verify",
     "./core/skills/tdd",
@@ -36,6 +37,7 @@
   "agents": [
     "./core/agents/commit.md",
     "./core/agents/code-reviewer.md",
-    "./core/agents/pr-reviewer.md"
+    "./core/agents/pr-reviewer.md",
+    "./core/agents/premortem.md"
   ]
 }

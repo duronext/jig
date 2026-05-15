@@ -57,6 +57,7 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 | `pr-create` | PR creation with voice/tone standards and test plan |
 | `pr-respond` | PR comment response — analyze, fix, commit, push, reply, resolve |
 | `postmortem` | Post-merge retrospective with specialist/logic reviewer diagnosis |
+| `premortem` | Prospective-hindsight risk analysis — imagines failure at configured horizons, produces narrative + decision matrix |
 | `debug` | Systematic debugging — root cause before fixes, always |
 | `verify` | Evidence before assertions — run it before claiming it works |
 | `tdd` | Red-green-refactor discipline |
@@ -71,6 +72,7 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 | `commit` | Conventional commits with hook awareness |
 | `code-review` | Dispatches review swarm, delivers scored report |
 | `pr-review` | Posts inline PR comments with suggestion blocks |
+| `premortem` | Invokes the premortem swarm and surfaces results with an interactive decision walk-through |
 
 ### Core Specialists
 
