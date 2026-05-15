@@ -33,7 +33,12 @@ alwaysApply: false
 - Direct invocation via `/review` with a plan document path
 - Automatic for medium-to-large features and improvements
 
-**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` mode.
+### Mode: premortem
+- `premortem` skill invokes this with `mode: premortem` after the orchestrator builds the diff
+- Direct invocation via `/review` with a target horizon set is also supported
+- Specialists with `stage: premortem` are dispatched; the synthesizer replaces the logic reviewer
+
+**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. In `premortem` mode, the **premortem-synthesizer** is dispatched instead. Not dispatched in `prd` mode.
 
 ---
 
@@ -51,6 +56,7 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - `mode: prd` → include specialists where `stage: prd` or `stage: both`
    - `mode: plan` → include specialists where `stage: plan` or `stage: both`
+   - `mode: premortem` → include specialists where `stage: premortem`
 6. Filter by the requested tier:
    - `tier: all` → include all specialists matching the mode
    - `tier: fast-pass` → include only `tier: fast-pass` specialists matching the mode
@@ -59,6 +65,7 @@ Check `jig.config.md` for the appropriate tier config:
 - `mode: code` → `swarm-tiers`
 - `mode: prd` → `prd-swarm-tiers`
 - `mode: plan` → `plan-swarm-tiers`
+- `mode: premortem` → `premortem-swarm-tiers`
 
 ### Stage 2: PREPARE the Input
 
@@ -104,6 +111,33 @@ For each matching specialist, extract only the diff hunks for its matched files.
    - `blast-radius` → "Focus on: All tasks (cross-cutting)"
    - `state-completeness` → "Focus on: Tasks involving state/status changes"
 4. Build the specialist input: full plan + PRD (if exists) + section hints
+
+#### Mode: premortem
+
+1. Receive the diff from the `premortem` skill (already built via `git diff origin/{main-branch}...HEAD`).
+2. Receive the **horizons** array (e.g., `["1 week", "6 months"]`) and the **work-type** (e.g., `feature`).
+3. For each matching specialist, intersect globs with changed paths. With the default `globs: ["**/*"]`, all specialists match. Build the filtered diff per specialist.
+4. Build the specialist input:
+
+```
+{specialist body}
+
+---
+
+## Horizons
+
+For each of the following horizons, write a narrative:
+- {horizon 1}
+- {horizon 2}
+
+## Work Type
+
+{work-type}
+
+## Diff to Review
+
+{filtered diff}
+```
 
 ### Stage 3: DISPATCH (Parallel)
 
@@ -177,6 +211,36 @@ Agent tool:
 
 All specialists in prd/plan modes receive codebase access tools: Read, Grep, Glob.
 
+#### Mode: premortem
+
+For each specialist with a matching stage, spawn a parallel subagent:
+
+````
+Agent tool:
+  description: "Premortem: {specialist.name}"
+  model: {specialist.model from frontmatter, or premortem-specialist-model
+          from config as fallback}
+  prompt: |
+    {specialist body}
+
+    ---
+
+    ## Horizons
+
+    For each of the following horizons, write a narrative:
+    {bulleted horizons}
+
+    ## Work Type
+
+    {work-type}
+
+    ## Diff to Review
+
+    {filtered diff}
+````
+
+All premortem specialists receive codebase access tools: Read, Grep, Glob.
+
 **All matching specialists are dispatched in a single message** (parallel Agent calls). Do not dispatch sequentially.
 
 ### Stage 4: COLLECT
@@ -224,6 +288,22 @@ After collecting swarm findings, dispatch the code logic reviewer:
 4. Wait for the plan logic reviewer to complete
 5. Parse findings in the `[plan-logic]` format
 
+#### Mode: premortem
+
+**Always dispatch** the **premortem-synthesizer** after the specialist swarm completes (in place of a logic reviewer):
+
+1. Read `premortem-synthesizer.md` from `core/skills/premortem/`
+2. Build the prompt:
+   - The synthesizer's body
+   - All specialist narratives from Stage 4 (including N/A entries — they signal which areas were clean)
+   - The **full unfiltered diff** (synthesis needs cross-cutting visibility)
+   - The horizons and work-type
+3. Dispatch a single Agent with:
+   - `model: opus` (or `premortem-synthesizer-model` from `jig.config.md`)
+   - Full tool access: Read, Grep, Glob, Agent
+4. Wait for the synthesizer to complete
+5. Parse the output as the synthesis report (markdown block)
+
 ### Stage 6: SCORE
 
 Apply mechanical scoring based on the highest severity finding. All findings are always reported regardless of score.
@@ -248,6 +328,14 @@ Deduplication (mode-aware):
 - If multiple specialists flag the same document section → merge into one finding, use the higher severity, note all specialists
 - If the plan logic reviewer flags the same task/section as a specialist → drop the logic reviewer's finding (specialist caught it first)
 - If a specialist flags something already in the document's Open Questions section → skip (author already knows)
+
+**Mode: premortem** — no severity-based numeric score. Instead emit:
+- **Risk count**: total number of risks in the synthesis
+- **Convergence count**: number of risks flagged by 2+ specialists
+- **One-way door count**: number of one-way doors identified by `reversibility-premortem`
+- **N/A specialists**: count of specialists that returned literal `N/A`
+
+These are diagnostic counts, not gates. Premortem informs; it does not block.
 
 ### Stage 7: REPORT
 
@@ -297,6 +385,27 @@ The rest of the report format is identical across modes:
 |---|---|---|
 | {name} | {N blocking / N major / N minor / clean / N/A / skipped} | {one-line summary or —} |
 | logic-reviewer | {N blocking / N major / N minor / clean / skipped} | {one-line summary or —} |
+
+### Mode: premortem
+
+**Header replaces the score line:**
+
+```
+## Premortem: {branch}
+**Date**: YYYY-MM-DD
+**Work type**: {work-type}
+**Horizons**: {comma-separated horizons}
+**Specialists**: N dispatched, M N/A
+**Diff**: F files, +A/-D LOC
+```
+
+**Body sections** (in order):
+
+1. `## Synthesis` — the synthesizer's full output (convergent risks, individual risks, one-way doors, open questions)
+2. `## Specialist narratives` — each specialist's full narrative inside a `<details><summary>` block for collapsibility
+3. `## Specialist Summary` — table with columns: Specialist, Risks, per-horizon counts
+
+**Persist the full report** to `docs/premortems/YYYY-MM-DD-{branch-name}-premortem.md`. Print the path at the end of the terminal output. The terminal prints only sections 1 and 3 (compressed view); the file contains everything.
 
 **Skipped vs N/A distinction:**
 - **Skipped** = specialist's globs matched zero changed files (never spawned)
