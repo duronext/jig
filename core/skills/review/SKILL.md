@@ -10,9 +10,9 @@ alwaysApply: false
 
 # Review Swarm Engine
 
-**PURPOSE**: Dispatch parallel specialist review agents, each focused on one concern. Operates in three modes: **code** (diff review), **prd** (requirements review), and **plan** (implementation plan review). The orchestrator coordinates discovery, dispatch, scoring, and reporting across all modes.
+**PURPOSE**: Dispatch parallel specialist review agents, each focused on one concern. Operates in four modes: **code** (diff review), **prd** (requirements review), **plan** (implementation plan review), and **premortem** (prospective-hindsight failure analysis). The orchestrator coordinates discovery, dispatch, scoring, and reporting across all modes.
 
-**CONFIGURATION**: Reads `jig.config.md` for `swarm-tiers` (code), `prd-swarm-tiers` (prd), `plan-swarm-tiers` (plan), `deep-review-model`, `plan-deep-review-model`, `design-review-model`, and `specialist-model-default`.
+**CONFIGURATION**: Reads `jig.config.md` for `swarm-tiers` (code), `prd-swarm-tiers` (prd), `plan-swarm-tiers` (plan), `premortem-swarm-tiers` (premortem), `deep-review-model`, `plan-deep-review-model`, `premortem-specialist-model`, `premortem-synthesizer-model`, `design-review-model`, and `specialist-model-default`.
 
 ---
 
@@ -425,9 +425,10 @@ See `tiers.md` for tier definitions, severity levels, and the default specialist
 1. Create a new `.md` file in `team/specialists/` (for team-specific) or `core/specialists/` (for framework)
 2. Add frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`
 3. **For PRD/PLAN specialists**: add `stage: prd`, `stage: plan`, or `stage: both`
-4. **For code review specialists**: omit `stage` (backward compatible default)
-5. Write the review prompt body with: What to check, What to ignore, Report format
-6. The orchestrator discovers it automatically on next run — no config updates needed
+4. **For PREMORTEM specialists**: add `stage: premortem`
+5. **For code review specialists**: omit `stage` (backward compatible default)
+6. Write the review prompt body with: What to check, What to ignore, Report format
+7. The orchestrator discovers it automatically on next run — no config updates needed
 
 ## Splitting a Specialist
 
