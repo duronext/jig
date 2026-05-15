@@ -72,6 +72,38 @@ If not found, ask:
 
 ---
 
+## Step 1.5: Read matching premortem (if exists)
+
+After detecting the PR from branch, check for a matching premortem file:
+
+```bash
+ls docs/premortems/*-{branch}-premortem.md 2>/dev/null
+```
+
+If a file exists, read it. Capture the synthesis section's risks (title, narrative, decision).
+
+**At the end of the postmortem report**, after the existing patterns table, append a new section `## Predicted vs Actual`:
+
+For each risk in the premortem:
+- Compare its narrative to the incident's root cause (which postmortem already extracted from review comments and incident reports).
+- Classify as:
+  - **HIT** — premortem predicted this exact failure mode. Note the specialist that flagged it.
+  - **PARTIAL** — premortem flagged an adjacent risk; the actual cause shares the root architectural decision.
+  - **MISS** — premortem did not surface this risk.
+- If the actual root cause was *not* surfaced by any premortem risk, add a **specialist evolution suggestion**:
+
+```
+The actual root cause was {description}. None of the 8 premortem specialists
+flagged it. The {best-fit specialist} could have caught it if its prompt
+explicitly asked about {pattern}.
+```
+
+Emit the section even if all risks were misses — the data is the point.
+
+If no premortem file exists, **skip this section entirely** (do not emit a "no premortem found" note — it's noise).
+
+---
+
 ## Step 2: Fetch PR Data
 
 Run in parallel. Extract owner/repo from the git remote -- do not hardcode.
