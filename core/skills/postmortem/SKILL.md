@@ -74,10 +74,12 @@ If not found, ask:
 
 ## Step 1.5: Read matching premortem (if exists)
 
-After detecting the PR from branch, check for a matching premortem file:
+After detecting the PR from branch, check for a matching premortem file.
+Compute `{sanitized-branch}` = current branch with `/` replaced by `-`:
 
 ```bash
-ls docs/premortems/*-{branch}-premortem.md 2>/dev/null
+branch=$(git branch --show-current | tr '/' '-')
+ls docs/premortems/*-${branch}-premortem.md 2>/dev/null
 ```
 
 If a file exists, read it. Capture the synthesis section's risks (title, narrative, decision).

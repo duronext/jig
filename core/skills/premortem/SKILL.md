@@ -118,7 +118,7 @@ After writing the file:
 After premortem, `pr-create` reads the matching premortem file and embeds the **decision matrix** (not the full narratives) into the PR description. Reviewers see what was raised and how the author resolved it.
 
 ### With `postmortem`
-When an incident postmortem runs against a merged PR, it auto-reads `docs/premortems/*-{branch}-premortem.md` and runs predicted-vs-actual diff. See `core/skills/postmortem/SKILL.md`.
+When an incident postmortem runs against a merged PR, it auto-reads the matching premortem file. Compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then look for `docs/premortems/*-{sanitized-branch}-premortem.md`. See `core/skills/postmortem/SKILL.md`.
 
 ### With `kickoff`
 If `premortem-horizons[work-type]` is non-empty, kickoff offers premortem between REVIEW and SHIP. Skippable.

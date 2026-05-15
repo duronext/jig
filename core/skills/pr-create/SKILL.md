@@ -103,7 +103,7 @@ Premortem is recommended for this kind of change. Run /jig:premortem before open
 - If the author accepts: invoke the `premortem` skill, wait for completion, then continue to Step 0 (review).
 - If the author declines: log the skipped detectors as a one-line note for the PR description, then continue to Step 0.
 
-If a premortem file exists at `docs/premortems/*-{branch}-premortem.md`, skip the prompt entirely — premortem already happened.
+If a premortem file already exists for this branch, skip the prompt entirely — premortem already happened. Compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then check `docs/premortems/*-{sanitized-branch}-premortem.md`.
 
 ### Step 0: Run the code review swarm
 
@@ -214,7 +214,7 @@ it asked for and how this addresses it.}
 Fixes {TICKET-REFERENCE}
 ```
 
-**If a premortem file exists for this branch** (`docs/premortems/*-{branch}-premortem.md`):
+**If a premortem file exists for this branch** (compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then check `docs/premortems/*-{sanitized-branch}-premortem.md`):
 
 1. Parse the file for the synthesis section's risks.
 2. Extract any risk with a checked Accept/Mitigate/Instrument box.
