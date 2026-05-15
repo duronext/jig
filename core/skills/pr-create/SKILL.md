@@ -50,6 +50,61 @@ Run review (code review swarm)
                         Push + create PR
 ```
 
+### Step 0a: Check for premortem-triggering risk signals
+
+Before running the code review swarm, scan the diff for signals that suggest a premortem would be valuable.
+
+Run:
+```bash
+git diff origin/{main-branch}...HEAD --name-only
+git diff origin/{main-branch}...HEAD --stat
+```
+
+Read `premortem-detectors` and `premortem-critical-paths` from `jig.config.md`.
+
+For each detector class, check if any changed path matches. The detectors are:
+
+**Backend** (path globs):
+- `migrations`: `**/migrations/**`, `**/*schema*`, `**/*.sql`, `**/models/**`, `**/entities/**`, `**/prisma/**`
+- `api-routes`: `**/api/**`, `**/routes/**`, `**/handlers/**`, `**/*openapi*`, `**/*.proto`, `**/graphql/**`
+- `cross-service-deps`: `package.json`, `go.mod`, `Cargo.toml`, `requirements*.txt`, `pyproject.toml`
+- `large-diff`: total LOC changes exceed `premortem-detectors.thresholds.large-diff-loc` (default 500)
+
+**Frontend** (path globs):
+- `routing`: `**/pages/**`, `**/app/**`, `**/routes/**`, `**/middleware.{ts,js}`
+- `layouts`: `**/layout*`, `**/_app.*`, `**/providers/**`, `**/{App,Root}.{tsx,jsx}`
+- `auth-ui`: `**/{auth,login,signup,session,oauth}*`
+- `money-ui`: `**/{checkout,billing,subscription,payment,pricing,cart}*`
+- `build-config`: `**/next.config.*`, `**/vite.config.*`, `**/webpack.config.*`, `**/turbo.json`, `**/tsconfig*.json`
+- `flags`: `**/feature*flag*`, `**/{flags,experiments}/**`, `**/growthbook*`, `**/launchdarkly*`, `**/statsig*`
+- `i18n`: `**/i18n/**`, `**/locales/**`, `**/messages/**`
+- `service-workers`: `**/sw.{ts,js}`, `**/service-worker.*`, `**/workbox*`
+- `csp`: `**/{csp,headers,next.config}*`
+- `public-copy`: `**/{terms,privacy,legal}*`, `**/pricing/**`
+- `a11y-primitives`: `**/components/**/{modal,dialog,menu,combobox,select,form}*`
+
+**Content-based** (grep the diff):
+- `third-party-scripts`: diff lines add `<script src=` or `from "next/script"`
+- `new-fetch-origin`: diff adds `fetch(` or `axios(` with a URL not previously seen
+- `new-storage`: diff adds `localStorage`, `sessionStorage`, or `IndexedDB` in a file that didn't have them
+- `bundle-size`: a new dependency in `package.json` exceeds `premortem-detectors.thresholds.bundle-size-kb` (default 50)
+- `error-boundaries`: any file matching `**/{error,ErrorBoundary}*` changed
+
+**Critical paths** (team-configured): match against any glob in `premortem-critical-paths`.
+
+If **any** detector fires, prompt the author:
+
+```
+This change touches: {comma-separated detector names that fired}.
+Premortem is recommended for this kind of change. Run /jig:premortem before opening the PR?
+[Y/n]
+```
+
+- If the author accepts: invoke the `premortem` skill, wait for completion, then continue to Step 0 (review).
+- If the author declines: log the skipped detectors as a one-line note for the PR description, then continue to Step 0.
+
+If a premortem file exists at `docs/premortems/*-{branch}-premortem.md`, skip the prompt entirely — premortem already happened.
+
 ### Step 0: Run the code review swarm
 
 **Before writing the PR, run `review` to catch issues while they are cheap to fix.**
@@ -158,6 +213,16 @@ it asked for and how this addresses it.}
 
 Fixes {TICKET-REFERENCE}
 ```
+
+**If a premortem file exists for this branch** (`docs/premortems/*-{branch}-premortem.md`):
+
+1. Parse the file for the synthesis section's risks.
+2. Extract any risk with a checked Accept/Mitigate/Instrument box.
+3. Append a `## Premortem decisions` section to the PR body containing:
+   - One bullet per decided risk: `**{title}**: {decision} — {rationale if provided}`
+   - A link to the full premortem file: `Full premortem: docs/premortems/{filename}`
+
+Do not include the full narratives — they're in the file. The PR body shows what the author *decided*.
 
 ### Step 6: Push and create
 
