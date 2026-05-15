@@ -132,6 +132,23 @@ The single-comment endpoint drops the PR number from the path. Using `/pulls/{pr
 
 ## Step 2: Analyze Each Comment
 
+**Premortem-aware response context:**
+
+Before drafting responses to reviewer comments, check
+`docs/premortems/*-{branch}-premortem.md` (if it exists). For each reviewer
+comment, see if it maps to a known premortem risk:
+
+- If yes AND the risk was marked **Accept**: include the author's accept
+  rationale in the response. Example:
+  > "This concern was raised in the premortem and explicitly accepted because
+  > {rationale from premortem file}. Happy to discuss if you disagree with the
+  > trade-off."
+
+- If yes AND the risk was marked **Mitigate** or **Instrument**: note which
+  fix/instrumentation is already planned or done.
+
+This avoids re-litigating decisions the author already made consciously.
+
 For each unresolved comment:
 
 1. Read the referenced code files

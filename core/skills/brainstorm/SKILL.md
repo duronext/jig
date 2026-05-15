@@ -148,6 +148,17 @@ Present the checklist results to the user as part of the design review. Each "Ye
 
 See `framework/CONCERNS_CHECKLIST.md` for full documentation on checklist configuration and work type behavior.
 
+**If `premortem` is in the concerns checklist** and the work-type has non-empty
+`premortem-horizons`:
+
+Flag premortem as a *future consideration* in the design summary:
+
+> "When this design is implemented, run /jig:premortem before the PR — the
+> {work-type} work-type has horizons configured."
+
+Do not run premortem from brainstorm. Design-stage premortem is too early; the
+implementation hasn't taken shape yet.
+
 ---
 
 ## After the Design
