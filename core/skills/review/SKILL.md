@@ -345,7 +345,7 @@ Produce the unified report. Adapt the header by mode:
 - `mode: prd` → `## PRD Review Summary`
 - `mode: plan` → `## Plan Review Summary`
 
-The rest of the report format is identical across modes:
+The rest of the report format is identical for the code, prd, and plan modes — premortem has its own format below:
 
 **Confidence Score**: X/10
 **Risk Level**: Low/Medium/High
@@ -386,7 +386,7 @@ The rest of the report format is identical across modes:
 | {name} | {N blocking / N major / N minor / clean / N/A / skipped} | {one-line summary or —} |
 | logic-reviewer | {N blocking / N major / N minor / clean / skipped} | {one-line summary or —} |
 
-### Mode: premortem
+#### Mode: premortem
 
 **Header replaces the score line:**
 

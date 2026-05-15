@@ -22,7 +22,7 @@ alwaysApply: false
 
 - `/jig:premortem` invoked manually
 - `pr-create` detected risk signals and the author accepted the suggestion
-- `kickoff` reached the optional premortem stage for a work-type configured with non-empty `premortem-horizons`
+- `kickoff` reached the optional premortem stage for a work-type configured with non-empty `premortem-horizons` (v1: invoke `/jig:premortem` directly — kickoff auto-prompt is a planned follow-up)
 
 **Do NOT use when:**
 - The diff is empty (no commits ahead of main)
@@ -121,7 +121,9 @@ After premortem, `pr-create` reads the matching premortem file and embeds the **
 When an incident postmortem runs against a merged PR, it auto-reads the matching premortem file. Compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then look for `docs/premortems/*-{sanitized-branch}-premortem.md`. See `core/skills/postmortem/SKILL.md`.
 
 ### With `kickoff`
-If `premortem-horizons[work-type]` is non-empty, kickoff offers premortem between REVIEW and SHIP. Skippable.
+Planned: when `premortem-horizons[work-type]` is non-empty, kickoff will offer
+premortem between REVIEW and SHIP. Not yet implemented in v1 — invoke
+`/jig:premortem` directly. The kickoff hook is a planned follow-up.
 
 ### With `brainstorm`
 If `premortem` is in the concerns checklist, brainstorm flags it as a *future consideration* during design — doesn't run it.

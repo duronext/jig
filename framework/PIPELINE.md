@@ -97,3 +97,7 @@ Each stage transition has a gate check — preconditions that must be met before
 For work-types where `premortem-horizons` is configured (default: feature, improvement, migration), `kickoff` offers an optional premortem after `review` and before `pr-create`. Premortem is non-blocking: the author can skip it or run it deliberately via `/jig:premortem`.
 
 See `core/skills/premortem/SKILL.md` for the orchestrator and `core/skills/review/SKILL.md` for the `mode: premortem` dispatch.
+
+Note for v1: the kickoff integration described above is currently a documented
+integration point; `kickoff` does not yet auto-prompt for premortem. Run
+`/jig:premortem` directly. The kickoff hook is planned as a follow-up.
