@@ -271,9 +271,19 @@ All premortem specialists receive codebase access tools: Read, Grep, Glob.
 
 ### Stage 4: COLLECT
 
-Wait for all specialist subagents to complete. For each result:
+Wait for all specialist subagents to complete. Handling depends on mode:
+
+#### Mode: code, prd, plan
+For each result:
 - If the response is exactly `N/A` → record as N/A (ran but found nothing)
-- Otherwise → parse the findings (File, Finding, Fix/Suggestion lines)
+- Otherwise → parse the findings (File, Finding, Fix/Suggestion lines) into structured records
+
+#### Mode: premortem
+Premortem specialists return **narrative output** (horizon-keyed past-tense stories + a short risk list per the specialist body), not File/Finding/Fix lines. Do NOT attempt to parse this as structured findings — preserve the raw text verbatim so the synthesizer can read it.
+
+For each result:
+- If the response is exactly `N/A` → record as N/A (specialist ran but the diff had nothing in its concern area)
+- Otherwise → **store the raw markdown output as-is** keyed by specialist name. Stage 5 passes this collection to the synthesizer untouched.
 
 ### Stage 5: DEEP REVIEW
 
