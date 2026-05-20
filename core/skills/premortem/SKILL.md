@@ -86,22 +86,34 @@ The `review` skill handles discover, prepare, dispatch, collect, synthesize, sco
 
 ### Stage 4: Persist the Report
 
-`review` returns the full markdown report. The first line MUST be
-`<!-- premortem-schema: v1 -->` (the synthesizer and review skill emit
-this — verify it is present before writing). Write the file to:
+Before writing the file, validate the synthesizer output against the v1
+contract from `framework/PREMORTEM_FILE_FORMAT.md`. The output MUST
+contain:
+
+1. `<!-- premortem-schema: v1 -->` as the literal first line.
+2. A `## Synthesis` heading.
+3. At least one `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple using
+   the literal ☐ glyph (U+2610), not ASCII `[ ]`.
+4. A `## Specialist Summary` heading followed by a table.
+
+If any check fails:
+- Do NOT write the file.
+- Print the raw output to the terminal with a clear diagnostic:
+  "Synthesizer output failed v1 schema validation: {which check failed}.
+  Showing raw output below. Run premortem again to retry."
+- Then abort.
+
+If all checks pass, write the file to:
 
 ```
 docs/premortems/{YYYY-MM-DD}-{sanitized-branch-name}-premortem.md
 ```
 
-Where `{sanitized-branch-name}` is the current branch with `/` replaced
-by `-` for filesystem safety.
+Where `{sanitized-branch-name}` follows the algorithm in
+`framework/BRANCH_SANITIZATION.md`.
 
-If `docs/premortems/` does not exist, create it.
-
-If the report does not start with `<!-- premortem-schema: vN -->`, the
-synthesizer output is malformed. Do not persist; instead, print the raw
-output and ask the author to retry.
+If `docs/premortems/` does not exist, create it. After writing, print the
+path.
 
 See `framework/PREMORTEM_FILE_FORMAT.md` for the file format contract.
 
@@ -134,10 +146,24 @@ After writing the file:
 ## Integration Notes
 
 ### With `pr-create`
-After premortem, `pr-create` reads the matching premortem file and embeds the **decision matrix** (not the full narratives) into the PR description. Reviewers see what was raised and how the author resolved it.
+After premortem, `pr-create` reads the matching premortem file and embeds
+the **decision matrix** (not the full narratives) into the PR description.
+Reviewers see what was raised and how the author resolved it.
 
 ### With `postmortem`
-When an incident postmortem runs against a merged PR, it auto-reads the matching premortem file. Compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then look for `docs/premortems/*-{sanitized-branch}-premortem.md`. See `core/skills/postmortem/SKILL.md`.
+When an incident postmortem runs against a merged PR, it auto-reads the
+matching premortem file. Compute `{sanitized-branch}` using the canonical
+algorithm in `framework/BRANCH_SANITIZATION.md`, then look for
+`docs/premortems/*-{sanitized-branch}-premortem.md`.
+
+**Sanitization & log-on-miss:** Compute `{sanitized-branch}` using the
+canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If the lookup
+glob returns zero matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`.
+Do not fail silently — a missing premortem file when one is expected is a
+contract violation worth surfacing.
+
+See `core/skills/postmortem/SKILL.md`.
 
 ### With `kickoff`
 Planned: when `premortem-horizons[work-type]` is non-empty, kickoff will offer

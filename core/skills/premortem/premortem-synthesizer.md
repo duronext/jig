@@ -36,6 +36,20 @@ This is a stable parseable marker for downstream consumers. Without it,
 the orchestrator will refuse to persist your output. See
 `framework/PREMORTEM_FILE_FORMAT.md` for the full contract.
 
+**Required output structure (parser-validated):**
+
+The orchestrator will reject your output if any of these are missing:
+1. `<!-- premortem-schema: v1 -->` as the literal first line
+2. A `## Synthesis` heading (level-2)
+3. At least one `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple (the
+   literal ☐ U+2610 glyph, not ASCII `[ ]`)
+4. A `## Specialist Summary` heading (level-2) followed by a markdown
+   table
+
+If you cannot produce all four for the given inputs (e.g., all specialists
+returned `N/A`), still emit the structure with empty/minimal sections
+rather than omitting headings.
+
 A markdown report with these sections, in this order:
 
 ### 1. Convergent risks

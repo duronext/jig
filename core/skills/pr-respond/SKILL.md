@@ -134,9 +134,17 @@ The single-comment endpoint drops the PR number from the path. Using `/pulls/{pr
 
 **Premortem-aware response context:**
 
-Before drafting responses to reviewer comments, check for a matching premortem
-file. Compute `{sanitized-branch}` = current branch with `/` replaced by `-`,
-then check `docs/premortems/*-{sanitized-branch}-premortem.md` (if it exists).
+Before drafting responses to reviewer comments, check for a matching
+premortem file.
+
+**Sanitization & log-on-miss:** Compute `{sanitized-branch}` using the
+canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If the lookup
+glob (`docs/premortems/*-{sanitized-branch}-premortem.md`) returns zero
+matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`.
+Do not fail silently — a missing premortem file when one is expected is a
+contract violation worth surfacing. If no file is found, skip the
+premortem-aware response path entirely (treat as if no premortem exists).
 
 **Validate schema version:** Read the file's first line. It must match
 `<!-- premortem-schema: v1 -->`. If absent or a different major version,

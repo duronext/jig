@@ -75,12 +75,21 @@ If not found, ask:
 ## Step 1.5: Read matching premortem (if exists)
 
 After detecting the PR from branch, check for a matching premortem file.
-Compute `{sanitized-branch}` = current branch with `/` replaced by `-`:
+
+**Sanitization & log-on-miss:** Compute `{sanitized-branch}` using the
+canonical algorithm in `framework/BRANCH_SANITIZATION.md`:
 
 ```bash
-branch=$(git branch --show-current | tr '/' '-')
-ls docs/premortems/*-${branch}-premortem.md 2>/dev/null
+sanitized=$(git branch --show-current | sed -E 's/[^A-Za-z0-9._-]/-/g; s/-+/-/g; s/^-+|-+$//g')
+ls docs/premortems/*-${sanitized}-premortem.md 2>/dev/null
 ```
+
+If the glob returns zero matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized}-premortem.md → NOT FOUND`.
+Do not fail silently — a missing premortem file when one is expected is a
+contract violation worth surfacing. If no file is found, skip this step
+entirely (do not emit a "no premortem found" note — the log line is
+sufficient).
 
 If a file exists, read it.
 

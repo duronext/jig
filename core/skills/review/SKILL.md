@@ -52,6 +52,32 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 2. Read each file and parse the YAML frontmatter
 3. Extract: `name`, `description`, `model`, `tier`, `stage`, `globs`, `severity`
 4. Deduplicate by `name` (team > pack > core)
+
+### Stage 1.5: VALIDATE Specialist Frontmatter
+
+Before filtering by mode, validate each discovered specialist's frontmatter
+against the minimum schema:
+
+| Field | Required | Type | Notes |
+|---|---|---|---|
+| `name` | yes | string | must match the file basename without `.md` |
+| `description` | yes | string | one-line summary |
+| `model` | yes | string | `haiku` \| `sonnet` \| `opus` |
+| `tier` | yes | string | `fast-pass` \| `full` |
+| `globs` | yes | list | at least one entry |
+| `severity` | yes | string | `blocking` \| `major` \| `minor` |
+| `stage` | optional | string | absent (code review default), `prd`, `plan`, `both`, or `premortem` |
+
+For any specialist with missing or malformed required fields, do NOT
+dispatch it. Instead, emit a one-line warning to the orchestrator output:
+
+```
+Skipping specialist `{name}`: invalid frontmatter ({missing or wrong fields})
+```
+
+Continue with the remaining valid specialists. The validation failure is
+logged but not fatal — better to run a partial swarm than none.
+
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - `mode: prd` → include specialists where `stage: prd` or `stage: both`

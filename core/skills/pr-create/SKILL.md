@@ -105,7 +105,15 @@ Premortem is recommended for this kind of change. Run /jig:premortem before open
 - If the author accepts: invoke the `premortem` skill, wait for completion, then continue to Step 0 (review).
 - If the author declines: log the skipped detectors as a one-line note for the PR description, then continue to Step 0.
 
-If a premortem file already exists for this branch, skip the prompt entirely — premortem already happened. Compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then check `docs/premortems/*-{sanitized-branch}-premortem.md`.
+If a premortem file already exists for this branch, skip the prompt
+entirely — premortem already happened.
+
+**Sanitization & log-on-miss:** Compute `{sanitized-branch}` using the
+canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If the lookup
+glob returns zero matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`.
+Do not fail silently — a missing premortem file when one is expected is a
+contract violation worth surfacing.
 
 ### Step 0: Run the code review swarm
 
@@ -216,7 +224,13 @@ it asked for and how this addresses it.}
 Fixes {TICKET-REFERENCE}
 ```
 
-**If a premortem file exists for this branch** (compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then check `docs/premortems/*-{sanitized-branch}-premortem.md`):
+**If a premortem file exists for this branch** — compute
+`{sanitized-branch}` using the canonical algorithm in
+`framework/BRANCH_SANITIZATION.md`, then check
+`docs/premortems/*-{sanitized-branch}-premortem.md`. If the lookup glob
+returns zero matches, emit:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`
+and skip the premortem embedding section below.
 
 **Validate schema version:** Read the file's first line. It must match
 `<!-- premortem-schema: v1 -->`. If absent or a different major version,
