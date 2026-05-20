@@ -95,18 +95,20 @@ contract from `framework/PREMORTEM_FILE_FORMAT.md`. The composed output
 MUST contain:
 
 1. `<!-- premortem-schema: v1 -->` as the literal first line (emitted by the composer, not the synthesizer).
-2. A `## Synthesis` heading.
-3. Under `## Synthesis`, both `### Convergent risks` and `### Individual risks` subheadings (level-3) MUST be present. These may have empty bodies but the headings themselves are required per `framework/PREMORTEM_FILE_FORMAT.md`.
-4. Risk-block format: **if any risks are present**, each MUST use the
+2. A `# Premortem: {branch}` H1 title (level-1) within the first 10 lines, emitted by the composer.
+3. All five metadata header lines present after the H1 and before `## Synthesis`: `**Date**:`, `**Work type**:`, `**Horizons**:`, `**Specialists**:`, `**Diff**:`. These come from the composer (Stage 7 step 3), not the synthesizer.
+4. A `## Synthesis` heading.
+5. Under `## Synthesis`, both `### Convergent risks` and `### Individual risks` subheadings (level-3) MUST be present. These may have empty bodies but the headings themselves are required per `framework/PREMORTEM_FILE_FORMAT.md`.
+6. Risk-block format: **if any risks are present**, each MUST use the
    `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐
    glyph (U+2610), not ASCII `[ ]`. Zero risks is acceptable — a
    docs-only or low-signal diff can legitimately produce a file with no
    decisions. In that case Convergent risks and Individual risks sections
    remain present but empty.
-5. A `## One-way doors identified` heading (top-level — not nested under
+7. A `## One-way doors identified` heading (top-level — not nested under
    Synthesis).
-6. A `## Open questions for the author` heading (top-level).
-7. A `## Specialist Summary` heading followed by a table.
+8. A `## Open questions for the author` heading (top-level).
+9. A `## Specialist Summary` heading followed by a table.
 
 If any check fails:
 - Do NOT write the file.
