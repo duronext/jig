@@ -125,8 +125,9 @@ glob has drifted out of sync with the repo's actual paths.
 **Skip guard (check this BEFORE prompting).** Compute `{sanitized-branch}` using the canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If `docs/premortems/*-{sanitized-branch}-premortem.md` returns one or more matches, premortem already happened for this branch — **skip the rest of Step 0a entirely** (no prompt, no detector-fires message). Proceed to Step 0.
 
 If the lookup glob returns zero matches, emit a single visible log line:
-`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`.
-Do not fail silently — a missing premortem file when one is expected is a contract violation worth surfacing.
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND (no prior premortem for this branch; proceeding with detector checks)`.
+
+In this Step 0a context, absence is the normal default — most branches won't have a premortem yet. The log is for visibility ("did the skip guard run?"), not an error signal. Contract-violation framing is reserved for sites where a premortem is *expected* to exist (Step 5 embedding, `postmortem` Step 2.5, `pr-respond` Step 2).
 
 **Otherwise (no existing premortem file), if any detector fires, prompt the author:**
 

@@ -365,7 +365,16 @@ These are diagnostic counts, not gates. Premortem informs; it does not block.
 
 ### Stage 7: REPORT
 
-Produce the unified report. Adapt the header by mode:
+**Mode dispatch (read this FIRST):** Stage 7 has two distinct report templates. Pick exactly one based on the mode and skip the other entirely:
+
+- `mode: code | prd | plan` → use the findings template immediately below (header + Confidence Score + Blocking/Major/Minor sections + Specialist Summary). **Skip** the `#### Mode: premortem` block further down.
+- `mode: premortem` → **Skip the findings template below**; jump directly to the `#### Mode: premortem` block (search for it in this stage). Do not emit `## Code Review Summary` or any of the standard scoring sections — premortem's first line must be `<!-- premortem-schema: v1 -->`, and emitting the standard template first would cause Stage 4 to reject the output.
+
+---
+
+#### Findings template (modes: code, prd, plan)
+
+Adapt the header by mode:
 
 - `mode: code` → `## Code Review Summary`
 - `mode: prd` → `## PRD Review Summary`
