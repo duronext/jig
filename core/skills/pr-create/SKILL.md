@@ -62,9 +62,21 @@ git diff origin/{main-branch}...HEAD --name-only
 git diff origin/{main-branch}...HEAD --stat
 ```
 
-Read `premortem-detectors` and `premortem-critical-paths` from `jig.config.md`.
+Read `premortem-detectors` and `premortem-critical-paths` from `jig.config.md`. The config block looks like:
 
-For each detector class, check if any changed path matches. The detectors are:
+```yaml
+premortem-detectors:
+  backend: [migrations, api-routes, cross-service-deps]
+  frontend: [routing, layouts, auth-ui, money-ui, ...]
+  content: [new-fetch-origin, new-storage, ...]
+  thresholds:
+    large-diff-loc: 500
+    bundle-size-kb: 50
+```
+
+The lists `backend`, `frontend`, and `content` are the **enabled-detector sets** for this project. Only detector class names present in those lists actually run. The canonical catalog below describes every detector Jig knows about; if a class is absent from the config list (e.g., a team removes `money-ui`), skip it. If a class is present in config but not in the catalog below, log `Unknown detector: {name}` and skip it.
+
+For each **enabled** detector class, check if any changed path matches. The canonical detector catalog:
 
 **Backend** (path globs):
 - `migrations`: `**/migrations/**`, `**/*schema*`, `**/*.sql`, `**/models/**`, `**/entities/**`, `**/prisma/**`
