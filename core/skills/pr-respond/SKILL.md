@@ -151,6 +151,19 @@ premortem-aware response path entirely (treat as if no premortem exists).
 skip the premortem-aware response path entirely (treat as if no premortem
 exists).
 
+**File is source of truth, not the PR body.** Always re-read the persisted
+premortem file when constructing the response — do NOT rely on the PR body
+bullets, which are a snapshot from PR-creation time and may be stale. If
+the file's current decision for a risk differs from what the PR body says,
+the file wins. If a reviewer comment maps to a risk whose decision has
+changed since the PR was opened, surface the difference in the response:
+
+> "Note: the author has since updated this decision from {old} to {new}.
+> See `docs/premortems/{filename}` for current state."
+
+This prevents pr-respond from quoting outdated rationale when the author
+has reconsidered.
+
 For each reviewer comment, see if it maps to a known premortem risk:
 
 - If yes AND the risk was marked **Accept**: include the author's accept

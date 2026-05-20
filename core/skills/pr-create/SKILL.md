@@ -94,6 +94,22 @@ For each detector class, check if any changed path matches. The detectors are:
 
 **Critical paths** (team-configured): match against any glob in `premortem-critical-paths`.
 
+**Visibility: log the detector result.** Always emit a one-line summary of
+the Step 0a detector pass before deciding whether to prompt. Choose one of
+these two forms:
+
+- **If one or more detectors fired:**
+  `Premortem detectors fired: {comma-separated detector names}`
+- **If zero detectors fired AND the diff exceeds
+  `premortem-detectors.thresholds.large-diff-loc` (default 500 LOC):**
+  `Premortem detectors: 0 fired ({N} LOC diff — exceeds threshold; consider /jig:premortem-audit if this seems wrong)`
+- **If zero detectors fired AND the diff is below the threshold:** no line
+  needed (the silence is correct).
+
+This makes absence-of-detection visible exactly when it might be wrong — a
+large diff that nonetheless hits no detectors usually means a critical-path
+glob has drifted out of sync with the repo's actual paths.
+
 If **any** detector fires, prompt the author:
 
 ```
@@ -238,13 +254,28 @@ do not embed decisions; instead include in the PR description:
 "⚠️ Premortem file at `{path}` has incompatible schema version — skipping
 decision embedding. See `framework/PREMORTEM_FILE_FORMAT.md`."
 
-1. Parse the file for the synthesis section's risks.
-2. Extract any risk with a checked Accept/Mitigate/Instrument box.
-3. Append a `## Premortem decisions` section to the PR body containing:
-   - One bullet per decided risk: `**{title}**: {decision} — {rationale if provided}`
-   - A link to the full premortem file: `Full premortem: docs/premortems/{filename}`
+**If a premortem file exists for this branch** (sanitized per
+`framework/BRANCH_SANITIZATION.md`):
 
-Do not include the full narratives — they're in the file. The PR body shows what the author *decided*.
+1. Validate the schema version (see Step 0a precheck — same rule applies
+   here).
+2. Compute the file's content hash:
+   `git_sha=$(git hash-object docs/premortems/{filename})` so the PR body
+   can reference an immutable version.
+3. Parse the file for the synthesis section's risks.
+4. Extract any risk with a checked Accept/Mitigate/Instrument box.
+5. Append a `## Premortem decisions` section to the PR body containing:
+   - **Header line:**
+     `Full premortem: docs/premortems/{filename} @ git-sha {git_sha}`
+     (this pins the PR body to a specific version of the file)
+   - One bullet per decided risk:
+     `**{title}**: {decision} — {rationale if provided}`
+   - Closing line:
+     `Source of truth: the premortem file linked above. If decisions change, re-run /jig:pr-update to refresh this section.`
+     (this tells reviewers + pr-respond that the file is authoritative)
+
+Do not include the full narratives — they're in the file. The PR body shows
+what the author *decided* at PR-creation time.
 
 ### Step 6: Push and create
 
