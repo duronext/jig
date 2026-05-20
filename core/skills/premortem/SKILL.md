@@ -94,7 +94,10 @@ contain:
 2. A `## Synthesis` heading.
 3. At least one `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple using
    the literal ☐ glyph (U+2610), not ASCII `[ ]`.
-4. A `## Specialist Summary` heading followed by a table.
+4. A `## One-way doors identified` heading (top-level — not nested under
+   Synthesis).
+5. A `## Open questions for the author` heading (top-level).
+6. A `## Specialist Summary` heading followed by a table.
 
 If any check fails:
 - Do NOT write the file.

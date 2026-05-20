@@ -431,20 +431,16 @@ The rest of the report format is identical for the code, prd, and plan modes —
 2. `## Specialist narratives` — each specialist's full narrative inside a `<details><summary>` block for collapsibility
 3. `## Specialist Summary` — table with columns: Specialist, Risks, per-horizon counts
 
-**Persist the full report** to
-`docs/premortems/YYYY-MM-DD-{sanitized-branch}-premortem.md`. The file
-MUST begin with this literal first line:
+**Return** the full report (including the literal
+`<!-- premortem-schema: v1 -->` first line per
+`framework/PREMORTEM_FILE_FORMAT.md`). Do NOT persist the file from this
+stage — the `premortem` orchestrator's Stage 4 is the sole persister and
+owns schema validation, branch-name sanitization, and the actual
+filesystem write. Returning the report to the caller is sufficient.
 
-```
-<!-- premortem-schema: v1 -->
-```
-
-Followed by the standard header (Date, Work type, Horizons, Specialists,
-Diff stats) and then the body sections. See
-`framework/PREMORTEM_FILE_FORMAT.md` for the canonical contract.
-
-Print the path at the end of the terminal output. The terminal prints
-only sections 1 and 3 (compressed view); the file contains everything.
+The terminal output for this stage should print only the compressed view
+(Synthesis + Specialist Summary table). The orchestrator handles file
+writes and prints the persisted path.
 
 **Skipped vs N/A distinction:**
 - **Skipped** = specialist's globs matched zero changed files (never spawned)

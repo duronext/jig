@@ -70,7 +70,6 @@ For each detector class, check if any changed path matches. The detectors are:
 - `migrations`: `**/migrations/**`, `**/*schema*`, `**/*.sql`, `**/models/**`, `**/entities/**`, `**/prisma/**`
 - `api-routes`: `**/api/**`, `**/routes/**`, `**/handlers/**`, `**/*openapi*`, `**/*.proto`, `**/graphql/**`
 - `cross-service-deps`: `package.json`, `go.mod`, `Cargo.toml`, `requirements*.txt`, `pyproject.toml`
-- `large-diff`: total LOC changes exceed `premortem-detectors.thresholds.large-diff-loc` (default 500)
 
 **Frontend** (path globs):
 - `routing`: `**/pages/**`, `**/app/**`, `**/routes/**`, `**/middleware.{ts,js}`
@@ -95,16 +94,17 @@ For each detector class, check if any changed path matches. The detectors are:
 **Critical paths** (team-configured): match against any glob in `premortem-critical-paths`.
 
 **Visibility: log the detector result.** Always emit a one-line summary of
-the Step 0a detector pass before deciding whether to prompt. Choose one of
-these two forms:
+the Step 0a detector pass before deciding whether to prompt.
 
 - **If one or more detectors fired:**
   `Premortem detectors fired: {comma-separated detector names}`
-- **If zero detectors fired AND the diff exceeds
-  `premortem-detectors.thresholds.large-diff-loc` (default 500 LOC):**
-  `Premortem detectors: 0 fired ({N} LOC diff — exceeds threshold; consider /jig:premortem-audit if this seems wrong)`
-- **If zero detectors fired AND the diff is below the threshold:** no line
-  needed (the silence is correct).
+- **If zero detectors fired AND the diff exceeds `premortem-detectors.thresholds.large-diff-loc` (default 500 LOC):**
+  `Premortem detectors: 0 fired ({N} LOC diff — exceeds large-diff-loc threshold; check if critical-path globs are still aligned with the repo's actual paths)`
+- **If zero detectors fired AND the diff is below the threshold:** no line needed (the silence is correct).
+
+Note: `large-diff-loc` is a *meta-trigger*, not a detector. It's only used
+to decide whether to emit the "zero fired" warning. It does not fire on its
+own and is not present in the `premortem-detectors.backend` list.
 
 This makes absence-of-detection visible exactly when it might be wrong — a
 large diff that nonetheless hits no detectors usually means a critical-path

@@ -50,19 +50,30 @@ If you cannot produce all four for the given inputs (e.g., all specialists
 returned `N/A`), still emit the structure with empty/minimal sections
 rather than omitting headings.
 
-A markdown report with these sections, in this order:
+A markdown report with this exact heading structure (level matters — see
+`framework/PREMORTEM_FILE_FORMAT.md`):
 
-### 1. Convergent risks
+## Synthesis
+
+### Convergent risks
 Risks raised by 2+ specialists. Use the ⚠️ icon and place them first — convergence is a strong quality signal.
 
-### 2. Individual risks
+### Individual risks
 Risks raised by exactly one specialist. Still actionable; less converged.
 
-### 3. One-way doors identified
-Pull the table from `reversibility-premortem`'s output if present. If reversibility ran but found none, write "All changes in this diff are reasonably reversible."
+## One-way doors identified
+(Top-level — not nested under Synthesis.) Pull the table from
+`reversibility-premortem`'s output if present. If reversibility ran but
+found none, write "All changes in this diff are reasonably reversible."
 
-### 4. Open questions for the author
-3–7 concrete questions. Examples: "Is the on-call team aware of the new webhook handler?" "Has the {dependent team} confirmed they're ready for the event shape change?"
+## Open questions for the author
+(Top-level — not nested under Synthesis.) 3–7 concrete questions.
+Examples: "Is the on-call team aware of the new webhook handler?" "Has
+the {dependent team} confirmed they're ready for the event shape change?"
+
+## Specialist Summary
+(Top-level.) Table with columns: Specialist, Risks, per-horizon counts,
+Notes.
 
 For each risk in sections 1 and 2, emit:
 

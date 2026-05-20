@@ -100,7 +100,7 @@ premortem-critical-paths:
   - "**/{auth,session,oauth}*"
 
 premortem-detectors:
-  backend: [migrations, api-routes, cross-service-deps, large-diff]
+  backend: [migrations, api-routes, cross-service-deps]
   frontend: [routing, layouts, auth-ui, money-ui, build-config, flags,
              third-party-scripts, i18n, service-workers, csp,
              public-copy, a11y-primitives]
