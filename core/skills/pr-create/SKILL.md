@@ -240,42 +240,28 @@ it asked for and how this addresses it.}
 Fixes {TICKET-REFERENCE}
 ```
 
-**If a premortem file exists for this branch** — compute
-`{sanitized-branch}` using the canonical algorithm in
-`framework/BRANCH_SANITIZATION.md`, then check
-`docs/premortems/*-{sanitized-branch}-premortem.md`. If the lookup glob
-returns zero matches, emit:
+**Look up the premortem file:** Compute `{sanitized-branch}` using the canonical algorithm in `framework/BRANCH_SANITIZATION.md`, then check `docs/premortems/*-{sanitized-branch}-premortem.md`. If the lookup glob returns zero matches, emit:
 `Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`
-and skip the premortem embedding section below.
+and skip the rest of this premortem-embedding flow.
 
-**Validate schema version:** Read the file's first line. It must match
-`<!-- premortem-schema: v1 -->`. If absent or a different major version,
-do not embed decisions; instead include in the PR description:
-"⚠️ Premortem file at `{path}` has incompatible schema version — skipping
-decision embedding. See `framework/PREMORTEM_FILE_FORMAT.md`."
+**Validate schema version:** Read the file's first line. It must match `<!-- premortem-schema: v1 -->`. If absent or a different major version, do not embed decisions; instead include in the PR description: "⚠️ Premortem file at `{path}` has incompatible schema version — skipping decision embedding. See `framework/PREMORTEM_FILE_FORMAT.md`."
 
-**If a premortem file exists for this branch** (sanitized per
-`framework/BRANCH_SANITIZATION.md`):
+**If the file exists and the schema is valid, embed decisions:**
 
-1. Validate the schema version (see Step 0a precheck — same rule applies
-   here).
-2. Compute the file's content hash:
-   `git_sha=$(git hash-object docs/premortems/{filename})` so the PR body
-   can reference an immutable version.
-3. Parse the file for the synthesis section's risks.
-4. Extract any risk with a checked Accept/Mitigate/Instrument box.
-5. Append a `## Premortem decisions` section to the PR body containing:
+1. Compute the file's content hash: `git_sha=$(git hash-object docs/premortems/{filename})` so the PR body can reference an immutable version.
+2. Parse the file for the synthesis section's risks.
+3. Extract any risk with a checked Accept/Mitigate/Instrument box.
+4. Append a `## Premortem decisions` section to the PR body containing:
    - **Header line:**
      `Full premortem: docs/premortems/{filename} @ git-sha {git_sha}`
      (this pins the PR body to a specific version of the file)
    - One bullet per decided risk:
      `**{title}**: {decision} — {rationale if provided}`
    - Closing line:
-     `Source of truth: the premortem file linked above. If decisions change, re-run /jig:pr-update to refresh this section.`
+     `Source of truth: the premortem file linked above. To refresh this section after editing the file, regenerate the PR description manually or via /jig:pr-create on a freshly-rebased branch.`
      (this tells reviewers + pr-respond that the file is authoritative)
 
-Do not include the full narratives — they're in the file. The PR body shows
-what the author *decided* at PR-creation time.
+Do not include the full narratives — they're in the file. The PR body shows what the author *decided* at PR-creation time.
 
 ### Step 6: Push and create
 

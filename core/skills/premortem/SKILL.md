@@ -92,8 +92,12 @@ contain:
 
 1. `<!-- premortem-schema: v1 -->` as the literal first line.
 2. A `## Synthesis` heading.
-3. At least one `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple using
-   the literal ☐ glyph (U+2610), not ASCII `[ ]`.
+3. Risk-block format: **if any risks are present**, each MUST use the
+   `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐
+   glyph (U+2610), not ASCII `[ ]`. Zero risks is acceptable — a
+   docs-only or low-signal diff can legitimately produce a file with no
+   decisions. In that case Convergent risks and Individual risks sections
+   may be empty, but the headings MUST still be present.
 4. A `## One-way doors identified` heading (top-level — not nested under
    Synthesis).
 5. A `## Open questions for the author` heading (top-level).
