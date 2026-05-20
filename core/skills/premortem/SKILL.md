@@ -76,11 +76,14 @@ Invoke the `review` skill with:
 
 ```
 mode: premortem
+tier: all
 diff: {full diff from Stage 2}
 changed-files: {list of paths}
 horizons: {array from Stage 1}
 work-type: {from Stage 1}
 ```
+
+**Why `tier: all`:** the 8 premortem specialists use `tier: full-only` (per the canonical taxonomy in `core/skills/review/tiers.md`). `tier: fast-pass` would dispatch zero specialists; `tier: all` is the only valid tier choice for premortem dispatch.
 
 The `review` skill handles discover, prepare, dispatch, collect, synthesize, score, and report (see `core/skills/review/SKILL.md` — Mode: premortem branches at Stages 1, 2, 3, 5, 6, 7).
 
@@ -93,16 +96,17 @@ MUST contain:
 
 1. `<!-- premortem-schema: v1 -->` as the literal first line (emitted by the composer, not the synthesizer).
 2. A `## Synthesis` heading.
-3. Risk-block format: **if any risks are present**, each MUST use the
+3. Under `## Synthesis`, both `### Convergent risks` and `### Individual risks` subheadings (level-3) MUST be present. These may have empty bodies but the headings themselves are required per `framework/PREMORTEM_FILE_FORMAT.md`.
+4. Risk-block format: **if any risks are present**, each MUST use the
    `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐
    glyph (U+2610), not ASCII `[ ]`. Zero risks is acceptable — a
    docs-only or low-signal diff can legitimately produce a file with no
    decisions. In that case Convergent risks and Individual risks sections
-   may be empty, but the headings MUST still be present.
-4. A `## One-way doors identified` heading (top-level — not nested under
+   remain present but empty.
+5. A `## One-way doors identified` heading (top-level — not nested under
    Synthesis).
-5. A `## Open questions for the author` heading (top-level).
-6. A `## Specialist Summary` heading followed by a table.
+6. A `## Open questions for the author` heading (top-level).
+7. A `## Specialist Summary` heading followed by a table.
 
 If any check fails:
 - Do NOT write the file.

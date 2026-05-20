@@ -31,13 +31,14 @@ When in doubt, group conservatively — false convergence is worse than missed c
 **Required output structure (parser-validated by `premortem` Stage 4 on the final composed file):**
 
 Your output is one part of the final report; it MUST contain these `##`-level sections in this order:
-1. A `## Synthesis` heading (level-2), with nested `### Convergent risks` and `### Individual risks`
-2. Risk-block format: if any risks are present, each MUST use the `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐ glyph (U+2610), not ASCII `[ ]`. Zero risks is acceptable; in that case Convergent risks and Individual risks sections remain present but empty.
-3. A `## One-way doors identified` heading (level-2, top-level — not nested under Synthesis)
-4. A `## Open questions for the author` heading (level-2, top-level)
-5. A `## Specialist Summary` heading (level-2) followed by a markdown table
+1. A `## Synthesis` heading (level-2).
+2. Under `## Synthesis`, both `### Convergent risks` and `### Individual risks` subheadings (level-3) MUST be present. These may have empty bodies (e.g., no convergent risks were found) but the headings themselves are required.
+3. Risk-block format: if any risks are present, each MUST use the `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐ glyph (U+2610), not ASCII `[ ]`. Zero risks is acceptable; in that case Convergent risks and Individual risks sections remain present but empty.
+4. A `## One-way doors identified` heading (level-2, top-level — not nested under Synthesis)
+5. A `## Open questions for the author` heading (level-2, top-level)
+6. A `## Specialist Summary` heading (level-2) followed by a markdown table
 
-If you cannot produce all five for the given inputs (e.g., all specialists
+If you cannot produce all six for the given inputs (e.g., all specialists
 returned `N/A`), still emit the structure with empty/minimal sections
 rather than omitting headings.
 
