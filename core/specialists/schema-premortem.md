@@ -2,7 +2,7 @@
 name: schema-premortem
 description: Imaginative pre-merge failure analysis for database schema changes — locks at scale, backfill, replication, indexes, FK orphans
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"

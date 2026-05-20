@@ -2,7 +2,7 @@
 name: observability-premortem
 description: Imaginative pre-merge failure analysis for observability gaps — logs, metrics, traces, alerts, PII, cardinality, dashboards
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"

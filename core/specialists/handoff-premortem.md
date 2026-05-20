@@ -2,7 +2,7 @@
 name: handoff-premortem
 description: Cognitive handoff and knowledge-decay risks — 6 months out, will the next reader (or agent) understand and safely modify this code?
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"

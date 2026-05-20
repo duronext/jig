@@ -86,11 +86,12 @@ The `review` skill handles discover, prepare, dispatch, collect, synthesize, sco
 
 ### Stage 4: Persist the Report
 
-Before writing the file, validate the synthesizer output against the v1
-contract from `framework/PREMORTEM_FILE_FORMAT.md`. The output MUST
-contain:
+Before writing the file, validate the composed report (Stage 7 output,
+which combines the composer's framing + synthesizer body) against the v1
+contract from `framework/PREMORTEM_FILE_FORMAT.md`. The composed output
+MUST contain:
 
-1. `<!-- premortem-schema: v1 -->` as the literal first line.
+1. `<!-- premortem-schema: v1 -->` as the literal first line (emitted by the composer, not the synthesizer).
 2. A `## Synthesis` heading.
 3. Risk-block format: **if any risks are present**, each MUST use the
    `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐

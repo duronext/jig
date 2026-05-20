@@ -2,7 +2,7 @@
 name: integration-premortem
 description: Imaginative pre-merge failure analysis for cross-service and mono-repo integration risk — contract drift, transitive deps, event shape changes
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"

@@ -63,7 +63,7 @@ against the minimum schema:
 | `name` | yes | string | must match the file basename without `.md` |
 | `description` | yes | string | one-line summary |
 | `model` | yes | string | `haiku` \| `sonnet` \| `opus` |
-| `tier` | yes | string | `fast-pass` \| `full` |
+| `tier` | yes | string | `fast-pass` \| `full-only` (see `tiers.md`) |
 | `globs` | yes | list | at least one entry |
 | `severity` | yes | string | `blocking` \| `major` \| `minor` |
 | `stage` | optional | string | absent (code review default), `prd`, `plan`, `both`, or `premortem` |
@@ -426,7 +426,7 @@ The rest of the report format is identical for the code, prd, and plan modes —
    **Specialists**: N dispatched, M N/A
    **Diff**: F files, +A/-D LOC
    ```
-4. **Synthesizer output** — passed through unchanged. It already contains the next four `##`-level sections in this exact order (per `framework/PREMORTEM_FILE_FORMAT.md`):
+4. **Synthesizer output** — passed through unchanged. The synthesizer emits only the body (starting with `## Synthesis`); per the synthesizer prompt at `core/skills/premortem/premortem-synthesizer.md`, it does NOT emit the schema marker, H1, or header lines (those are the composer's responsibility above). It contains the next four `##`-level sections in this exact order (per `framework/PREMORTEM_FILE_FORMAT.md`):
    - `## Synthesis` (with nested `### Convergent risks` and `### Individual risks`)
    - `## One-way doors identified` (top-level — not nested under Synthesis)
    - `## Open questions for the author` (top-level)

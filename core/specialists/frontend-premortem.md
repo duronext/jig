@@ -2,7 +2,7 @@
 name: frontend-premortem
 description: Imaginative pre-merge failure analysis for client-side code — UX, a11y, hydration, optimistic state, error states, locale, bundle health
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"

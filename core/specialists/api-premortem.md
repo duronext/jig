@@ -2,7 +2,7 @@
 name: api-premortem
 description: Imaginative pre-merge failure analysis for API surface — contract drift, idempotency, error codes, breaking changes, consumer assumptions
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"

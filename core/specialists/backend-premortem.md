@@ -2,7 +2,7 @@
 name: backend-premortem
 description: Imaginative pre-merge failure analysis for server-side business logic — invariants, concurrency, retries, partial failures, hot paths
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"

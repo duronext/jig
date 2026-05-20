@@ -26,33 +26,18 @@ When in doubt, group conservatively — false convergence is worse than missed c
 
 ## Your Output
 
-**First line of output MUST be:**
+**Note on framing:** The composer (`review` Stage 7) prepends the `<!-- premortem-schema: v1 -->` marker, the `# Premortem: {branch}` H1 title, and the metadata header lines. Your output should start directly with `## Synthesis` — do NOT emit the schema marker, H1 title, or header lines yourself. The composer handles those.
 
-```
-<!-- premortem-schema: v1 -->
-```
+**Required output structure (parser-validated by `premortem` Stage 4 on the final composed file):**
 
-This is a stable parseable marker for downstream consumers. Without it,
-the orchestrator will refuse to persist your output. See
-`framework/PREMORTEM_FILE_FORMAT.md` for the full contract.
+Your output is one part of the final report; it MUST contain these `##`-level sections in this order:
+1. A `## Synthesis` heading (level-2), with nested `### Convergent risks` and `### Individual risks`
+2. Risk-block format: if any risks are present, each MUST use the `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐ glyph (U+2610), not ASCII `[ ]`. Zero risks is acceptable; in that case Convergent risks and Individual risks sections remain present but empty.
+3. A `## One-way doors identified` heading (level-2, top-level — not nested under Synthesis)
+4. A `## Open questions for the author` heading (level-2, top-level)
+5. A `## Specialist Summary` heading (level-2) followed by a markdown table
 
-**Required output structure (parser-validated):**
-
-The orchestrator will reject your output if any of these are missing:
-1. `<!-- premortem-schema: v1 -->` as the literal first line
-2. A `## Synthesis` heading (level-2)
-3. Risk-block format: if any risks are present, each MUST use the
-   `☐ Accept`  `☐ Mitigate`  `☐ Instrument` triple with the literal ☐
-   glyph (U+2610), not ASCII `[ ]`. Zero risks is acceptable; in that
-   case Convergent risks and Individual risks sections remain present
-   but empty.
-4. A `## One-way doors identified` heading (level-2, top-level — not
-   nested under Synthesis)
-5. A `## Open questions for the author` heading (level-2, top-level)
-6. A `## Specialist Summary` heading (level-2) followed by a markdown
-   table
-
-If you cannot produce all six for the given inputs (e.g., all specialists
+If you cannot produce all five for the given inputs (e.g., all specialists
 returned `N/A`), still emit the structure with empty/minimal sections
 rather than omitting headings.
 

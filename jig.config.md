@@ -94,6 +94,9 @@ premortem-swarm-tiers:
   full: all
 premortem-specialist-model: opus
 premortem-synthesizer-model: opus
+# Note: 'full' here is a tier-group config key meaning 'include all matching
+# specialists regardless of per-specialist tier value'. Per-specialist tier
+# values follow tiers.md: 'fast-pass' or 'full-only'. See core/skills/review/tiers.md.
 
 premortem-critical-paths:
   - "**/{checkout,billing,payment,subscription}*"

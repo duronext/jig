@@ -2,7 +2,7 @@
 name: reversibility-premortem
 description: Imaginative pre-merge failure analysis for one-way doors — persisted side effects, missing feature flags, external commitments
 model: opus
-tier: full
+tier: full-only
 stage: premortem
 globs:
   - "**/*"
