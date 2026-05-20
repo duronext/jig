@@ -218,6 +218,12 @@ Fixes {TICKET-REFERENCE}
 
 **If a premortem file exists for this branch** (compute `{sanitized-branch}` = current branch with `/` replaced by `-`, then check `docs/premortems/*-{sanitized-branch}-premortem.md`):
 
+**Validate schema version:** Read the file's first line. It must match
+`<!-- premortem-schema: v1 -->`. If absent or a different major version,
+do not embed decisions; instead include in the PR description:
+"⚠️ Premortem file at `{path}` has incompatible schema version — skipping
+decision embedding. See `framework/PREMORTEM_FILE_FORMAT.md`."
+
 1. Parse the file for the synthesis section's risks.
 2. Extract any risk with a checked Accept/Mitigate/Instrument box.
 3. Append a `## Premortem decisions` section to the PR body containing:

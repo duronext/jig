@@ -26,6 +26,16 @@ When in doubt, group conservatively — false convergence is worse than missed c
 
 ## Your Output
 
+**First line of output MUST be:**
+
+```
+<!-- premortem-schema: v1 -->
+```
+
+This is a stable parseable marker for downstream consumers. Without it,
+the orchestrator will refuse to persist your output. See
+`framework/PREMORTEM_FILE_FORMAT.md` for the full contract.
+
 A markdown report with these sections, in this order:
 
 ### 1. Convergent risks

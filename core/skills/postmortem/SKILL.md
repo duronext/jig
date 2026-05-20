@@ -82,7 +82,16 @@ branch=$(git branch --show-current | tr '/' '-')
 ls docs/premortems/*-${branch}-premortem.md 2>/dev/null
 ```
 
-If a file exists, read it. Capture the synthesis section's risks (title, narrative, decision).
+If a file exists, read it.
+
+**Validate schema version:** Read the file's first line. It must match
+`<!-- premortem-schema: v1 -->`. If absent or a different major version,
+emit one note in the postmortem report: "Premortem file found but schema
+version `{found}` is not supported — skipping Predicted vs Actual diff.
+See `framework/PREMORTEM_FILE_FORMAT.md`." and skip the rest of this
+step.
+
+Capture the synthesis section's risks (title, narrative, decision).
 
 **At the end of the postmortem report**, after the existing patterns table, append a new section `## Predicted vs Actual`:
 

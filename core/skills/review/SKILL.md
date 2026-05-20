@@ -405,7 +405,20 @@ The rest of the report format is identical for the code, prd, and plan modes —
 2. `## Specialist narratives` — each specialist's full narrative inside a `<details><summary>` block for collapsibility
 3. `## Specialist Summary` — table with columns: Specialist, Risks, per-horizon counts
 
-**Persist the full report** to `docs/premortems/YYYY-MM-DD-{branch-name}-premortem.md`. Print the path at the end of the terminal output. The terminal prints only sections 1 and 3 (compressed view); the file contains everything.
+**Persist the full report** to
+`docs/premortems/YYYY-MM-DD-{sanitized-branch}-premortem.md`. The file
+MUST begin with this literal first line:
+
+```
+<!-- premortem-schema: v1 -->
+```
+
+Followed by the standard header (Date, Work type, Horizons, Specialists,
+Diff stats) and then the body sections. See
+`framework/PREMORTEM_FILE_FORMAT.md` for the canonical contract.
+
+Print the path at the end of the terminal output. The terminal prints
+only sections 1 and 3 (compressed view); the file contains everything.
 
 **Skipped vs N/A distinction:**
 - **Skipped** = specialist's globs matched zero changed files (never spawned)

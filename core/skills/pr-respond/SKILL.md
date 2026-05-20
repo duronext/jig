@@ -137,6 +137,12 @@ The single-comment endpoint drops the PR number from the path. Using `/pulls/{pr
 Before drafting responses to reviewer comments, check for a matching premortem
 file. Compute `{sanitized-branch}` = current branch with `/` replaced by `-`,
 then check `docs/premortems/*-{sanitized-branch}-premortem.md` (if it exists).
+
+**Validate schema version:** Read the file's first line. It must match
+`<!-- premortem-schema: v1 -->`. If absent or a different major version,
+skip the premortem-aware response path entirely (treat as if no premortem
+exists).
+
 For each reviewer comment, see if it maps to a known premortem risk:
 
 - If yes AND the risk was marked **Accept**: include the author's accept

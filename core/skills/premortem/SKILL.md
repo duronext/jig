@@ -86,15 +86,24 @@ The `review` skill handles discover, prepare, dispatch, collect, synthesize, sco
 
 ### Stage 4: Persist the Report
 
-`review` returns the full markdown report. Write it to:
+`review` returns the full markdown report. The first line MUST be
+`<!-- premortem-schema: v1 -->` (the synthesizer and review skill emit
+this — verify it is present before writing). Write the file to:
 
 ```
-docs/premortems/{YYYY-MM-DD}-{branch-name}-premortem.md
+docs/premortems/{YYYY-MM-DD}-{sanitized-branch-name}-premortem.md
 ```
 
-Where `{branch-name}` is the current branch with `/` replaced by `-` for filesystem safety.
+Where `{sanitized-branch-name}` is the current branch with `/` replaced
+by `-` for filesystem safety.
 
 If `docs/premortems/` does not exist, create it.
+
+If the report does not start with `<!-- premortem-schema: vN -->`, the
+synthesizer output is malformed. Do not persist; instead, print the raw
+output and ask the author to retry.
+
+See `framework/PREMORTEM_FILE_FORMAT.md` for the file format contract.
 
 ### Stage 5: Surface to Author
 
