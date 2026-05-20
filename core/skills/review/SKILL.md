@@ -427,9 +427,16 @@ The rest of the report format is identical for the code, prd, and plan modes —
 
 **Body sections** (in order):
 
-1. `## Synthesis` — the synthesizer's full output (convergent risks, individual risks, one-way doors, open questions)
-2. `## Specialist narratives` — each specialist's full narrative inside a `<details><summary>` block for collapsibility
-3. `## Specialist Summary` — table with columns: Specialist, Risks, per-horizon counts
+The synthesizer's output already contains the first four `##`-level sections in this order (see `framework/PREMORTEM_FILE_FORMAT.md`):
+
+1. `## Synthesis` — with nested `### Convergent risks` and `### Individual risks`
+2. `## One-way doors identified` — top-level, not nested under Synthesis
+3. `## Open questions for the author` — top-level, not nested under Synthesis
+4. `## Specialist Summary` — table with columns: Specialist, Risks, per-horizon counts
+
+Pass the synthesizer's output through unchanged — do not re-emit or duplicate any of these sections. The composer's only addition is one section appended at the end:
+
+5. `## Specialist narratives` — each specialist's full narrative inside a `<details><summary>` block for collapsibility. This is the only section the composer creates; the synthesizer does not produce it because narratives come from the individual specialists in Stage 4, not the synthesizer.
 
 **Return** the full report (including the literal
 `<!-- premortem-schema: v1 -->` first line per
