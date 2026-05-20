@@ -42,7 +42,17 @@ alwaysApply: false
 
 2. Look up horizons from `jig.config.md`:
    - `premortem-horizons[work-type]`
-   - If empty or undefined: confirm with the user before continuing (premortem isn't configured for this work-type).
+   - **If the `premortem-horizons` key itself is missing from
+     `jig.config.md`**: premortem is not configured for this project.
+     Abort with a clear message: "Premortem is not configured in this
+     project's `jig.config.md`. To enable, uncomment the `## Premortem`
+     block in your config (see `scaffold/jig.config.md` for a template)
+     or set `premortem-horizons` for your work-types. Then re-run
+     `/jig:premortem`."
+   - **If the key is present but empty/undefined for this work-type**:
+     prompt the author "Premortem isn't configured for {work-type}. Use
+     default horizons [1 week, 6 months] for this run? [Y/n]". On `Y`,
+     proceed; on `n`, abort.
 
 3. Verify the branch is ahead of `main-branch`:
    ```bash

@@ -54,6 +54,8 @@ Run review (code review swarm)
 
 Before running the code review swarm, scan the diff for signals that suggest a premortem would be valuable.
 
+**Configuration check (defensive):** If `premortem-detectors` is not present in `jig.config.md`, premortem detection is not configured for this project. Skip Step 0a entirely and proceed to Step 0 with a one-line note: `Premortem detectors: not configured (skipping)`. Do not prompt the author. Do not halt.
+
 Run:
 ```bash
 git diff origin/{main-branch}...HEAD --name-only
