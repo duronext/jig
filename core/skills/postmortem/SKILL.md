@@ -89,6 +89,51 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews
 
 ---
 
+## Step 2.5: Read matching premortem (if exists)
+
+Postmortem runs **post-merge**, when the user is typically checked out on `main` — so `git branch --show-current` returns the wrong value for the premortem-file lookup. Use the PR's `headRefName` (the feature branch the PR was merged from), which was fetched in Step 2.
+
+**Sanitization & log-on-miss:** Compute `{sanitized-branch}` using the canonical algorithm in `framework/BRANCH_SANITIZATION.md`:
+
+```bash
+# Read headRefName from Step 2's PR metadata, not from local git state
+head_ref=$(gh pr view {number} --json headRefName --jq .headRefName)
+sanitized=$(printf %s "$head_ref" | sed -E 's/[^A-Za-z0-9._-]/-/g; s/-+/-/g; s/^-+|-+$//g')
+ls docs/premortems/*-${sanitized}-premortem.md 2>/dev/null
+```
+
+If the glob returns zero matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized}-premortem.md → NOT FOUND`.
+Do not fail silently — a missing premortem file when one is expected is a contract violation worth surfacing. If no file is found, skip this step entirely (do not emit a "no premortem found" note — the log line is sufficient).
+
+If a file exists, read it.
+
+**Validate schema version:** Read the file's first line. It must match `<!-- premortem-schema: v1 -->`. If absent or a different major version, emit one note in the postmortem report: "Premortem file found but schema version `{found}` is not supported — skipping Predicted vs Actual diff. See `framework/PREMORTEM_FILE_FORMAT.md`." and skip the rest of this step.
+
+Capture the synthesis section's risks (title, narrative, decision).
+
+**At the end of the postmortem report**, after the existing patterns table, append a new section `## Predicted vs Actual`:
+
+For each risk in the premortem:
+- Compare its narrative to the incident's root cause (which postmortem already extracted from review comments and incident reports).
+- Classify as:
+  - **HIT** — premortem predicted this exact failure mode. Note the specialist that flagged it.
+  - **PARTIAL** — premortem flagged an adjacent risk; the actual cause shares the root architectural decision.
+  - **MISS** — premortem did not surface this risk.
+- If the actual root cause was *not* surfaced by any premortem risk, add a **specialist evolution suggestion**:
+
+```
+The actual root cause was {description}. None of the 8 premortem specialists
+flagged it. The {best-fit specialist} could have caught it if its prompt
+explicitly asked about {pattern}.
+```
+
+Emit the section even if all risks were misses — the data is the point.
+
+If no premortem file exists, **skip this section entirely** (do not emit a "no premortem found" note — it's noise).
+
+---
+
 ## Step 3: Analyze Comments
 
 **Filter:**

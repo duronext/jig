@@ -50,6 +50,96 @@ Run review (code review swarm)
                         Push + create PR
 ```
 
+### Step 0a: Check for premortem-triggering risk signals
+
+Before running the code review swarm, scan the diff for signals that suggest a premortem would be valuable.
+
+**Configuration check (defensive):** If `premortem-detectors` is not present in `jig.config.md`, premortem detection is not configured for this project. Skip Step 0a entirely and proceed to Step 0 with a one-line note: `Premortem detectors: not configured (skipping)`. Do not prompt the author. Do not halt.
+
+Run:
+```bash
+git diff origin/{main-branch}...HEAD --name-only
+git diff origin/{main-branch}...HEAD --stat
+```
+
+Read `premortem-detectors` and `premortem-critical-paths` from `jig.config.md`. The config block looks like:
+
+```yaml
+premortem-detectors:
+  backend: [migrations, api-routes, cross-service-deps]
+  frontend: [routing, layouts, auth-ui, money-ui, ...]
+  content: [new-fetch-origin, new-storage, ...]
+  thresholds:
+    large-diff-loc: 500
+    bundle-size-kb: 50
+```
+
+The lists `backend`, `frontend`, and `content` are the **enabled-detector sets** for this project. Only detector class names present in those lists actually run. The canonical catalog below describes every detector Jig knows about; if a class is absent from the config list (e.g., a team removes `money-ui`), skip it. If a class is present in config but not in the catalog below, log `Unknown detector: {name}` and skip it.
+
+For each **enabled** detector class, check if any changed path matches. The canonical detector catalog:
+
+**Backend** (path globs):
+- `migrations`: `**/migrations/**`, `**/*schema*`, `**/*.sql`, `**/models/**`, `**/entities/**`, `**/prisma/**`
+- `api-routes`: `**/api/**`, `**/routes/**`, `**/handlers/**`, `**/*openapi*`, `**/*.proto`, `**/graphql/**`
+- `cross-service-deps`: `package.json`, `go.mod`, `Cargo.toml`, `requirements*.txt`, `pyproject.toml`
+
+**Frontend** (path globs):
+- `routing`: `**/pages/**`, `**/app/**`, `**/routes/**`, `**/middleware.{ts,js}`
+- `layouts`: `**/layout*`, `**/_app.*`, `**/providers/**`, `**/{App,Root}.{tsx,jsx}`
+- `auth-ui`: `**/{auth,login,signup,session,oauth}*`
+- `money-ui`: `**/{checkout,billing,subscription,payment,pricing,cart}*`
+- `build-config`: `**/next.config.*`, `**/vite.config.*`, `**/webpack.config.*`, `**/turbo.json`, `**/tsconfig*.json`
+- `flags`: `**/feature*flag*`, `**/{flags,experiments}/**`, `**/growthbook*`, `**/launchdarkly*`, `**/statsig*`
+- `i18n`: `**/i18n/**`, `**/locales/**`, `**/messages/**`
+- `service-workers`: `**/sw.{ts,js}`, `**/service-worker.*`, `**/workbox*`
+- `csp`: `**/{csp,headers,next.config}*`
+- `public-copy`: `**/{terms,privacy,legal}*`, `**/pricing/**`
+- `a11y-primitives`: `**/components/**/{modal,dialog,menu,combobox,select,form}*`
+
+**Content-based** (grep the diff):
+- `third-party-scripts`: diff lines add `<script src=` or `from "next/script"`
+- `new-fetch-origin`: diff adds `fetch(` or `axios(` with a URL not previously seen
+- `new-storage`: diff adds `localStorage`, `sessionStorage`, or `IndexedDB` in a file that didn't have them
+- `bundle-size`: a new dependency in `package.json` exceeds `premortem-detectors.thresholds.bundle-size-kb` (default 50)
+- `error-boundaries`: any file matching `**/{error,ErrorBoundary}*` changed
+
+**Critical paths** (team-configured): match against any glob in `premortem-critical-paths`.
+
+**Visibility: log the detector result.** Always emit a one-line summary of
+the Step 0a detector pass before deciding whether to prompt.
+
+- **If one or more detectors fired:**
+  `Premortem detectors fired: {comma-separated detector names}`
+- **If zero detectors fired AND the diff exceeds `premortem-detectors.thresholds.large-diff-loc` (default 500 LOC):**
+  `Premortem detectors: 0 fired ({N} LOC diff — exceeds large-diff-loc threshold; check if critical-path globs are still aligned with the repo's actual paths)`
+- **If zero detectors fired AND the diff is below the threshold:** no line needed (the silence is correct).
+
+Note: `large-diff-loc` is a *meta-trigger*, not a detector. It's only used
+to decide whether to emit the "zero fired" warning. It does not fire on its
+own and is not present in the `premortem-detectors.backend` list.
+
+This makes absence-of-detection visible exactly when it might be wrong — a
+large diff that nonetheless hits no detectors usually means a critical-path
+glob has drifted out of sync with the repo's actual paths.
+
+**Skip guard (check this BEFORE prompting).** Compute `{sanitized-branch}` using the canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If `docs/premortems/*-{sanitized-branch}-premortem.md` returns one or more matches, premortem already happened for this branch — **skip the rest of Step 0a entirely** (no prompt, no detector-fires message). Proceed to Step 0.
+
+If the lookup glob returns zero matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND (no prior premortem for this branch; proceeding with detector checks)`.
+
+In this Step 0a context, absence is the normal default — most branches won't have a premortem yet. The log is for visibility ("did the skip guard run?"), not an error signal. Contract-violation framing is reserved for sites where a premortem is *expected* to exist (Step 5 embedding, `postmortem` Step 2.5, `pr-respond` Step 2).
+
+**Otherwise (no existing premortem file), if any detector fires, prompt the author:**
+
+```
+This change touches: {comma-separated detector names that fired}.
+Premortem is recommended for this kind of change. Run /jig:premortem before opening the PR?
+[Y/n]
+```
+
+- If the author accepts: invoke the `premortem` skill, wait for completion, then continue to Step 0 (review).
+- If the author declines: log the skipped detectors as a one-line note for the PR description, then continue to Step 0.
+
 ### Step 0: Run the code review swarm
 
 **Before writing the PR, run `review` to catch issues while they are cheap to fix.**
@@ -158,6 +248,29 @@ it asked for and how this addresses it.}
 
 Fixes {TICKET-REFERENCE}
 ```
+
+**Look up the premortem file:** Compute `{sanitized-branch}` using the canonical algorithm in `framework/BRANCH_SANITIZATION.md`, then check `docs/premortems/*-{sanitized-branch}-premortem.md`. If the lookup glob returns zero matches, emit:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`
+and skip the rest of this premortem-embedding flow.
+
+**Validate schema version:** Read the file's first line. It must match `<!-- premortem-schema: v1 -->`. If absent or a different major version, do not embed decisions; instead include in the PR description: "⚠️ Premortem file at `{path}` has incompatible schema version — skipping decision embedding. See `framework/PREMORTEM_FILE_FORMAT.md`."
+
+**If the file exists and the schema is valid, embed decisions:**
+
+1. Compute the file's content hash: `git_sha=$(git hash-object docs/premortems/{filename})` so the PR body can reference an immutable version.
+2. Parse the file for the synthesis section's risks.
+3. Extract any risk with a checked Accept/Mitigate/Instrument box.
+4. Append a `## Premortem decisions` section to the PR body containing:
+   - **Header line:**
+     `Full premortem: docs/premortems/{filename} @ git-sha {git_sha}`
+     (this pins the PR body to a specific version of the file)
+   - One bullet per decided risk:
+     `**{title}**: {decision} — {rationale if provided}`
+   - Closing line:
+     `Source of truth: the premortem file linked above. To refresh this section after editing the file, regenerate the PR description manually or via /jig:pr-create on a freshly-rebased branch.`
+     (this tells reviewers + pr-respond that the file is authoritative)
+
+Do not include the full narratives — they're in the file. The PR body shows what the author *decided* at PR-creation time.
 
 ### Step 6: Push and create
 

@@ -48,6 +48,7 @@ main-branch: main
 - error-handling: core/specialists/error-handling
 - security: core/specialists/security
 - test-strategy: manual
+- premortem: core/skills/premortem
 ```
 
 ## Review
@@ -76,6 +77,40 @@ plan-swarm-tiers:
   full: all
 plan-deep-review-model: opus
 design-review-model: sonnet
+```
+
+## Premortem
+
+```yaml
+premortem-horizons:
+  bug:         ["1 week"]
+  task:        ["1 week"]
+  improvement: ["1 week", "6 months"]
+  feature:     ["1 week", "6 months"]
+  migration:   ["1 week", "1 month", "6 months", "2 years"]
+
+premortem-swarm-tiers:
+  fast-pass: []
+  full: all
+premortem-specialist-model: opus
+premortem-synthesizer-model: opus
+# Note: 'full' here is a tier-group config key meaning 'include all matching
+# specialists regardless of per-specialist tier value'. Per-specialist tier
+# values follow tiers.md: 'fast-pass' or 'full-only'. See core/skills/review/tiers.md.
+
+premortem-critical-paths:
+  - "**/{checkout,billing,payment,subscription}*"
+  - "**/{auth,session,oauth}*"
+
+premortem-detectors:
+  backend: [migrations, api-routes, cross-service-deps]
+  frontend: [routing, layouts, auth-ui, money-ui, build-config, flags,
+             third-party-scripts, i18n, service-workers, csp,
+             public-copy, a11y-primitives]
+  content: [new-fetch-origin, new-storage, bundle-size, error-boundaries]
+  thresholds:
+    large-diff-loc: 500
+    bundle-size-kb: 50
 ```
 
 ## Execution

@@ -132,6 +132,51 @@ The single-comment endpoint drops the PR number from the path. Using `/pulls/{pr
 
 ## Step 2: Analyze Each Comment
 
+**Premortem-aware response context:**
+
+Before drafting responses to reviewer comments, check for a matching
+premortem file.
+
+**Sanitization & log-on-miss:** Compute `{sanitized-branch}` using the
+canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If the lookup
+glob (`docs/premortems/*-{sanitized-branch}-premortem.md`) returns zero
+matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`.
+Do not fail silently — a missing premortem file when one is expected is a
+contract violation worth surfacing. If no file is found, skip the
+premortem-aware response path entirely (treat as if no premortem exists).
+
+**Validate schema version:** Read the file's first line. It must match
+`<!-- premortem-schema: v1 -->`. If absent or a different major version,
+skip the premortem-aware response path entirely (treat as if no premortem
+exists).
+
+**File is source of truth, not the PR body.** Always re-read the persisted
+premortem file when constructing the response — do NOT rely on the PR body
+bullets, which are a snapshot from PR-creation time and may be stale. If
+the file's current decision for a risk differs from what the PR body says,
+the file wins. If a reviewer comment maps to a risk whose decision has
+changed since the PR was opened, surface the difference in the response:
+
+> "Note: the author has since updated this decision from {old} to {new}.
+> See `docs/premortems/{filename}` for current state."
+
+This prevents pr-respond from quoting outdated rationale when the author
+has reconsidered.
+
+For each reviewer comment, see if it maps to a known premortem risk:
+
+- If yes AND the risk was marked **Accept**: include the author's accept
+  rationale in the response. Example:
+  > "This concern was raised in the premortem and explicitly accepted because
+  > {rationale from premortem file}. Happy to discuss if you disagree with the
+  > trade-off."
+
+- If yes AND the risk was marked **Mitigate** or **Instrument**: note which
+  fix/instrumentation is already planned or done.
+
+This avoids re-litigating decisions the author already made consciously.
+
 For each unresolved comment:
 
 1. Read the referenced code files

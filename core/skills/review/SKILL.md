@@ -10,9 +10,9 @@ alwaysApply: false
 
 # Review Swarm Engine
 
-**PURPOSE**: Dispatch parallel specialist review agents, each focused on one concern. Operates in three modes: **code** (diff review), **prd** (requirements review), and **plan** (implementation plan review). The orchestrator coordinates discovery, dispatch, scoring, and reporting across all modes.
+**PURPOSE**: Dispatch parallel specialist review agents, each focused on one concern. Operates in four modes: **code** (diff review), **prd** (requirements review), **plan** (implementation plan review), and **premortem** (prospective-hindsight failure analysis). The orchestrator coordinates discovery, dispatch, scoring, and reporting across all modes.
 
-**CONFIGURATION**: Reads `jig.config.md` for `swarm-tiers` (code), `prd-swarm-tiers` (prd), `plan-swarm-tiers` (plan), `deep-review-model`, `plan-deep-review-model`, `design-review-model`, and `specialist-model-default`.
+**CONFIGURATION**: Reads `jig.config.md` for `swarm-tiers` (code), `prd-swarm-tiers` (prd), `plan-swarm-tiers` (plan), `premortem-swarm-tiers` (premortem), `deep-review-model`, `plan-deep-review-model`, `premortem-specialist-model`, `premortem-synthesizer-model`, `design-review-model`, and `specialist-model-default`.
 
 ---
 
@@ -33,7 +33,12 @@ alwaysApply: false
 - Direct invocation via `/review` with a plan document path
 - Automatic for medium-to-large features and improvements
 
-**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` mode.
+### Mode: premortem
+- `premortem` skill invokes this with `mode: premortem` after the orchestrator builds the diff
+- Direct invocation via `/review` with a target horizon set is also supported
+- Specialists with `stage: premortem` are dispatched; the synthesizer replaces the logic reviewer
+
+**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. In `premortem` mode, the **premortem-synthesizer** is dispatched instead. Not dispatched in `prd` mode.
 
 ---
 
@@ -47,10 +52,37 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 2. Read each file and parse the YAML frontmatter
 3. Extract: `name`, `description`, `model`, `tier`, `stage`, `globs`, `severity`
 4. Deduplicate by `name` (team > pack > core)
+
+### Stage 1.5: VALIDATE Specialist Frontmatter
+
+Before filtering by mode, validate each discovered specialist's frontmatter
+against the minimum schema:
+
+| Field | Required | Type | Notes |
+|---|---|---|---|
+| `name` | yes | string | must match the file basename without `.md` |
+| `description` | yes | string | one-line summary |
+| `model` | yes | string | `haiku` \| `sonnet` \| `opus` |
+| `tier` | yes | string | `fast-pass` \| `full-only` (see `tiers.md`) |
+| `globs` | yes | list | at least one entry |
+| `severity` | yes | string | `blocking` \| `major` \| `minor` |
+| `stage` | optional | string | absent (code review default), `prd`, `plan`, `both`, or `premortem` |
+
+For any specialist with missing or malformed required fields, do NOT
+dispatch it. Instead, emit a one-line warning to the orchestrator output:
+
+```
+Skipping specialist `{name}`: invalid frontmatter ({missing or wrong fields})
+```
+
+Continue with the remaining valid specialists. The validation failure is
+logged but not fatal — better to run a partial swarm than none.
+
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - `mode: prd` → include specialists where `stage: prd` or `stage: both`
    - `mode: plan` → include specialists where `stage: plan` or `stage: both`
+   - `mode: premortem` → include specialists where `stage: premortem`
 6. Filter by the requested tier:
    - `tier: all` → include all specialists matching the mode
    - `tier: fast-pass` → include only `tier: fast-pass` specialists matching the mode
@@ -59,6 +91,7 @@ Check `jig.config.md` for the appropriate tier config:
 - `mode: code` → `swarm-tiers`
 - `mode: prd` → `prd-swarm-tiers`
 - `mode: plan` → `plan-swarm-tiers`
+- `mode: premortem` → `premortem-swarm-tiers`
 
 ### Stage 2: PREPARE the Input
 
@@ -104,6 +137,33 @@ For each matching specialist, extract only the diff hunks for its matched files.
    - `blast-radius` → "Focus on: All tasks (cross-cutting)"
    - `state-completeness` → "Focus on: Tasks involving state/status changes"
 4. Build the specialist input: full plan + PRD (if exists) + section hints
+
+#### Mode: premortem
+
+1. Receive the diff from the `premortem` skill (already built via `git diff origin/{main-branch}...HEAD`).
+2. Receive the **horizons** array (e.g., `["1 week", "6 months"]`) and the **work-type** (e.g., `feature`).
+3. For each matching specialist, intersect globs with changed paths. With the default `globs: ["**/*"]`, all specialists match. Build the filtered diff per specialist.
+4. Build the specialist input:
+
+```
+{specialist body}
+
+---
+
+## Horizons
+
+For each of the following horizons, write a narrative:
+- {horizon 1}
+- {horizon 2}
+
+## Work Type
+
+{work-type}
+
+## Diff to Review
+
+{filtered diff}
+```
 
 ### Stage 3: DISPATCH (Parallel)
 
@@ -177,13 +237,53 @@ Agent tool:
 
 All specialists in prd/plan modes receive codebase access tools: Read, Grep, Glob.
 
+#### Mode: premortem
+
+For each specialist with a matching stage, spawn a parallel subagent:
+
+````
+Agent tool:
+  description: "Premortem: {specialist.name}"
+  model: {specialist.model from frontmatter, or premortem-specialist-model
+          from config as fallback}
+  prompt: |
+    {specialist body}
+
+    ---
+
+    ## Horizons
+
+    For each of the following horizons, write a narrative:
+    {bulleted horizons}
+
+    ## Work Type
+
+    {work-type}
+
+    ## Diff to Review
+
+    {filtered diff}
+````
+
+All premortem specialists receive codebase access tools: Read, Grep, Glob.
+
 **All matching specialists are dispatched in a single message** (parallel Agent calls). Do not dispatch sequentially.
 
 ### Stage 4: COLLECT
 
-Wait for all specialist subagents to complete. For each result:
+Wait for all specialist subagents to complete. Handling depends on mode:
+
+#### Mode: code, prd, plan
+For each result:
 - If the response is exactly `N/A` → record as N/A (ran but found nothing)
-- Otherwise → parse the findings (File, Finding, Fix/Suggestion lines)
+- Otherwise → parse the findings (File, Finding, Fix/Suggestion lines) into structured records
+
+#### Mode: premortem
+Premortem specialists return **narrative output** (horizon-keyed past-tense stories + a short risk list per the specialist body), not File/Finding/Fix lines. Do NOT attempt to parse this as structured findings — preserve the raw text verbatim so the synthesizer can read it.
+
+For each result:
+- If the response is exactly `N/A` → record as N/A (specialist ran but the diff had nothing in its concern area)
+- Otherwise → **store the raw markdown output as-is** keyed by specialist name. Stage 5 passes this collection to the synthesizer untouched.
 
 ### Stage 5: DEEP REVIEW
 
@@ -224,6 +324,22 @@ After collecting swarm findings, dispatch the code logic reviewer:
 4. Wait for the plan logic reviewer to complete
 5. Parse findings in the `[plan-logic]` format
 
+#### Mode: premortem
+
+**Always dispatch** the **premortem-synthesizer** after the specialist swarm completes (in place of a logic reviewer):
+
+1. Read `premortem-synthesizer.md` from `core/skills/premortem/`
+2. Build the prompt:
+   - The synthesizer's body
+   - All specialist narratives from Stage 4 (including N/A entries — they signal which areas were clean)
+   - The **full unfiltered diff** (synthesis needs cross-cutting visibility)
+   - The horizons and work-type
+3. Dispatch a single Agent with:
+   - `model: opus` (or `premortem-synthesizer-model` from `jig.config.md`)
+   - Full tool access: Read, Grep, Glob, Agent
+4. Wait for the synthesizer to complete
+5. Parse the output as the synthesis report (markdown block)
+
 ### Stage 6: SCORE
 
 Apply mechanical scoring based on the highest severity finding. All findings are always reported regardless of score.
@@ -249,15 +365,32 @@ Deduplication (mode-aware):
 - If the plan logic reviewer flags the same task/section as a specialist → drop the logic reviewer's finding (specialist caught it first)
 - If a specialist flags something already in the document's Open Questions section → skip (author already knows)
 
+**Mode: premortem** — no severity-based numeric score. Instead emit:
+- **Risk count**: total number of risks in the synthesis
+- **Convergence count**: number of risks flagged by 2+ specialists
+- **One-way door count**: number of one-way doors identified by `reversibility-premortem`
+- **N/A specialists**: count of specialists that returned literal `N/A`
+
+These are diagnostic counts, not gates. Premortem informs; it does not block.
+
 ### Stage 7: REPORT
 
-Produce the unified report. Adapt the header by mode:
+**Mode dispatch (read this FIRST):** Stage 7 has two distinct report templates. Pick exactly one based on the mode and skip the other entirely:
+
+- `mode: code | prd | plan` → use the findings template immediately below (header + Confidence Score + Blocking/Major/Minor sections + Specialist Summary). **Skip** the `#### Mode: premortem` block further down.
+- `mode: premortem` → **Skip the findings template below**; jump directly to the `#### Mode: premortem` block (search for it in this stage). Do not emit `## Code Review Summary` or any of the standard scoring sections — premortem's first line must be `<!-- premortem-schema: v1 -->`, and emitting the standard template first would cause Stage 4 to reject the output.
+
+---
+
+#### Findings template (modes: code, prd, plan)
+
+Adapt the header by mode:
 
 - `mode: code` → `## Code Review Summary`
 - `mode: prd` → `## PRD Review Summary`
 - `mode: plan` → `## Plan Review Summary`
 
-The rest of the report format is identical across modes:
+The rest of the report format is identical for the code, prd, and plan modes — premortem has its own format below:
 
 **Confidence Score**: X/10
 **Risk Level**: Low/Medium/High
@@ -298,6 +431,33 @@ The rest of the report format is identical across modes:
 | {name} | {N blocking / N major / N minor / clean / N/A / skipped} | {one-line summary or —} |
 | logic-reviewer | {N blocking / N major / N minor / clean / skipped} | {one-line summary or —} |
 
+#### Mode: premortem
+
+**Output assembly order** (this is the exact sequence the assembled report must follow — Stage 4 validation will reject any output whose first line is not the schema marker):
+
+1. **First line (literal):** `<!-- premortem-schema: v1 -->` — this MUST be byte-zero of the output. Required by `framework/PREMORTEM_FILE_FORMAT.md` and enforced by the orchestrator's Stage 4.
+2. **Title (H1):** `# Premortem: {branch}` — note H1 (`#`), not H2.
+3. **Header lines** (each on its own line, in this order):
+   ```
+   **Date**: YYYY-MM-DD
+   **Work type**: {work-type}
+   **Horizons**: {comma-separated horizons}
+   **Specialists**: N dispatched, M N/A
+   **Diff**: F files, +A/-D LOC
+   ```
+4. **Synthesizer output** — passed through unchanged. The synthesizer emits only the body (starting with `## Synthesis`); per the synthesizer prompt at `core/skills/premortem/premortem-synthesizer.md`, it does NOT emit the schema marker, H1, or header lines (those are the composer's responsibility above). It contains the next four `##`-level sections in this exact order (per `framework/PREMORTEM_FILE_FORMAT.md`):
+   - `## Synthesis` (with nested `### Convergent risks` and `### Individual risks`)
+   - `## One-way doors identified` (top-level — not nested under Synthesis)
+   - `## Open questions for the author` (top-level)
+   - `## Specialist Summary` (table with columns: Specialist, Risks, per-horizon counts)
+
+   Do not re-emit or duplicate any of these sections.
+5. **`## Specialist narratives`** (composer-added, appended last) — each specialist's full narrative inside a `<details><summary>` block for collapsibility. This is the only section the composer creates; the synthesizer does not produce it because narratives come from individual specialists in Stage 4, not the synthesizer.
+
+**Return** the full assembled report to the caller. Do NOT persist the file from this stage — the `premortem` orchestrator's Stage 4 is the sole persister and owns schema validation, branch-name sanitization, and the actual filesystem write. Returning the report is sufficient.
+
+The terminal output for this stage should print only the compressed view (Synthesis + Specialist Summary). The orchestrator handles file writes and prints the persisted path.
+
 **Skipped vs N/A distinction:**
 - **Skipped** = specialist's globs matched zero changed files (never spawned)
 - **N/A** = specialist ran but found nothing relevant in the diff
@@ -316,9 +476,10 @@ See `tiers.md` for tier definitions, severity levels, and the default specialist
 1. Create a new `.md` file in `team/specialists/` (for team-specific) or `core/specialists/` (for framework)
 2. Add frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`
 3. **For PRD/PLAN specialists**: add `stage: prd`, `stage: plan`, or `stage: both`
-4. **For code review specialists**: omit `stage` (backward compatible default)
-5. Write the review prompt body with: What to check, What to ignore, Report format
-6. The orchestrator discovers it automatically on next run — no config updates needed
+4. **For PREMORTEM specialists**: add `stage: premortem`
+5. **For code review specialists**: omit `stage` (backward compatible default)
+6. Write the review prompt body with: What to check, What to ignore, Report format
+7. The orchestrator discovers it automatically on next run — no config updates needed
 
 ## Splitting a Specialist
 
