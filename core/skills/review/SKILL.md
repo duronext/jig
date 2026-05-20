@@ -414,40 +414,30 @@ The rest of the report format is identical for the code, prd, and plan modes —
 
 #### Mode: premortem
 
-**Header replaces the score line:**
+**Output assembly order** (this is the exact sequence the assembled report must follow — Stage 4 validation will reject any output whose first line is not the schema marker):
 
-```
-## Premortem: {branch}
-**Date**: YYYY-MM-DD
-**Work type**: {work-type}
-**Horizons**: {comma-separated horizons}
-**Specialists**: N dispatched, M N/A
-**Diff**: F files, +A/-D LOC
-```
+1. **First line (literal):** `<!-- premortem-schema: v1 -->` — this MUST be byte-zero of the output. Required by `framework/PREMORTEM_FILE_FORMAT.md` and enforced by the orchestrator's Stage 4.
+2. **Title (H1):** `# Premortem: {branch}` — note H1 (`#`), not H2.
+3. **Header lines** (each on its own line, in this order):
+   ```
+   **Date**: YYYY-MM-DD
+   **Work type**: {work-type}
+   **Horizons**: {comma-separated horizons}
+   **Specialists**: N dispatched, M N/A
+   **Diff**: F files, +A/-D LOC
+   ```
+4. **Synthesizer output** — passed through unchanged. It already contains the next four `##`-level sections in this exact order (per `framework/PREMORTEM_FILE_FORMAT.md`):
+   - `## Synthesis` (with nested `### Convergent risks` and `### Individual risks`)
+   - `## One-way doors identified` (top-level — not nested under Synthesis)
+   - `## Open questions for the author` (top-level)
+   - `## Specialist Summary` (table with columns: Specialist, Risks, per-horizon counts)
 
-**Body sections** (in order):
+   Do not re-emit or duplicate any of these sections.
+5. **`## Specialist narratives`** (composer-added, appended last) — each specialist's full narrative inside a `<details><summary>` block for collapsibility. This is the only section the composer creates; the synthesizer does not produce it because narratives come from individual specialists in Stage 4, not the synthesizer.
 
-The synthesizer's output already contains the first four `##`-level sections in this order (see `framework/PREMORTEM_FILE_FORMAT.md`):
+**Return** the full assembled report to the caller. Do NOT persist the file from this stage — the `premortem` orchestrator's Stage 4 is the sole persister and owns schema validation, branch-name sanitization, and the actual filesystem write. Returning the report is sufficient.
 
-1. `## Synthesis` — with nested `### Convergent risks` and `### Individual risks`
-2. `## One-way doors identified` — top-level, not nested under Synthesis
-3. `## Open questions for the author` — top-level, not nested under Synthesis
-4. `## Specialist Summary` — table with columns: Specialist, Risks, per-horizon counts
-
-Pass the synthesizer's output through unchanged — do not re-emit or duplicate any of these sections. The composer's only addition is one section appended at the end:
-
-5. `## Specialist narratives` — each specialist's full narrative inside a `<details><summary>` block for collapsibility. This is the only section the composer creates; the synthesizer does not produce it because narratives come from the individual specialists in Stage 4, not the synthesizer.
-
-**Return** the full report (including the literal
-`<!-- premortem-schema: v1 -->` first line per
-`framework/PREMORTEM_FILE_FORMAT.md`). Do NOT persist the file from this
-stage — the `premortem` orchestrator's Stage 4 is the sole persister and
-owns schema validation, branch-name sanitization, and the actual
-filesystem write. Returning the report to the caller is sufficient.
-
-The terminal output for this stage should print only the compressed view
-(Synthesis + Specialist Summary table). The orchestrator handles file
-writes and prints the persisted path.
+The terminal output for this stage should print only the compressed view (Synthesis + Specialist Summary). The orchestrator handles file writes and prints the persisted path.
 
 **Skipped vs N/A distinction:**
 - **Skipped** = specialist's globs matched zero changed files (never spawned)

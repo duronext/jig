@@ -110,7 +110,13 @@ This makes absence-of-detection visible exactly when it might be wrong — a
 large diff that nonetheless hits no detectors usually means a critical-path
 glob has drifted out of sync with the repo's actual paths.
 
-If **any** detector fires, prompt the author:
+**Skip guard (check this BEFORE prompting).** Compute `{sanitized-branch}` using the canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If `docs/premortems/*-{sanitized-branch}-premortem.md` returns one or more matches, premortem already happened for this branch — **skip the rest of Step 0a entirely** (no prompt, no detector-fires message). Proceed to Step 0.
+
+If the lookup glob returns zero matches, emit a single visible log line:
+`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`.
+Do not fail silently — a missing premortem file when one is expected is a contract violation worth surfacing.
+
+**Otherwise (no existing premortem file), if any detector fires, prompt the author:**
 
 ```
 This change touches: {comma-separated detector names that fired}.
@@ -120,16 +126,6 @@ Premortem is recommended for this kind of change. Run /jig:premortem before open
 
 - If the author accepts: invoke the `premortem` skill, wait for completion, then continue to Step 0 (review).
 - If the author declines: log the skipped detectors as a one-line note for the PR description, then continue to Step 0.
-
-If a premortem file already exists for this branch, skip the prompt
-entirely — premortem already happened.
-
-**Sanitization & log-on-miss:** Compute `{sanitized-branch}` using the
-canonical algorithm in `framework/BRANCH_SANITIZATION.md`. If the lookup
-glob returns zero matches, emit a single visible log line:
-`Premortem lookup: docs/premortems/*-{sanitized-branch}-premortem.md → NOT FOUND`.
-Do not fail silently — a missing premortem file when one is expected is a
-contract violation worth surfacing.
 
 ### Step 0: Run the code review swarm
 
