@@ -151,10 +151,12 @@ prd-sync: linear
 
 ## Linear
 team-id: your-team-uuid
-project-id: your-project-uuid  # required for prd-sync
+prd-project-id: your-prd-project-uuid  # required for prd-sync — the dedicated PRD-collection project
 labels:
   ...
 ```
+
+`prd-project-id` is intentionally distinct from any ticket `project-id`: PRDs sync to a dedicated documents project (e.g., a "Product Requirement Documents" project), which is usually separate from where issues are filed.
 
 ### Sync Behavior
 
@@ -162,7 +164,7 @@ After `prd` writes the PRD locally, it calls Linear to create a document linked 
 
 ```
 mcp__claude_ai_Linear__save_document with:
-  projectId:   {project-id from jig.config.md}
+  projectId:   {prd-project-id from jig.config.md}
   title:       {PRD title — derived from filename or PRD overview}
   content:     {markdown body of the local PRD file}
 ```
@@ -170,7 +172,7 @@ mcp__claude_ai_Linear__save_document with:
 If the document already exists for this topic (look up by title within the project), update it in place rather than creating a duplicate:
 
 ```
-mcp__claude_ai_Linear__list_documents with projectId → find by title
+mcp__claude_ai_Linear__list_documents with projectId (prd-project-id) → find by title
 mcp__claude_ai_Linear__save_document with id, updated content
 ```
 
@@ -186,6 +188,6 @@ The mapping is convention-driven, not stored. To re-sync, look up by formatted t
 
 ### Failure Modes
 
-- **`project-id` missing in config** → skip sync, warn user: "PRD sync requested but no `project-id` in `## Linear` config. Set it and re-run `/prd --sync`."
+- **`prd-project-id` missing in config** → skip sync, warn user: "PRD sync requested but no `prd-project-id` in `## Linear` config. Set it and re-run `/prd --sync`."
 - **Linear MCP unavailable** → skip sync, warn user: "Linear MCP not connected. PRD saved locally only."
 - **Document creation fails** → save locally succeeded; surface the Linear error to the user and offer to retry.
