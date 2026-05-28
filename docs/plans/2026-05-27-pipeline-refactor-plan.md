@@ -104,9 +104,9 @@ filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | plan
 
 Run:
 ```bash
-grep -A 8 "## Pipeline" /Users/ded/work/jig/jig.config.md
-grep -A 6 "## Documents" /Users/ded/work/jig/jig.config.md
-grep "brainstorm" /Users/ded/work/jig/jig.config.md
+grep -A 8 "## Pipeline" jig.config.md
+grep -A 6 "## Documents" jig.config.md
+grep "brainstorm" jig.config.md
 ```
 
 Expected: stages list has 6 entries (no brainstorm), Documents section present, no `brainstorm` matches in the file.
@@ -249,9 +249,9 @@ Replace the `**CONFIGURATION**:` line near the top with:
 
 Run:
 ```bash
-wc -l /Users/ded/work/jig/core/skills/brainstorm/SKILL.md
-grep -n "HARD-GATE\|Concerns Checklist\|REQUIRED.*plan" /Users/ded/work/jig/core/skills/brainstorm/SKILL.md
-grep -n "discovery" /Users/ded/work/jig/core/skills/brainstorm/SKILL.md
+wc -l core/skills/brainstorm/SKILL.md
+grep -n "HARD-GATE\|Concerns Checklist\|REQUIRED.*plan" core/skills/brainstorm/SKILL.md
+grep -n "discovery" core/skills/brainstorm/SKILL.md
 ```
 
 Expected: line count noticeably smaller than before (was 250); HARD-GATE / Concerns Checklist / REQUIRED-plan strings gone; "discovery" appears in purpose/description.
@@ -354,7 +354,7 @@ Replace the "Save location" row with:
 
 Run:
 ```bash
-grep -n "Concerns Walk-Through\|plans-directory\|prd-sync" /Users/ded/work/jig/core/skills/prd/SKILL.md
+grep -n "Concerns Walk-Through\|plans-directory\|prd-sync" core/skills/prd/SKILL.md
 ```
 
 Expected: all three strings present; concerns walk-through is a new step.
@@ -524,8 +524,8 @@ Replace the Integration block (lines 266-280) with:
 
 Run:
 ```bash
-grep -n "Step 1: Transpose\|Identify the Contract\|Group by Layer\|Derive File Structure" /Users/ded/work/jig/core/skills/plan/SKILL.md
-wc -l /Users/ded/work/jig/core/skills/plan/SKILL.md
+grep -n "Step 1: Transpose\|Identify the Contract\|Group by Layer\|Derive File Structure" core/skills/plan/SKILL.md
+wc -l core/skills/plan/SKILL.md
 ```
 
 Expected: all four section headers present; line count under 500 (style guide ceiling).
@@ -694,8 +694,8 @@ graph TD
 
 Run:
 ```bash
-grep -n "BRAINSTORM\|brainstorm" /Users/ded/work/jig/core/skills/kickoff/SKILL.md | head -20
-grep -n "TRANSPOSE\|Discovery Tools" /Users/ded/work/jig/core/skills/kickoff/SKILL.md
+grep -n "BRAINSTORM\|brainstorm" core/skills/kickoff/SKILL.md | head -20
+grep -n "TRANSPOSE\|Discovery Tools" core/skills/kickoff/SKILL.md
 ```
 
 Expected: brainstorm references reframed as "tool" / "optional"; TRANSPOSE and Discovery Tools sections present.
@@ -825,8 +825,8 @@ Each stage transition has a gate check — preconditions that must be met before
 
 Run:
 ```bash
-grep -n "Brainstorm\|brainstorm" /Users/ded/work/jig/framework/PIPELINE.md
-grep -n "TRANSPOSE\|gate engine" /Users/ded/work/jig/framework/PIPELINE.md
+grep -n "Brainstorm\|brainstorm" framework/PIPELINE.md
+grep -n "TRANSPOSE\|gate engine" framework/PIPELINE.md
 ```
 
 Expected: brainstorm only appears as a "tool" (not a stage); TRANSPOSE and "gate engine" present.
@@ -887,7 +887,7 @@ The concerns checklist is a configurable list of engineering considerations that
 
 Run:
 ```bash
-grep -n "brainstorm" /Users/ded/work/jig/framework/CONCERNS_CHECKLIST.md
+grep -n "brainstorm" framework/CONCERNS_CHECKLIST.md
 ```
 
 Expected: zero matches.
@@ -980,7 +980,7 @@ Also update the architecture description if it references brainstorm as a stage.
 
 Run:
 ```bash
-grep -rn "during brainstorming\|brainstorm + plan\|brainstorm.*concerns\|light brainstorm" /Users/ded/work/jig/core /Users/ded/work/jig/framework /Users/ded/work/jig/scaffold /Users/ded/work/jig/CLAUDE.md
+grep -rn "during brainstorming\|brainstorm + plan\|brainstorm.*concerns\|light brainstorm" core framework scaffold CLAUDE.md
 ```
 
 Expected: zero matches. (Any remaining matches indicate a missed reference.)
@@ -1082,8 +1082,8 @@ Update the description to mention doc sync:
 
 Run:
 ```bash
-grep -n "PRD Document Sync\|prd-sync" /Users/ded/work/jig/packs/linear/README.md
-cat /Users/ded/work/jig/packs/linear/pack.json
+grep -n "PRD Document Sync\|prd-sync" packs/linear/README.md
+cat packs/linear/pack.json
 ```
 
 Expected: PRD Document Sync section present; pack.json description mentions PRD sync.
@@ -1106,7 +1106,7 @@ git commit -m "feat(linear): document PRD-sync contract behind prd-sync config"
 - [ ] **Step 1: Grep for orphaned brainstorm-as-stage references**
 
 ```bash
-grep -rn "brainstorm" /Users/ded/work/jig/core /Users/ded/work/jig/framework /Users/ded/work/jig/scaffold /Users/ded/work/jig/packs /Users/ded/work/jig/CLAUDE.md 2>/dev/null | grep -v "brainstorm/SKILL.md\|commands/brainstorm.md" | grep -iE "stage|before plan|forced|required|must" | head
+grep -rn "brainstorm" core framework scaffold packs CLAUDE.md 2>/dev/null | grep -v "brainstorm/SKILL.md\|commands/brainstorm.md" | grep -iE "stage|before plan|forced|required|must" | head
 ```
 
 Expected: no matches with "brainstorm" + "stage/before plan/forced/required/must" together.
@@ -1114,7 +1114,7 @@ Expected: no matches with "brainstorm" + "stage/before plan/forced/required/must
 - [ ] **Step 2: Grep for hardcoded `docs/plans` that should be configurable**
 
 ```bash
-grep -rn "docs/plans/YYYY-MM-DD" /Users/ded/work/jig/core /Users/ded/work/jig/framework 2>/dev/null
+grep -rn "docs/plans/YYYY-MM-DD" core framework 2>/dev/null
 ```
 
 Expected: only appears as example values (in defaults documentation), not as hardcoded paths in process steps.
@@ -1122,7 +1122,7 @@ Expected: only appears as example values (in defaults documentation), not as har
 - [ ] **Step 3: Verify TRANSPOSE is referenced from the right places**
 
 ```bash
-grep -rn "TRANSPOSE\|Transpose the Source" /Users/ded/work/jig/core /Users/ded/work/jig/framework 2>/dev/null
+grep -rn "TRANSPOSE\|Transpose the Source" core framework 2>/dev/null
 ```
 
 Expected: appears in `plan/SKILL.md` (definition), `kickoff/SKILL.md` (referenced), `framework/PIPELINE.md` (referenced).
@@ -1130,7 +1130,7 @@ Expected: appears in `plan/SKILL.md` (definition), `kickoff/SKILL.md` (reference
 - [ ] **Step 4: Verify every skill's frontmatter still parses**
 
 ```bash
-for f in $(find /Users/ded/work/jig/core/skills -name SKILL.md); do
+for f in $(find core/skills -name SKILL.md); do
   head -10 "$f" | grep -q "^name:" && head -10 "$f" | grep -q "^description:" && echo "OK $f" || echo "BAD $f"
 done
 ```
@@ -1140,14 +1140,14 @@ Expected: every line says `OK`.
 - [ ] **Step 5: Verify config schema is consistent between `jig.config.md` and `scaffold/jig.config.md`**
 
 ```bash
-diff <(grep -E "^##|^  - " /Users/ded/work/jig/jig.config.md | head -30) <(grep -E "^##|^  - " /Users/ded/work/jig/scaffold/jig.config.md | head -30)
+diff <(grep -E "^##|^  - " jig.config.md | head -30) <(grep -E "^##|^  - " scaffold/jig.config.md | head -30)
 ```
 
 Expected: structural sections match (values may differ).
 
 - [ ] **Step 6: Smoke-test the plan skill load by reading it end-to-end**
 
-Read `/Users/ded/work/jig/core/skills/plan/SKILL.md` start to finish. Confirm:
+Read `core/skills/plan/SKILL.md` start to finish. Confirm:
 - Step 1 (TRANSPOSE) reads cleanly and is teachable
 - No dangling references to "after brainstorm"
 - Self-review section verifies contract coverage
