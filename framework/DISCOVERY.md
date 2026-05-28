@@ -81,7 +81,7 @@ The concerns checklist in `jig.config.md` maps concern names to skill paths:
 - test-strategy: manual
 ```
 
-During brainstorming, `brainstorm` reads this list and:
+During PRD authoring, `prd` reads this list and:
 1. Presents each concern as a yes/no/NA decision
 2. For concerns marked yes, loads the referenced skill for guidance
 3. For concerns marked `manual`, flags it for human attention

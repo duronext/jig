@@ -118,7 +118,7 @@ Free text. Maps to `ticket-prefix` in jig.config.md.
 
 ```
 What engineering concerns matter to your team?
-These surface during brainstorming to make sure nothing gets missed.
+These surface during PRD authoring (Step 3c: Concerns Walk-Through) to make sure nothing gets missed.
 You can always add more later in jig.config.md.
 
   [ ] i18n / translations

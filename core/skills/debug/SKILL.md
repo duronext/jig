@@ -317,7 +317,7 @@ If systematic investigation reveals the issue is truly environmental, timing-dep
 
 **Called by:**
 - Any skill or workflow when a bug is encountered
-- `kickoff` routes bugs through light brainstorm then here
+- `kickoff` offers `debug` as a discovery-time tool for bugs with unclear root cause
 
 **Related skills:**
 - `tdd` -- for creating the failing test case (Phase 4, Step 1)

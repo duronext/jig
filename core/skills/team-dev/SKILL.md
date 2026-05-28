@@ -18,7 +18,7 @@ Execute implementation plans by spawning implementer teammates that work in para
 
 ```mermaid
 flowchart TD
-    A{Have implementation<br/>plan?} -->|No| B[Use brainstorm +<br/>plan first]
+    A{Have implementation<br/>plan?} -->|No| B[Use prd +<br/>plan first]
     A -->|Yes| C{3+ independent<br/>tasks?}
     C -->|No| D[Use sdd<br/>sequential]
     C -->|Yes| E{Tasks touch mostly<br/>different files?}
@@ -171,7 +171,7 @@ The lead groups tasks by file surface area before spawning. Tasks touching the s
 ## Integration
 
 **Required workflow (in order):**
-1. **brainstorm** — design the feature
+1. **prd** — capture requirements as acceptance contract
 2. **plan** — create the numbered implementation plan
 3. **team-dev** — execute in parallel with quality gates
 4. **finish** — merge/PR when all tasks pass

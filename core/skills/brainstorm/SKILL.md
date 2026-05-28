@@ -24,7 +24,7 @@ Invoke this skill when:
 - Adding functionality to existing code
 - Modifying behavior that affects users or systems
 - The user says "let's design", "how should we build", "I want to add..."
-- `kickoff` routes here during the BRAINSTORM stage
+- `kickoff` offers this as a discovery-time tool during the DISCOVER stage
 
 **Do NOT use when:**
 - Fixing a bug with an obvious root cause (use `debug`)
