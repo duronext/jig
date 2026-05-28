@@ -13,7 +13,7 @@ alwaysApply: false
 
 **PURPOSE**: Turn an approved design into a comprehensive implementation plan that an engineer (or AI agent) with zero codebase context can follow task by task. Every task is bite-sized, TDD-oriented, and self-contained.
 
-**CONFIGURATION**: Reads `jig.config.md` for commit conventions, execution strategy preferences, and parallel threshold.
+**CONFIGURATION**: Reads `jig.config.md` for `plans-directory` (save location), `filename-format`, `commit` conventions, execution strategy preferences (`parallel-threshold`, `default-strategy`), and optional `plan-sync` (remote document sync).
 
 ---
 
@@ -26,8 +26,8 @@ Invoke this skill when:
 - The user says "write a plan", "create an implementation plan", or "/plan"
 
 **Do NOT use when:**
-- You do not have an approved design or clear requirements (use `brainstorm` first)
 - The task is a single atomic change (just do it)
+- You have no source material at all — not a PRD, not a ticket, not a clear conversation. In that case, invoke `/brainstorm` or `/prd` first to produce *something* to transpose from.
 
 **Announce at start:** "I'm using the plan skill to create the implementation plan."
 
@@ -36,6 +36,81 @@ Invoke this skill when:
 ## Scope Check
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it was not, suggest breaking this into separate plans -- one per subsystem. Each plan should produce working, testable software on its own.
+
+---
+
+## Step 1: Transpose the Source
+
+**The critical step.** Before drafting tasks, distill the source material into a structured contract you can decompose. The methodology is the same regardless of input fidelity — only Step 1a branches on source type.
+
+### 1a. Identify the Contract
+
+**If a PRD exists** (referenced by the user, present in `{plans-directory}/`, or named in the ticket):
+- Load it. Your contract is the `[ ]` acceptance items — already layer-tagged.
+- Skip to Step 1b.
+
+**If no PRD exists**, extract an *implicit contract* from available context:
+- Read the ticket body and acceptance criteria
+- Scan recent conversation (brainstorm output, user statements)
+- For bugs: use the reproduction + expected behavior as the contract
+
+Write the implicit contract inline as 3-10 bullets, tagged by layer:
+
+```
+[DATA] Order entity has a `notes` field (optional text, max 2000 chars)
+[API] createOrder accepts `notes` in CreateOrderInput
+[LOGIC] Notes are stripped of HTML before persistence
+[UI] Order detail page shows notes in a collapsed section
+```
+
+This is scratch work — not a separate doc. It anchors the rest of the transposition.
+
+**If you cannot articulate 3 bullets from available context, stop.** You don't have enough to plan. Return to the user: "I don't have a clear contract for what to build. Want to capture a PRD with `/prd`, or talk through it with `/brainstorm` first?"
+
+### 1b. Group by Layer
+
+Bucket every contract item into its layer:
+
+| Layer | Examples |
+|-------|----------|
+| DATA | Entities, schema changes, migrations, indexes |
+| API | Endpoints, mutations, queries, RPC contracts |
+| LOGIC | Business rules, validations, state machines, side effects, jobs |
+| UI | Components, pages, states, interactions |
+
+Items spanning layers (e.g., a permission check that's both API and LOGIC) go in *every* layer they touch.
+
+### 1c. Derive File Structure
+
+For each layer, list the files that need to be created or modified. This is where the PRD becomes a build artifact:
+
+- DATA items → migration files + entity/schema files
+- API items → controller / resolver / handler files + input/output type files
+- LOGIC items → service / domain / job files
+- UI items → component / page / hook / style files
+
+Plus tests for every non-trivial file.
+
+This list becomes the `## File Structure` table in the plan document.
+
+### 1d. Sequence by Dependency
+
+Within layers, default order is **bottom-up**: DATA → LOGIC → API → UI. Across the build:
+
+- A task is **blocked by** another if it imports / depends on its output (a route handler depends on its service; a service depends on its entity)
+- Two tasks are **parallel-safe** if they touch disjoint files
+- Cross-cutting concerns (auth checks, validation utilities) often appear as shared dependencies — extract them to early tasks
+
+This sequencing populates the `Dependencies:` field on each task.
+
+### 1e. Decompose into TDD Bite-Sized Tasks
+
+Now and only now, expand each contract item into the 5-step TDD task template (existing format in this skill). Every contract `[ ]` item should map to at least one task. The reverse check at self-review: every task ties back to at least one contract item.
+
+**Transposition discipline:**
+- Don't skip contract items because "they're obvious" — they're not obvious to the build agent
+- Don't introduce work the contract doesn't justify (YAGNI applies at the transpose layer too)
+- If you discover the contract has gaps during transposition, surface them — don't invent requirements
 
 ---
 
@@ -189,7 +264,7 @@ For tasks that are purely structural (creating directories, config files, boiler
 
 After writing the complete plan, review it with fresh eyes. This is a checklist you run yourself -- not a subagent dispatch.
 
-**1. Spec coverage:** Skim each section/requirement in the design doc. Can you point to a task that implements it? List any gaps.
+**1. Transpose coverage:** For every `[ ]` item in the contract (PRD acceptance checklist or inline contract from Step 1a), point to the task(s) that implement it. If any item has no task, add one. If any task has no contract item, justify it or remove it.
 
 **2. Placeholder scan:** Search the plan for red flags -- any of the patterns from the "No Placeholders" section above. Fix them.
 
@@ -225,7 +300,9 @@ If the user requests changes based on findings, update the plan and re-run the s
 
 ## Plan Output
 
-Save to: `docs/plans/YYYY-MM-DD-<feature-name>-plan.md`
+Save to: `{plans-directory}/{filename-format}` resolved against `jig.config.md` (default: `docs/plans/YYYY-MM-DD-<feature-name>-plan.md`).
+
+If `plan-sync` is configured in `jig.config.md`, also push to the configured remote document target after saving locally (see the pack's README for sync method).
 
 ---
 
@@ -266,18 +343,17 @@ Read `jig.config.md` for `parallel-threshold` and `default-strategy` to inform t
 ## Integration
 
 **Called by:**
-- `brainstorm` (terminal state) -- after design is approved
 - `kickoff` during the PLAN stage
+- Direct user invocation (`/plan`) — when the user has source material ready
 
 **Terminal state:**
-- Invoke `team-dev` (parallel) or `sdd` (sequential)
+- Offer execution choice (team-dev or sdd). User chooses.
 
 **Related skills:**
-- `brainstorm` -- produces the design this skill consumes
-- `prd` -- produces PRD with acceptance checklist referenced in plan header
-- `tdd` -- implementers use TDD during execution
-- `team-dev` -- parallel execution engine
-- `sdd` -- sequential execution engine
+- `prd` — primary input source; produces the acceptance checklist that Step 1 transposes
+- `brainstorm` — optional pre-cursor when the user wants to explore approaches before locking in a plan
+- `tdd` — implementers follow TDD during execution
+- `team-dev` / `sdd` — execution engines
 
 ---
 
