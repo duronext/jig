@@ -3,8 +3,10 @@
 The guaranteed order of operations for all development work in Jig.
 
 ```
-DISCOVER → BRAINSTORM → PLAN → EXECUTE → REVIEW → SHIP → LEARN
+DISCOVER → (PRD?) → PLAN → BUILD → REVIEW → SHIP → LEARN
 ```
+
+`BRAINSTORM` and `DEBUG` are discovery-time tools that hang off DISCOVER; they are not pipeline stages. `REVIEW` is a multi-stage gate engine that runs after PRD (mode: prd), after PLAN (mode: plan), and during / after BUILD (mode: code, fast tier per-task and full tier pre-ship).
 
 ## Stages
 
@@ -16,40 +18,47 @@ Understand the problem. Find or create a ticket. Establish context.
 - **Output:** Ticket reference, branch, initial context
 - **Configurable:** `ticket-system` in `jig.config.md` (Linear, Jira, GitHub Issues)
 
-### 2. Brainstorm
+### 2. (Optional) PRD
 
-Explore the solution space. Ask questions. Propose approaches. Get design approval.
+Capture requirements as an enforceable acceptance contract. Required for features and large improvements; skipped for bugs and tasks.
 
-- **Skill:** `brainstorm`
-- **Output:** Approved design document
-- **Configurable:** Concerns checklist in `jig.config.md` — maps team skills into the brainstorming process
-- **Work type overrides:** Bugs get light brainstorm (root cause + fix). Tasks skip entirely.
+- **Skill:** `prd`
+- **Output:** PRD document with `[ ]` acceptance items, layer-tagged
+- **Configurable:** `plans-directory`, `prd-sync` in `jig.config.md`; concerns checklist
+- **Review:** PRD draft is auto-reviewed via `review:prd` before user refinement
 
 ### 3. Plan
 
-Turn the approved design into an implementation plan with bite-sized tasks.
+Transpose the source (PRD, ticket, or conversation context) into an implementation plan with bite-sized, TDD-oriented tasks.
 
-- **Skill:** `plan`
-- **Output:** Implementation plan with ordered tasks, file targets, and test expectations
-- **Configurable:** TDD emphasis, task granularity
+- **Skill:** `plan` (Step 1 = TRANSPOSE)
+- **Output:** Implementation plan with file structure, ordered tasks, dependencies, test commands
+- **Configurable:** `plans-directory`, `filename-format`, `plan-sync` in `jig.config.md`
+- **Review:** Plan draft is auto-reviewed via `review:plan` before user approval
 
-### 4. Execute
+### 4. Build
 
 Build the thing. Either in parallel or serial.
 
 - **Skills:** `team-dev` (parallel, 3+ independent tasks) or `sdd` (serial, coupled tasks)
 - **Output:** Implemented, tested, committed code
 - **Configurable:** `parallel-threshold`, `default-strategy`, `teammate-mode` in `jig.config.md`
-- **Quality gates:** Each task passes spec compliance review + code quality review before completion
+- **Quality gates:** Each task passes per-task fast-pass review (`review:code, tier: fast`) + tests before completion
+- **Pre-ship gate:** Full diff review via `review:code, tier: all` before merge
 
-### 5. Review
+### 5. Review (multi-stage gate)
 
-Comprehensive code review via specialist swarm.
+The `review` skill operates as a gate engine throughout the pipeline:
 
-- **Skill:** `review`
-- **Output:** Confidence-scored review report with findings by severity
-- **Configurable:** `swarm-tiers` (which specialists block vs advise), `deep-review-model`, `specialist-model-default`
-- **Discovery:** Specialists are collected from `core/`, `packs/`, and `team/` directories
+- **After PRD draft** → `mode: prd, tier: all` (catches missing acceptance items, contradictions, scope gaps)
+- **After PLAN draft** → `mode: plan, tier: all` + plan-logic-reviewer (Opus) (catches missing tasks, wrong sequencing, contract misses)
+- **During BUILD (per-task)** → `mode: code, tier: fast-pass` (per-task quality gate in team-dev)
+- **Pre-SHIP** → `mode: code, tier: all` (full diff review including logic-reviewer)
+
+Same skill, three modes. Specialists are tagged with `stage: prd | plan | both` or omitted (default = code).
+
+- **Configurable:** `swarm-tiers`, `prd-swarm-tiers`, `plan-swarm-tiers`, `deep-review-model`, `plan-deep-review-model`, `specialist-model-default`
+- **Discovery:** Specialists collected from `core/`, `packs/`, and `team/`
 
 ### 6. Ship
 
@@ -74,9 +83,11 @@ Post-merge retrospective. What went well? What should improve?
 | Stage | Bug | Feature | Improvement | Task |
 |-------|-----|---------|-------------|------|
 | Discover | Yes | Yes | Yes | Yes |
-| Brainstorm | Light | Full | Medium | Skip |
+| Brainstorm tool | Rare | Recommended | Optional | Skip |
+| Debug tool | If unclear | Skip | Skip | Skip |
+| PRD | Skip | Recommended | Optional | Skip |
 | Plan | 1-3 tasks | Detailed | Standard | Minimal |
-| Execute | SDD or team-dev | team-dev | Either | SDD |
+| Build | SDD or team-dev | team-dev | Either | SDD |
 | Review | Standard | Full swarm | Standard | Light |
 | Ship | Yes | Yes | Yes | Yes |
 | Learn | Optional | Always | Optional | Skip |
@@ -85,9 +96,9 @@ Post-merge retrospective. What went well? What should improve?
 
 Each stage transition has a gate check — preconditions that must be met before proceeding:
 
-- **Discover -> Brainstorm:** Ticket exists, branch created, context loaded
-- **Brainstorm -> Plan:** Design document approved by user
-- **Plan -> Execute:** Implementation plan reviewed, tasks ordered
-- **Execute -> Review:** All tasks pass spec compliance + code quality reviews
-- **Review -> Ship:** Review confidence score meets threshold, no blocking findings
+- **Discover -> PRD or Plan:** Ticket exists, branch created, context loaded
+- **PRD -> Plan:** PRD passes `review:prd`, user refines, acceptance checklist tagged
+- **Plan -> Build:** Plan passes `review:plan`, every contract item maps to a task
+- **Build -> Pre-ship Review:** All tasks pass per-task fast-pass review, all tests green
+- **Pre-ship Review -> Ship:** No blocking findings, confidence score meets threshold
 - **Ship -> Learn:** PR merged (learn happens post-merge)
