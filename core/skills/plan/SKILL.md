@@ -54,7 +54,7 @@ If the spec covers multiple independent subsystems, it should have been broken i
 - Scan recent conversation (brainstorm output, user statements)
 - For bugs: use the reproduction + expected behavior as the contract
 
-Write the implicit contract inline as 3-10 bullets, tagged by layer:
+Write the implicit contract inline as bullets, tagged by layer — one per requirement. Capture **as many as the work genuinely needs**; there is no upper limit. Completeness matters more than brevity here: every downstream task traces back to a contract item, so a dropped requirement is dropped work.
 
 ```
 [DATA] Order entity has a `notes` field (optional text, max 2000 chars)
@@ -63,9 +63,9 @@ Write the implicit contract inline as 3-10 bullets, tagged by layer:
 [UI] Order detail page shows notes in a collapsed section
 ```
 
-This is scratch work — not a separate doc. It anchors the rest of the transposition.
+This is scratch work — not a separate doc. It anchors the rest of the transposition. If the contract grows large enough that it's hard to hold in your head, that's a signal the work warrants a formal PRD — offer `/prd` — but an inline contract of any length is valid.
 
-**If you cannot articulate 3 bullets from available context, stop.** You don't have enough to plan. Return to the user: "I don't have a clear contract for what to build. Want to capture a PRD with `/prd`, or talk through it with `/brainstorm` first?"
+**The only floor is three.** If you cannot articulate at least 3 bullets from available context, stop — you don't have enough to plan. Return to the user: "I don't have a clear contract for what to build. Want to capture a PRD with `/prd`, or talk through it with `/brainstorm` first?"
 
 ### 1b. Group by Layer
 
