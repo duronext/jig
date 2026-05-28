@@ -1,6 +1,6 @@
 {
   "name": "jig",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The AI engineering workflow framework for teams — full lifecycle from ticket to post-mortem with quality gates at every stage",
   "author": {
     "name": "Duro Labs",

@@ -21,7 +21,7 @@ alwaysApply: false
 ## When to Use
 
 - "Build this", "execute the plan", "let's build", "implement this"
-- After `brainstorm` → `plan` produces an implementation plan
+- After `plan` produces an implementation plan from a PRD, ticket, or conversation context
 - When you have a plan file at `docs/plans/*.md` and want to execute it
 - When you're not sure whether to use `team-dev` or `sdd`
 

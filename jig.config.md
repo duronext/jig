@@ -15,7 +15,6 @@ ticket-system: github
 ```yaml
 stages:
   - discover
-  - brainstorm
   - plan
   - execute
   - review
@@ -27,10 +26,10 @@ stages:
 
 ```yaml
 bug:
-  skip: [brainstorm-full, learn]
-  brainstorm: light
+  skip: [learn]
+  review: light
 task:
-  skip: [brainstorm, learn]
+  skip: [learn]
   review: light
 ```
 
@@ -39,6 +38,15 @@ task:
 ```yaml
 format: "{username}/jig-{number}-{kebab-title}"
 main-branch: main
+```
+
+## Documents
+
+```yaml
+plans-directory: docs/plans
+filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | plan
+# prd-sync: none            # none | linear | jira | github (pack-driven)
+# plan-sync: none
 ```
 
 ## Concerns Checklist

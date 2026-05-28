@@ -29,7 +29,7 @@ Or create manually using the skill template in `SKILL_TEMPLATE.md`.
 
 ## Wiring Into the Pipeline
 
-To surface a team skill during brainstorming, add it to the Concerns Checklist in `jig.config.md`:
+To surface a team skill during PRD authoring, add it to the Concerns Checklist in `jig.config.md`:
 
 ```markdown
 ## Concerns Checklist

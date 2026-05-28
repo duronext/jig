@@ -8,9 +8,10 @@
   "plugins": [
     {
       "name": "jig",
-      "description": "Full lifecycle pipeline: discover, brainstorm, plan, execute, review, ship, learn",
+      "description": "Full lifecycle pipeline: discover, plan, execute, review, ship, learn — with brainstorm and debug as on-demand discovery tools",
       "source": "./",
-      "strict": true
+      "strict": true,
+      "version": "1.1.0"
     }
   ]
 }

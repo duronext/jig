@@ -1,14 +1,14 @@
 # Jig Concerns Checklist
 
-The concerns checklist is a configurable list of engineering considerations that `brainstorm` surfaces during feature design. It ensures teams never forget critical cross-cutting concerns.
+The concerns checklist is a configurable list of engineering considerations that the `prd` skill surfaces during requirements capture. It ensures teams never forget critical cross-cutting concerns when defining *what* to build.
 
 ## How It Works
 
 1. Team defines concerns in `jig.config.md`, each pointing to a skill, specialist, or `manual`
-2. During brainstorming (features and improvements), `brainstorm` presents each concern
+2. During PRD authoring (features and improvements), `prd` walks through each concern in Step 3c
 3. User marks each as Y (yes, applies), N (no, not relevant), or NA (not applicable)
-4. For Y concerns, the referenced skill is loaded for guidance
-5. Decisions are recorded in the design document
+4. For Y concerns, the referenced skill is loaded for guidance and its implications are added as acceptance items
+5. Decisions are recorded in the PRD (in the Acceptance Checklist or Out of Scope sections)
 
 ## Configuration
 
@@ -51,7 +51,8 @@ Teams are expected to expand this with their domain-specific concerns.
 
 | Work Type | Checklist Behavior |
 |-----------|-------------------|
-| Feature | Full checklist — every concern is surfaced |
-| Improvement | Full checklist |
-| Bug | Skipped — bugs use light brainstorm focused on root cause |
-| Task | Skipped — tasks skip brainstorm entirely |
+| Feature | Full checklist — every concern is surfaced during PRD authoring |
+| Large improvement | Full checklist |
+| Small improvement | Only concerns flagged by swarm or user |
+| Bug | Skipped — bug PRDs (light tier) focus on root cause and fix |
+| Task | Skipped — tasks don't go through PRD |

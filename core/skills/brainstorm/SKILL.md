@@ -1,21 +1,21 @@
 ---
 name: brainstorm
 description: >
-  Use when starting creative work — designing features, adding functionality,
-  modifying behavior, or exploring approaches. Guides collaborative design
-  exploration through one-at-a-time questions, approach proposals, and
-  incremental design approval. Hard gate: no code until design approved.
+  Use when exploring ideas, comparing approaches, or refining an unclear
+  problem — at any point in the workflow. A discovery-time tool, not a
+  pipeline stage. Invokable directly via /brainstorm or offered by kickoff
+  during DISCOVER. Produces understanding, not artifacts.
 tier: workflow
 alwaysApply: false
 ---
 
-# Brainstorming Ideas Into Designs
+# Brainstorming — Discovery-Time Ideation
 
-**PURPOSE**: Turn ideas into fully formed, approved designs through natural collaborative dialogue. Explore the solution space, surface cross-cutting concerns, and get user sign-off before any code is written.
+**PURPOSE**: Help the user think through ideas, compare options, and iterate on an unclear problem. Brainstorm produces *understanding*, not artifacts. Invoke it whenever you need to explore the solution space — at the start of a task, mid-implementation when scope is unclear, or any time the user says "let's think about this."
 
-**CONFIGURATION**: Reads `jig.config.md` for the Concerns Checklist (maps team skills into design review) and pipeline stage overrides by work type.
+**NOT A PIPELINE STAGE**: Brainstorm is not a required step before `plan`. It hangs off `DISCOVER` as an optional tool, the same way `debug` does. The user invokes it on demand; `kickoff` may offer it during discovery if the work type benefits from exploration.
 
----
+**CONFIGURATION**: Reads `jig.config.md` for `plans-directory` (only if the user opts into saving a brainstorm doc).
 
 ## When to Use
 
@@ -24,7 +24,7 @@ Invoke this skill when:
 - Adding functionality to existing code
 - Modifying behavior that affects users or systems
 - The user says "let's design", "how should we build", "I want to add..."
-- `kickoff` routes here during the BRAINSTORM stage
+- `kickoff` offers this as a discovery-time tool during the DISCOVER stage
 
 **Do NOT use when:**
 - Fixing a bug with an obvious root cause (use `debug`)
@@ -33,33 +33,16 @@ Invoke this skill when:
 
 ---
 
-<HARD-GATE>
-Do NOT invoke any implementation skill, write any code, scaffold any project,
-or take any implementation action until you have presented a design and the
-user has approved it. This applies to EVERY project regardless of perceived
-simplicity.
-</HARD-GATE>
-
-## Anti-Pattern: "This Is Too Simple To Need A Design"
-
-Every project goes through this process. A single-function utility, a config change, a migration -- all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
-
----
-
 ## Checklist
 
 Complete these steps in order:
 
-1. **Explore project context** -- check files, docs, recent commits
-2. **Offer visual companion** (if topic involves visual questions) -- this is its own message, not combined with a clarifying question. See the Visual Companion section below.
-3. **Ask clarifying questions** -- one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** -- with trade-offs and your recommendation
-5. **Present design** -- in sections scaled to complexity, get user approval after each section
-6. **Concerns Checklist** -- walk through configurable concerns from `jig.config.md`
-7. **Write design doc** -- save to `docs/plans/YYYY-MM-DD-<topic>-design.md`
-8. **Spec self-review** -- scan for placeholders, contradictions, ambiguity, scope
-9. **User reviews written spec** -- ask user to review before proceeding
-10. **Transition to implementation** -- invoke `plan` to create implementation plan
+1. **Explore project context** — check files, docs, recent commits
+2. **Offer visual companion** (if topic involves visual questions) — its own message; see Visual Companion section
+3. **Ask clarifying questions** — one at a time, understand purpose / constraints / success criteria
+4. **Propose 2-3 approaches** — with trade-offs and your recommendation
+5. **Iterate** — refine the approach with the user until they have clarity
+6. **Hand off** — summarize what was decided in conversation; return control to the user or invoking skill. Do NOT auto-invoke `plan`. Do NOT write a design doc unless the user explicitly asks for one.
 
 ---
 
@@ -72,18 +55,14 @@ flowchart TD
     B -->|no| D[Ask clarifying questions<br/>one at a time]
     C --> D
     D --> E[Propose 2-3 approaches<br/>with trade-offs]
-    E --> F[Present design sections<br/>get approval per section]
-    F --> G[Concerns Checklist<br/>from jig.config.md]
-    G --> H{User approves design?}
-    H -->|no, revise| F
-    H -->|yes| I[Write design doc<br/>docs/plans/YYYY-MM-DD-*-design.md]
-    I --> J[Spec self-review<br/>fix inline]
-    J --> K{User reviews spec?}
-    K -->|changes requested| I
-    K -->|approved| L((Invoke plan))
+    E --> F[Iterate with user]
+    F --> G{User has clarity?}
+    G -->|no, keep exploring| D
+    G -->|yes| H[Summarize decisions<br/>in conversation]
+    H --> I((Return control))
 ```
 
-**The terminal state is invoking `plan`.** Do NOT invoke any other implementation skill. The ONLY skill invoked after brainstorming is `plan`.
+**The terminal state is returning control.** Brainstorm produces understanding, not artifacts. Do NOT auto-invoke `plan` or any other implementation skill — the user decides what's next.
 
 ---
 
@@ -129,66 +108,16 @@ flowchart TD
 
 ---
 
-## Concerns Checklist (Configurable)
+## After Brainstorming
 
-Read the `## Concerns Checklist` section from `jig.config.md`. Walk through each concern defined there. Mark N/A if it does not apply -- but **explicitly mark it**, do not skip silently.
+Brainstorm produces no required artifact. When the user has clarity, end the session by:
 
-For each concern:
-- If marked **Yes** and mapped to a skill -> load that skill for guidance
-- If marked **Yes** and mapped to a specialist -> note the specialist's domain
-- If marked **Yes** and mapped to `manual` -> flag for human review
-- If marked **No** or **N/A** -> record the decision with brief rationale
+1. **Summarizing the decisions** — 3-5 bullets in conversation capturing the chosen approach and key trade-offs
+2. **Asking what's next** — "Want to capture this as a PRD, jump to a plan, or sit with it?"
 
-Present the checklist results to the user as part of the design review. Each "Yes" adds scope to the plan -- the user should explicitly approve the added scope.
+If the user wants a design doc for archival reasons, save to `{plans-directory}/YYYY-MM-DD-<topic>-brainstorm.md` (read `plans-directory` from `jig.config.md`, default `docs/plans`). This is opt-in, not default.
 
-**If no concerns checklist is configured**, use the minimal defaults:
-- Error handling
-- Security
-- Test strategy
-
-See `framework/CONCERNS_CHECKLIST.md` for full documentation on checklist configuration and work type behavior.
-
----
-
-## After the Design
-
-### Write the Design Document
-
-Save to: `docs/plans/YYYY-MM-DD-<topic>-design.md`
-
-The design document should include:
-- Problem statement
-- Approved approach (with rationale)
-- Architecture and component breakdown
-- Data flow
-- Error handling strategy
-- Test strategy
-- Concerns checklist results
-- Any open questions or deferred decisions
-
-### Spec Self-Review
-
-After writing the spec document, review it with fresh eyes:
-
-1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
-2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
-3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
-4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
-
-Fix any issues inline. No need to re-review -- just fix and move on.
-
-### User Review Gate
-
-After the self-review passes, ask the user to review the written spec before proceeding:
-
-> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before we start writing the implementation plan."
-
-Wait for the user's response. If they request changes, make them and re-run the self-review. Only proceed once the user approves.
-
-### Transition to Implementation
-
-- **REQUIRED**: Invoke `plan` to create a detailed implementation plan
-- Do NOT invoke any other skill. `plan` is the next step.
+**Do NOT auto-invoke `plan` or any other implementation skill.** Brainstorm's job is to leave the user better-informed; the next move is theirs.
 
 ---
 
@@ -225,14 +154,16 @@ A question about a UI topic is not automatically a visual question. "What does p
 ## Integration
 
 **Called by:**
-- `kickoff` during the BRAINSTORM stage
+- Direct user invocation (`/brainstorm`)
+- `kickoff` may offer it during DISCOVER for features / unclear scope
 
 **Terminal state:**
-- **REQUIRED**: Invoke `plan` to create implementation plan
+- Return control to the user or invoking skill. No forced next step.
 
 **Related skills:**
-- `prd` -- for capturing formal product requirements before brainstorming
-- `plan` -- the next step after design approval
+- `prd` — when ideas crystallize into requirements
+- `plan` — when approach is clear and ready to decompose
+- `debug` — sister discovery tool for understanding bugs
 
 ---
 
@@ -240,10 +171,7 @@ A question about a UI topic is not automatically a visual question. "What does p
 
 | Mistake | Consequence | Fix |
 |---------|------------|-----|
-| Skipping design for "simple" projects | Unexamined assumptions, wasted rework | Design can be short, but it must exist |
 | Multiple questions per message | User overwhelmed, answers incomplete | One question at a time, always |
-| Jumping to implementation before approval | Building the wrong thing | Hard gate: no code until design approved |
-| Skipping Concerns Checklist | Missing cross-cutting concerns discovered late | Walk through every concern, mark N/A explicitly |
 | Writing vague design sections | Ambiguous requirements lead to wrong implementation | Scale sections to complexity, be specific |
 | Not decomposing large projects | Unmanageable scope, spec too broad | Flag multi-subsystem projects, decompose first |
-| Skipping user review of written spec | Misunderstandings baked into the plan | Always ask user to review before proceeding |
+| Auto-invoking `plan` after brainstorming | User loses control of the workflow | Brainstorm returns control. The user chooses what's next. |

@@ -13,7 +13,7 @@ alwaysApply: false
 
 **PURPOSE**: The pipeline orchestrator. Routes work through stages and checks gates at each transition. **Kickoff does NOT execute stages itself** — it invokes the downstream skill for each stage using the Skill tool.
 
-**ORCHESTRATOR RULE**: At every stage transition, you MUST invoke the downstream skill using the Skill tool (e.g., `Skill: jig:brainstorm`). Do NOT attempt to execute the stage inline by following kickoff's summary of what the stage does. The downstream skill has the full process — kickoff only knows enough to route and check gates.
+**ORCHESTRATOR RULE**: At every stage transition, you MUST invoke the downstream skill using the Skill tool (e.g., `Skill: jig:plan`). Do NOT attempt to execute the stage inline by following kickoff's summary of what the stage does. The downstream skill has the full process — kickoff only knows enough to route and check gates.
 
 **CONFIGURATION**: Reads `jig.config.md` for pipeline stages, work type overrides, ticket system, branching format, and concerns checklist.
 
@@ -45,21 +45,29 @@ Invoke this skill when:
 ```mermaid
 graph LR
   classify["CLASSIFY<br/>work type"] --> discover["DISCOVER<br/>ticket + branch"]
-  discover --> requirements["REQUIREMENTS<br/>PRD (optional)"]
-  discover -.->|bugs / tasks / small| brainstorm
-  requirements --> brainstorm["BRAINSTORM<br/>design + concerns"]
-  brainstorm --> plan["PLAN<br/>tasks + files"]
-  plan --> execute["EXECUTE<br/>build + test"]
-  execute --> review["REVIEW<br/>audit + fix"]
-  review --> ship["SHIP<br/>PR + merge"]
+  discover -.->|tool| brainstorm["BRAINSTORM<br/>ideation (optional)"]
+  discover -.->|tool| debug["DEBUG<br/>root cause (bugs)"]
+  discover --> prd["PRD<br/>requirements (optional)"]
+  prd --> review_prd["REVIEW:prd<br/>tier all"]
+  review_prd --> plan["PLAN<br/>transpose + tasks"]
+  discover --> plan
+  plan --> review_plan["REVIEW:plan<br/>tier all"]
+  review_plan --> build["BUILD<br/>execute + test"]
+  build -.->|fast tier<br/>while building| review_code_fast["REVIEW:code<br/>tier fast-pass"]
+  build --> review_code["REVIEW:code<br/>tier all"]
+  review_code --> ship["SHIP<br/>PR + merge"]
   ship --> learn["LEARN<br/>postmortem"]
 
-  review -.->|plan wrong| plan
-  review -.->|scope changed| brainstorm
-  execute -.->|blocked| plan
+  review_plan -.->|plan wrong| plan
+  review_code -.->|scope changed| prd
+  build -.->|blocked| plan
 ```
 
 Each stage has a **gate**. You don't move forward until the gate is satisfied.
+
+`BRAINSTORM` and `DEBUG` are **discovery-time tools**, not stages — they hang off `DISCOVER` and are invoked on demand (by the user or offered by kickoff) when the work benefits from exploration or root-cause investigation. They produce understanding, not artifacts, and return control to the workflow when done.
+
+`REVIEW` is a **multi-stage gate engine**: it runs after PRD (`tier: all`), after PLAN (`tier: all`), and during/after BUILD (`tier: fast-pass` per-task during, `tier: all` pre-ship). The same skill, three modes. See `core/skills/review/SKILL.md`.
 
 The pipeline stages and work type overrides are configurable in `jig.config.md`. Read the config at the start of each session to determine which stages to run.
 
@@ -72,10 +80,10 @@ Before anything else, determine the work type. This controls pipeline depth.
 ```mermaid
 graph TD
   start{"What kind of work?"}
-  start -->|broken / incorrect| bug["BUG<br/>Brainstorm: light<br/>Plan: 1-3 tasks<br/>Execute: sequential<br/>Learn: optional"]
-  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Brainstorm: medium<br/>Plan: standard<br/>Execute: SDD or team-dev<br/>Learn: optional"]
-  start -->|new capability| feature["FEATURE<br/>Brainstorm: full + checklist<br/>Plan: detailed<br/>Execute: team-dev<br/>Learn: yes"]
-  start -->|config / chore / refactor| task["TASK / CHORE<br/>Brainstorm: skip<br/>Plan: minimal<br/>Execute: direct<br/>Learn: no"]
+  start -->|broken / incorrect| bug["BUG<br/>Discovery tool: debug<br/>Plan: 1-3 tasks<br/>Execute: sequential<br/>Learn: optional"]
+  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tool: brainstorm (optional)<br/>Plan: standard<br/>Execute: SDD or team-dev<br/>Learn: optional"]
+  start -->|new capability| feature["FEATURE<br/>Discovery tool: brainstorm (recommended)<br/>PRD: recommended<br/>Plan: detailed<br/>Execute: team-dev<br/>Learn: yes"]
+  start -->|config / chore / refactor| task["TASK / CHORE<br/>Skip discovery tools<br/>Plan: minimal<br/>Execute: direct<br/>Learn: no"]
 ```
 
 Check `jig.config.md` for stage overrides per work type. The config may skip or lighten stages beyond these defaults.
@@ -127,34 +135,32 @@ For **bugs**, **tasks**, and **small improvements**: skip this step. Users can s
 
 ### Gate Check
 
-- [ ] PRD saved to `docs/plans/YYYY-MM-DD-<topic>-prd.md` OR user opted to skip
+- [ ] PRD saved to the path resolved from `jig.config.md` (`plans-directory` + `filename-format`, default `docs/plans/YYYY-MM-DD-<topic>-prd.md`) OR user opted to skip
 - [ ] If PRD exists, acceptance checklist has `[ ]` items tagged by layer
 
 ---
 
-## Step 3: BRAINSTORM
+## Discovery Tools (optional, on-demand)
 
-**Gate**: A design is approved by the user.
+During or after DISCOVER, the user may benefit from one of two discovery-time tools. Offer them when appropriate; never force them.
 
-**Routing by work type:**
+### Brainstorm
 
-| Work Type | Brainstorm Depth | Action |
-|-----------|-----------------|--------|
-| Bug | Light | Invoke `jig:brainstorm` — focuses on root cause and fix approach |
-| Improvement | Medium | Invoke `jig:brainstorm` — explores approaches with concerns checklist |
-| Feature | Full | Invoke `jig:brainstorm` — full design exploration with concerns checklist |
-| Task/Chore | Skip | Move directly to Step 4: PLAN |
+Offer for: features with unclear scope, improvements where approach isn't obvious, any time the user signals "I'm not sure how to approach this."
 
-**INVOKE `jig:brainstorm` using the Skill tool.** Do not brainstorm inline — the `brainstorm` skill has the full interview process, approach generation, concerns checklist integration, and design approval flow. Kickoff's job is to tell the skill what depth to use (light/medium/full) based on the work type classification from Step 1.
+**Skip for:** tasks with obvious scope, bugs where the fix is clear from the ticket.
 
-Pass the work type context when invoking: "This is a {work type}. Run {depth} brainstorming."
+If user accepts, **INVOKE `jig:brainstorm` using the Skill tool.** It returns control to kickoff when done — no auto-handoff to plan.
+
+### Debug
+
+Offer for: bugs where the root cause isn't obvious from the ticket.
+
+If user accepts, **INVOKE `jig:debug` using the Skill tool.** It returns control to kickoff when done.
 
 ### Gate Check
 
-Before proceeding, confirm:
-- [ ] Design is reviewed and approved by the user
-- [ ] Concerns checklist completed (features/improvements)
-- [ ] Design doc saved to `docs/plans/YYYY-MM-DD-<topic>-design.md` (features)
+These are tools, not stages. There's no gate — the user moves on when they're ready. Kickoff proceeds to the next stage (PRD or PLAN) when the user signals readiness.
 
 ---
 
@@ -162,17 +168,18 @@ Before proceeding, confirm:
 
 **Gate**: A numbered plan exists with tasks, files, and verification steps.
 
-**INVOKE `jig:plan` using the Skill tool.** Do not write the plan inline — the `plan` skill handles task decomposition, file path identification, dependency mapping, verification steps, and TDD orientation. It saves the plan to `docs/plans/`.
+**INVOKE `jig:plan` using the Skill tool.** The `plan` skill's Step 1 is TRANSPOSE — it distills the available source (PRD, ticket, conversation) into a layered contract, derives file structure, sequences by dependency, and decomposes into TDD bite-sized tasks. Kickoff does not transpose; it hands off.
 
-If a PRD was created in Step 2b, mention it when invoking: "PRD is at docs/plans/YYYY-MM-DD-<topic>-prd.md."
+If a PRD was created in Step 2b, mention it when invoking: "PRD is at `{plans-directory}/YYYY-MM-DD-<topic>-prd.md`." Otherwise plan will transpose from the ticket + conversation context.
 
 ### Gate Check
 
 Before proceeding, confirm:
 - [ ] Plan reviewed and approved by the user
 - [ ] Tasks have clear file paths and skill references
-- [ ] Dependencies identified (which tasks block which)
-- [ ] Plan saved to `docs/plans/`
+- [ ] Dependencies identified
+- [ ] Plan saved to the path resolved from `jig.config.md` (`plans-directory` + `filename-format`)
+- [ ] Every contract item (PRD `[ ]` or inline) maps to at least one task
 
 ---
 
@@ -180,7 +187,7 @@ Before proceeding, confirm:
 
 **Gate**: All tasks implemented, tested, and committed.
 
-**INVOKE `jig:build` using the Skill tool.** Pass the plan path: "Execute the plan at docs/plans/YYYY-MM-DD-<topic>-plan.md." The `build` skill analyzes the task graph and auto-selects parallel (`team-dev`) or serial (`sdd`) execution. Do not choose the strategy yourself.
+**INVOKE `jig:build` using the Skill tool.** Pass the plan path: "Execute the plan at `{plans-directory}/<resolved-filename>-plan.md`" (resolve `plans-directory` and `filename-format` from `jig.config.md`). The `build` skill analyzes the task graph and auto-selects parallel (`team-dev`) or serial (`sdd`) execution. Do not choose the strategy yourself.
 
 ### Gate Check
 
@@ -238,17 +245,18 @@ The pipeline enforces ordering. Here's the complete transition map:
 ```
 CLASSIFY
   └──> DISCOVER (always)
-         ├──> REQUIREMENTS (features, large improvements — optional)
-         │    └──> BRAINSTORM
+         ├╌╌╌> BRAINSTORM (optional tool, returns to DISCOVER)
+         ├╌╌╌> DEBUG (optional tool, returns to DISCOVER)
          │
-         ├──> BRAINSTORM (bugs, small improvements — skip requirements)
-         │    └──> PLAN (always after brainstorm)
+         ├──> PRD (features, large improvements — optional)
+         │    └──> REVIEW:prd → PLAN
          │
-         └──> PLAN (tasks/chores skip brainstorm + requirements)
-                └──> EXECUTE (always)
-                       └──> REVIEW (always)
-                              └──> SHIP (always)
-                                     └──> LEARN (features, complex improvements)
+         └──> PLAN (always — transposes whatever source is available)
+                └──> REVIEW:plan → BUILD
+                       └──> REVIEW:code (fast, per-task during build)
+                              └──> REVIEW:code (full, pre-ship)
+                                     └──> SHIP
+                                            └──> LEARN (features, complex improvements)
 ```
 
 ### Looping Back
@@ -270,12 +278,12 @@ When looping back, update the plan document to reflect changes.
 |---------|------------|-----|
 | Skipping Discover | No ticket, no branch convention, no tracking | Always start with the ticket |
 | Skipping Requirements for features | Vague scope, acceptance criteria discovered mid-implementation | Run `/prd` before brainstorming |
-| Skipping Brainstorm | Missing cross-cutting concerns | Run the Concerns Checklist |
 | Skipping Plan for "simple" features | Can't parallelize, ad-hoc execution | Even 2-task plans help |
 | Skipping Review | AI-generated bugs ship to production | Self-audit is non-negotiable |
 | Skipping Learn | Same review feedback on every PR | Run postmortem on complex features |
 | Starting with code | "Add a button" without understanding the requirement | Discover first, always |
-| Planning without brainstorming | Plan misses cross-cutting concerns | Design before decomposing |
+| Forcing brainstorm before plan | Workflow friction; brainstorm is an optional tool | Offer brainstorm during DISCOVER; never gate plan on it |
+| Skipping the TRANSPOSE step | Plan misses contract items, tasks don't tie to acceptance criteria | Plan's Step 1 transposes — verify every contract item maps to a task |
 
 ---
 
@@ -286,8 +294,9 @@ When looping back, update the plan document to reflect changes.
 | Classify | (kickoff handles directly) | Work type determined |
 | Discover | (kickoff handles directly) | Ticket + branch |
 | Requirements | `Skill: jig:prd` | PRD with acceptance checklist |
-| Brainstorm | `Skill: jig:brainstorm` | Approved design |
-| Plan | `Skill: jig:plan` | `docs/plans/*.md` |
+| Brainstorm (tool) | `Skill: jig:brainstorm` | Understanding, no artifact |
+| Debug (tool) | `Skill: jig:debug` | Root cause, no artifact |
+| Plan | `Skill: jig:plan` | `{plans-directory}/*-plan.md` |
 | Execute | `Skill: jig:build` | Implemented + tested code |
 | Review | `Skill: jig:review` | Audited code |
 | Ship | `Skill: jig:pr-create` | Merged PR |

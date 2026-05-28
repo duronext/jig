@@ -1,7 +1,7 @@
 {
   "name": "linear",
   "prefix": "linear",
-  "description": "Linear issue tracker integration — ticket creation, field mapping, and branch naming via Linear MCP tools",
+  "description": "Linear integration — ticket creation, field mapping, branch naming, and optional PRD document sync via Linear MCP tools",
   "skills": [],
   "specialists": []
 }

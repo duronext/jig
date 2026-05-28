@@ -15,7 +15,6 @@ ticket-system: github
 ```yaml
 stages:
   - discover
-  - brainstorm
   - plan
   - execute
   - review
@@ -27,10 +26,10 @@ stages:
 
 ```yaml
 bug:
-  skip: [brainstorm-full, learn]
-  brainstorm: light
+  skip: [learn]
+  review: light
 task:
-  skip: [brainstorm, learn]
+  skip: [learn]
   review: light
 ```
 
@@ -41,10 +40,19 @@ format: "{username}/{ticket-prefix}-{number}-{kebab-title}"
 main-branch: main
 ```
 
+## Documents
+
+```yaml
+plans-directory: docs/plans
+filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | plan
+# prd-sync: none            # none | linear | jira | github (pack-driven)
+# plan-sync: none
+```
+
 ## Concerns Checklist
 
 Map your engineering concerns to skills or specialists.
-These surface during brainstorming for features and improvements.
+These surface during PRD authoring for features and improvements.
 Uncomment and point to your team skills as you create them.
 
 ```yaml

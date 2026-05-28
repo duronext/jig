@@ -14,7 +14,7 @@ alwaysApply: false
 
 **PRINCIPLE**: API-first. The platform contract (data model, API surface, business rules) comes before UI. Sections are ordered by platform priority, not visual priority.
 
-**CONFIGURATION**: Reads `jig.config.md` for `ticket-system` (to determine where to sync the PRD) and pipeline stage overrides by work type.
+**CONFIGURATION**: Reads `jig.config.md` for `ticket-system` (sync target), `plans-directory` (local save location), `prd-sync` (optional remote document sync), and the `## Concerns Checklist` (concerns to walk through).
 
 ---
 
@@ -99,6 +99,27 @@ Present the swarm findings to the user **alongside the draft**:
 
 The user then refines the draft (Step 4) informed by both their own review and the specialist findings.
 
+### Step 3c: Concerns Walk-Through
+
+After the swarm findings are presented but before refinement, walk through the `## Concerns Checklist` from `jig.config.md`.
+
+For each concern listed:
+- If marked **Yes** and mapped to a skill -> load that skill for guidance, then capture its implications as new acceptance items
+- If marked **Yes** and mapped to a specialist -> note the specialist's domain; the specialist will validate during `review:prd`
+- If marked **Yes** and mapped to `manual` -> add an acceptance item flagging human review
+- If marked **No** or **N/A** -> record the decision with brief rationale in an "Open Questions" or "Out of Scope" section
+
+Each `Yes` concern adds scope to the PRD acceptance checklist. The user must explicitly approve added scope.
+
+**Work type behavior:**
+- Features and large improvements: full walk-through
+- Bugs and small improvements: only walk through concerns flagged relevant by the swarm or user
+- Tasks: skip
+
+**If no concerns checklist is configured in `jig.config.md`**, use minimal defaults: error-handling, security, test-strategy.
+
+See `framework/CONCERNS_CHECKLIST.md` for full configuration documentation.
+
 ### Step 4: Refine
 
 Walk through the draft with the user:
@@ -111,10 +132,11 @@ Walk through the draft with the user:
 
 ### Step 5: Save
 
-1. **Write the PRD** to `docs/plans/YYYY-MM-DD-<topic>-prd.md`
-2. **Ask**: "Want to sync these requirements to the ticket too?"
-3. If yes -- push the PRD content to the ticket system configured in `jig.config.md`
-4. Confirm save locations to the user
+1. **Determine the local save path** — read `plans-directory` and `filename-format` from `jig.config.md` (defaults: `docs/plans/` and `{date}-{topic}-{kind}.md`). Resolve to e.g. `docs/plans/2026-05-27-export-feature-prd.md`.
+2. **Write the PRD** to the resolved path.
+3. **Check `prd-sync` in `jig.config.md`** — if set (e.g., `prd-sync: linear`), invoke the configured pack's doc-sync instructions. See the pack's README for the sync method (e.g., `packs/linear/README.md` → "PRD document sync").
+4. **Always offer ticket sync** — "Want to also sync these requirements to the ticket description?" If yes, push the PRD content to the ticket system configured in `jig.config.md` (separate from doc sync — ticket is the issue, doc is the standalone artifact).
+5. **Confirm all save locations** to the user.
 
 ---
 
@@ -366,17 +388,17 @@ This pointer tells downstream agents (spec reviewers, team-dev quality gates) wh
 
 ## Integration with kickoff
 
-This skill sits between **DISCOVER** and **BRAINSTORM** in the kickoff pipeline:
+This skill sits inside the **DISCOVER** stage in the kickoff pipeline as an optional requirements-capture tool:
 
 ```
-CLASSIFY -> DISCOVER -> REQUIREMENTS (this skill) -> BRAINSTORM -> PLAN -> ...
+CLASSIFY -> DISCOVER -> (PRD optional) -> PLAN -> EXECUTE -> REVIEW -> SHIP -> LEARN
 ```
 
 - **Features**: kickoff prompts "Capture requirements with `/prd`?"
 - **Large improvements**: prompted
 - **Bugs/tasks**: skipped (invoke manually if needed)
 
-The PRD becomes the **input** to brainstorming. Brainstorming decides *how* to satisfy the requirements; the PRD defines *what* the requirements are.
+The PRD becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the PRD's acceptance checklist and distills it into a build sequence. The PRD defines *what* the requirements are; `plan` decides *how* to satisfy them.
 
 ---
 
@@ -418,7 +440,8 @@ The PRD becomes the **input** to brainstorming. Brainstorming decides *how* to s
 |---------|------|
 | Full tier | 12 sections, features and large improvements |
 | Light tier | 5 sections, bugs and small improvements |
-| Save location | `docs/plans/YYYY-MM-DD-<topic>-prd.md` |
+| Save location | `{plans-directory}/{filename-format}` (default: `docs/plans/YYYY-MM-DD-<topic>-prd.md`) |
+| Remote sync | Optional via `prd-sync` in `jig.config.md` (pack-driven) |
 | Acceptance items | Atomic, testable, layer-tagged, concrete |
 | Layer tags | `[API]`, `[DATA]`, `[LOGIC]`, `[UI]` |
 | API-first | Platform contract before UI in section order |

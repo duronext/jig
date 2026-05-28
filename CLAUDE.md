@@ -35,8 +35,8 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 
 ### How Skills Compose
 
-- **Direct invocation** — workflow skills invoke each other by name (`kickoff` → `brainstorm` → `plan`)
-- **Concerns checklist** — `jig.config.md` maps engineering concerns to skills. `brainstorm` reads the config and loads relevant skills during design.
+- **Direct invocation** — workflow skills invoke each other by name (`kickoff` → `prd` → `plan`)
+- **Concerns checklist** — `jig.config.md` maps engineering concerns to skills. `prd` reads the config and loads relevant skills during PRD authoring.
 - **Specialist dispatch** — `review` discovers specialist `.md` files from all three directories, filters by glob match, and dispatches as parallel subagents.
 
 ## Inventory
@@ -50,7 +50,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `kickoff` | Pipeline orchestrator — classifies work, routes through stages |
 | `init` | First-run setup — auto-detects environment, interviews, generates config |
 | `ticket` | Ticket creation — routes to the configured ticket-system pack (Linear/Jira/GitHub) |
-| `brainstorm` | Collaborative design exploration with configurable concerns checklist |
+| `brainstorm` | Discovery-time ideation tool — explore approaches, compare options, refine unclear problems |
 | `prd` | PRD creation with enforceable acceptance checklists (feeds into spec reviewer) |
 | `plan` | Spec → implementation plan with bite-sized TDD tasks |
 | `build` | Plan execution — analyzes task graph, auto-selects parallel or serial |
@@ -171,7 +171,7 @@ Commit conventions (format, types, scopes, co-author rules) are defined in `jig.
 3. Create `core/skills/{name}/SKILL.md`
 4. Add to the `skills` array in `.claude-plugin/plugin.json`
 5. Add a command file in `commands/{name}.md` for `/jig:` namespace browsing
-6. If the skill should surface during brainstorming, add it to the concerns checklist in `jig.config.md`
+6. If the skill should surface during PRD authoring, add it to the concerns checklist in `jig.config.md`
 
 ### How consumers install Jig
 Teams add this to their project's `.claude/settings.json`:

@@ -135,3 +135,59 @@ mcp__linear-server__list_teams → find your team → copy id
 # Label IDs
 mcp__linear-server__list_issue_labels with teamId: {team-id} → copy each id
 ```
+
+## PRD Document Sync
+
+When `prd-sync: linear` is set in `jig.config.md`, the `prd` skill calls into this pack to push the PRD content to a Linear document after saving locally.
+
+### Configuration
+
+Add to `jig.config.md`:
+
+```yaml
+## Documents
+plans-directory: docs/plans
+prd-sync: linear
+
+## Linear
+team-id: your-team-uuid
+prd-project-id: your-prd-project-uuid  # required for prd-sync — the dedicated PRD-collection project
+labels:
+  ...
+```
+
+`prd-project-id` is intentionally distinct from any ticket `project-id`: PRDs sync to a dedicated documents project (e.g., a "Product Requirement Documents" project), which is usually separate from where issues are filed.
+
+### Sync Behavior
+
+After `prd` writes the PRD locally, it calls Linear to create a document linked to the configured project:
+
+```
+mcp__claude_ai_Linear__save_document with:
+  projectId:   {prd-project-id from jig.config.md}
+  title:       {PRD title — derived from filename or PRD overview}
+  content:     {markdown body of the local PRD file}
+```
+
+If the document already exists for this topic (look up by title within the project), update it in place rather than creating a duplicate:
+
+```
+mcp__claude_ai_Linear__list_documents with projectId (prd-project-id) → find by title
+mcp__claude_ai_Linear__save_document with id, updated content
+```
+
+### Topic-to-Document Mapping
+
+Use the PRD's filename stem (e.g., `2026-05-27-export-feature`) as the document's stable identifier. Format the document title for human readability — strip the date prefix:
+
+```
+2026-05-27-export-feature-prd.md  →  document title: "Export Feature — PRD"
+```
+
+The mapping is convention-driven, not stored. To re-sync, look up by formatted title.
+
+### Failure Modes
+
+- **`prd-project-id` missing in config** → skip sync, warn user: "PRD sync requested but no `prd-project-id` in `## Linear` config. Set it and re-run `/prd --sync`."
+- **Linear MCP unavailable** → skip sync, warn user: "Linear MCP not connected. PRD saved locally only."
+- **Document creation fails** → save locally succeeded; surface the Linear error to the user and offer to retry.
