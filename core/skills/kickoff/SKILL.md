@@ -13,7 +13,7 @@ alwaysApply: false
 
 **PURPOSE**: The pipeline orchestrator. Routes work through stages and checks gates at each transition. **Kickoff does NOT execute stages itself** — it invokes the downstream skill for each stage using the Skill tool.
 
-**ORCHESTRATOR RULE**: At every stage transition, you MUST invoke the downstream skill using the Skill tool (e.g., `Skill: jig:brainstorm`). Do NOT attempt to execute the stage inline by following kickoff's summary of what the stage does. The downstream skill has the full process — kickoff only knows enough to route and check gates.
+**ORCHESTRATOR RULE**: At every stage transition, you MUST invoke the downstream skill using the Skill tool (e.g., `Skill: jig:plan`). Do NOT attempt to execute the stage inline by following kickoff's summary of what the stage does. The downstream skill has the full process — kickoff only knows enough to route and check gates.
 
 **CONFIGURATION**: Reads `jig.config.md` for pipeline stages, work type overrides, ticket system, branching format, and concerns checklist.
 
@@ -135,7 +135,7 @@ For **bugs**, **tasks**, and **small improvements**: skip this step. Users can s
 
 ### Gate Check
 
-- [ ] PRD saved to `docs/plans/YYYY-MM-DD-<topic>-prd.md` OR user opted to skip
+- [ ] PRD saved to the path resolved from `jig.config.md` (`plans-directory` + `filename-format`, default `docs/plans/YYYY-MM-DD-<topic>-prd.md`) OR user opted to skip
 - [ ] If PRD exists, acceptance checklist has `[ ]` items tagged by layer
 
 ---
@@ -187,7 +187,7 @@ Before proceeding, confirm:
 
 **Gate**: All tasks implemented, tested, and committed.
 
-**INVOKE `jig:build` using the Skill tool.** Pass the plan path: "Execute the plan at docs/plans/YYYY-MM-DD-<topic>-plan.md." The `build` skill analyzes the task graph and auto-selects parallel (`team-dev`) or serial (`sdd`) execution. Do not choose the strategy yourself.
+**INVOKE `jig:build` using the Skill tool.** Pass the plan path: "Execute the plan at `{plans-directory}/<resolved-filename>-plan.md`" (resolve `plans-directory` and `filename-format` from `jig.config.md`). The `build` skill analyzes the task graph and auto-selects parallel (`team-dev`) or serial (`sdd`) execution. Do not choose the strategy yourself.
 
 ### Gate Check
 
