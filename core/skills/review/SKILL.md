@@ -92,6 +92,7 @@ For each matching specialist, extract only the diff hunks for its matched files.
    - `ui-conflict` → "Focus on: UI States, Component Behavior, Entry Points"
    - `blast-radius` → "Focus on: All sections (cross-cutting)"
    - `state-completeness` → "Focus on: Business Logic, API Contract"
+   - `security-design` → "Focus on: Auth/Permissions, Data Model, API Contract, external inputs and boundaries"
 3. Build the specialist input: full document + section hints
 
 #### Mode: plan
@@ -103,6 +104,7 @@ For each matching specialist, extract only the diff hunks for its matched files.
    - `migration-safety` → "Focus on: Tasks involving DB/schema changes"
    - `blast-radius` → "Focus on: All tasks (cross-cutting)"
    - `state-completeness` → "Focus on: Tasks involving state/status changes"
+   - `security-design` → "Focus on: Tasks touching auth, data handling, secrets, or external inputs"
 4. Build the specialist input: full plan + PRD (if exists) + section hints
 
 ### Stage 3: DISPATCH (Parallel)
@@ -124,6 +126,8 @@ Agent tool:
 
     {filtered diff}             <- only the files matching this specialist's globs
 ```
+
+Code-mode specialists receive codebase access tools (Read, Grep, Glob) plus any connected static-analysis MCP tools (e.g. Semgrep), so a specialist like `security` can scan the changed files directly rather than reasoning over the diff text alone.
 
 #### Mode: prd
 
