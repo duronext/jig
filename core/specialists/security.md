@@ -24,7 +24,7 @@ Run Semgrep static analysis **first**, then triage its findings against the diff
    - Map each kept finding's Semgrep severity to this specialist's severity (`ERROR`→blocking, `WARNING`→major, `INFO`→minor) and record the rule id.
 4. Then run the manual review below to catch logic/authz/exposure issues Semgrep rules do not cover.
 
-**If the Semgrep MCP tools are not available** in this environment, note `Semgrep MCP: unavailable — manual review only` at the top of your report and proceed with the manual checklist. Do not fail the review.
+**If the Semgrep MCP tools are not available** in this environment, note `Semgrep MCP: unavailable — manual review only` at the top of your report and proceed with the manual checklist. Do not fail the review. (See `docs/semgrep-mcp.md` for connecting a Semgrep MCP server.)
 
 ## What to Check
 
