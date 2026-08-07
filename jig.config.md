@@ -62,7 +62,7 @@ filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | plan
 
 ```yaml
 swarm-tiers:
-  fast-pass: [security, dead-code, error-handling]
+  fast-pass: [security, dependency-scan, dead-code, error-handling]
   full: all
 deep-review-model: opus
 specialist-model-default: haiku
