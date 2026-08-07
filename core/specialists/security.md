@@ -77,4 +77,12 @@ For each finding:
 - **Impact**: what an attacker could do
 - **Fix**: specific remediation steps
 
+Then, once for the whole finding set, a required **Why This Matters** statement:
+- **Why This Matters**: 2–4 sentences in plain, non-jargon language a
+  non-engineer could follow. State what would actually happen if these findings
+  reached production — the concrete real-world consequence (data exposed, money
+  lost, systems compromised, trust/regulatory fallout) — and contrast it with
+  how cheap the fix is now. Make the stakes real; do not restate the technical
+  findings.
+
 If no security issues are found in the diff, respond with exactly: `N/A`

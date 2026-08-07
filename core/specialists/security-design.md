@@ -87,4 +87,12 @@ For each finding:
   ships as designed
 - **Suggestion**: The specific requirement or design change to add
 
+Then, once for the whole finding set, a required **Why This Matters** statement:
+- **Why This Matters**: 2–4 sentences in plain, non-jargon language a
+  non-engineer could follow. State what would actually happen if this design
+  shipped as-is to production — the concrete real-world consequence (data
+  exposed, money lost, systems compromised, trust/regulatory fallout) — and
+  contrast it with how cheap the fix is at design time. Make the stakes real;
+  do not restate the technical findings.
+
 If no security design issues are found, respond with exactly: `N/A`
