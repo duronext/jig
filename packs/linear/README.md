@@ -4,44 +4,53 @@ Integration pack for teams using [Linear](https://linear.app) as their ticket sy
 
 ## Prerequisites
 
-- Linear MCP server connected (`mcp__linear-server__*` tools available)
+- Linear MCP server connected (`mcp__linear__*` tools available)
 - `ticket-system: linear` in `jig.config.md`
-- `## Linear` section in `jig.config.md` with team ID and label mappings (optional but recommended)
+- `## Linear` section in `jig.config.md` with team and label mapping (optional but recommended)
 - `## Estimates` section in `jig.config.md` with the team's scale (optional)
+
+> **Tool namespace:** the current Linear MCP is Linear's own server at
+> `https://mcp.linear.app/mcp`, and its tools are `mcp__linear__*`. Older setups may still
+> carry a claude.ai-managed Linear connector pointing at `https://mcp.linear.app/sse`, whose
+> tools were `mcp__claude_ai_Linear__*`. That SSE endpoint is retired and now 404s — if you
+> see both, remove the connector on claude.ai and keep the `/mcp` server.
 
 ## How It Works
 
 When `ticket` creates an issue and `ticket-system` is `linear`, it reads this pack for:
 
 1. **Tool mapping** — which MCP tool to call and how to structure the payload
-2. **Field mapping** — how Jig issue types map to Linear label IDs (from `jig.config.md`)
+2. **Field mapping** — how Jig issue types map to Linear labels (from `jig.config.md`)
 3. **Branch naming** — uses Linear's `gitBranchName` response field directly
+
+**Names, not UUIDs.** The Linear MCP resolves teams, labels, users, and projects by name, so
+nothing in `jig.config.md` needs a UUID. Pass the human-readable value straight through.
 
 ## Creating a Ticket
 
-Read the `## Linear` section from `jig.config.md` for `team-id` and `labels`. Read `## Estimates` for the scale.
+Read the `## Linear` section from `jig.config.md` for `team` and `labels`. Read `## Estimates`
+for the scale.
 
 Then call:
 
 ```
-mcp__linear-server__save_issue with:
-  teamId:      {team-id from jig.config.md, or look up by team name}
+mcp__linear__save_issue with:
+  team:        {team from jig.config.md — key like "ENG", or the team name}
   title:       {title}
   description: {markdown body}
   estimate:    {value from the team's estimate scale}
-  labelIds:    [{label ID from jig.config.md labels mapping}]
-  assigneeId:  {user ID, or omit if unassigned}
+  labels:      [{label name from jig.config.md labels mapping}]
+  assignee:    {user name, email, or "me" — omit if unassigned}
 ```
 
-### Looking Up Assignees
+`labels` **replaces** the issue's full label set; labels not included are removed. When
+updating an existing issue, pass every label you want it to keep.
 
-If the user says "assign to yuri", look up the user:
+### Assignees
 
-```
-mcp__linear-server__list_users → find by name
-```
-
-Use the returned `id` as `assigneeId`.
+`assignee` accepts a user ID, name, email, or `"me"` — pass it directly. No lookup step is
+needed. If a name is ambiguous, disambiguate with `mcp__linear__list_users` (filter with
+`query`) and pass the returned `id`.
 
 ## Issue Type → Label Resolution
 
@@ -49,33 +58,39 @@ Read `labels` from the `## Linear` section in `jig.config.md`:
 
 ```yaml
 ## Linear
+team: ENG
 labels:
-  feature: f6a13428-...
-  improvement: defa5e44-...
-  bug: 58ee0937-...
-  task: 74e26191-...
-  refactor: b6537203-...
-  incident: 776064f1-...
+  feature: Feature
+  improvement: Improvement
+  bug: Bug
+  task: Task
+  refactor: Refactor
+  incident: Incident
 ```
 
-The `ticket` skill determines the issue type during the interview. Map it to the label ID:
+The `ticket` skill determines the issue type during the interview. Map it to the label name
+and pass it in the `labels` array:
 
-| Interview Answer | Config Key | Label ID from config |
-|-----------------|-----------|---------------------|
-| Feature | `labels.feature` | `f6a13428-...` |
-| Improvement | `labels.improvement` | `defa5e44-...` |
-| Bug | `labels.bug` | `58ee0937-...` |
-| Task | `labels.task` | `74e26191-...` |
-| Refactor | `labels.refactor` | `b6537203-...` |
-| Incident | `labels.incident` | `776064f1-...` |
+| Interview Answer | Config Key | Passed as |
+|-----------------|-----------|-----------|
+| Feature | `labels.feature` | `labels: ["Feature"]` |
+| Improvement | `labels.improvement` | `labels: ["Improvement"]` |
+| Bug | `labels.bug` | `labels: ["Bug"]` |
+| Task | `labels.task` | `labels: ["Task"]` |
+| Refactor | `labels.refactor` | `labels: ["Refactor"]` |
+| Incident | `labels.incident` | `labels: ["Incident"]` |
 
-**If labels aren't in config**, look them up dynamically:
+The mapping exists because the config key is Jig's vocabulary and the value is whatever that
+team named the label in Linear — they usually match, but don't have to.
+
+**If labels aren't in config**, look them up:
 
 ```
-mcp__linear-server__list_issue_labels with teamId: {team-id}
+mcp__linear__list_issue_labels with team: {team}
 ```
 
-Match by name (case-insensitive). This is slower but works for teams that haven't configured IDs yet.
+Match by name (case-insensitive). Many workspaces nest these under a parent label group such
+as "Issue Type"; pass the leaf name (`"Bug"`), not the group path.
 
 ## Estimate Scale
 
@@ -117,23 +132,20 @@ scale: [0, 1, 2, 4, 16, 32]
 unit: hours
 
 ## Linear
-team-id: your-team-uuid-here
+team: ENG
 labels:
-  feature: your-feature-label-uuid
-  improvement: your-improvement-label-uuid
-  bug: your-bug-label-uuid
-  task: your-task-label-uuid
-  refactor: your-refactor-label-uuid
+  feature: Feature
+  improvement: Improvement
+  bug: Bug
+  task: Task
+  refactor: Refactor
 ```
 
-**To find your IDs:**
+**To check the names your workspace uses:**
 
 ```
-# Team ID
-mcp__linear-server__list_teams → find your team → copy id
-
-# Label IDs
-mcp__linear-server__list_issue_labels with teamId: {team-id} → copy each id
+mcp__linear__list_teams                          → team names
+mcp__linear__list_issue_labels with team: {team} → label names
 ```
 
 ## PRD Document Sync
@@ -150,31 +162,37 @@ plans-directory: docs/plans
 prd-sync: linear
 
 ## Linear
-team-id: your-team-uuid
-prd-project-id: your-prd-project-uuid  # required for prd-sync — the dedicated PRD-collection project
+team: ENG
+prd-project: Product Requirement Documents  # required for prd-sync — the dedicated PRD-collection project
 labels:
   ...
 ```
 
-`prd-project-id` is intentionally distinct from any ticket `project-id`: PRDs sync to a dedicated documents project (e.g., a "Product Requirement Documents" project), which is usually separate from where issues are filed.
+`prd-project` is intentionally distinct from any ticket project: PRDs sync to a dedicated
+documents project, which is usually separate from where issues are filed.
 
 ### Sync Behavior
 
 After `prd` writes the PRD locally, it calls Linear to create a document linked to the configured project:
 
 ```
-mcp__claude_ai_Linear__save_document with:
-  projectId:   {prd-project-id from jig.config.md}
-  title:       {PRD title — derived from filename or PRD overview}
-  content:     {markdown body of the local PRD file}
+mcp__linear__save_document with:
+  project:  {prd-project from jig.config.md}
+  title:    {PRD title — derived from filename or PRD overview}
+  content:  {markdown body of the local PRD file}
 ```
 
-If the document already exists for this topic (look up by title within the project), update it in place rather than creating a duplicate:
+If the document already exists for this topic, update it in place rather than creating a
+duplicate. Search by title and confirm the match is in the configured project:
 
 ```
-mcp__claude_ai_Linear__list_documents with projectId (prd-project-id) → find by title
-mcp__claude_ai_Linear__save_document with id, updated content
+mcp__linear__list_documents with query: {title}, fields: ["id", "title", "project"]
+  → find the entry whose project.name matches prd-project
+mcp__linear__save_document with id: {that id}, content: {updated content}
 ```
+
+Search by `query` rather than filtering by project — `list_documents` takes `projectId` as a
+UUID, and the whole point of this pack is not to make teams hunt for UUIDs.
 
 ### Topic-to-Document Mapping
 
@@ -188,6 +206,6 @@ The mapping is convention-driven, not stored. To re-sync, look up by formatted t
 
 ### Failure Modes
 
-- **`prd-project-id` missing in config** → skip sync, warn user: "PRD sync requested but no `prd-project-id` in `## Linear` config. Set it and re-run `/prd --sync`."
+- **`prd-project` missing in config** → skip sync, warn user: "PRD sync requested but no `prd-project` in `## Linear` config. Set it and re-run `/prd --sync`."
 - **Linear MCP unavailable** → skip sync, warn user: "Linear MCP not connected. PRD saved locally only."
 - **Document creation fails** → save locally succeeded; surface the Linear error to the user and offer to retry.

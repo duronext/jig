@@ -105,11 +105,11 @@ Tracker packs read IDs from here. See packs/ for setup instructions.
 
 ```yaml
 # ## Linear
-# team-id: your-team-uuid
+# team: ENG
 # labels:
-#   feature: uuid
-#   bug: uuid
-#   task: uuid
+#   feature: Feature
+#   bug: Bug
+#   task: Task
 
 # ## Jira
 # project-key: PROJ
