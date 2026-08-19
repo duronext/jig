@@ -100,8 +100,8 @@ Plain language. Broad audience. Problem-first.
 Route to the configured ticket system. Each tracker pack provides the specific tool calls and field mapping.
 
 **Linear** (via `packs/linear/`):
-- Uses Linear MCP tools (`mcp__linear-server__save_issue`)
-- Maps issue types to label IDs
+- Uses Linear MCP tools (`mcp__linear__save_issue`)
+- Maps issue types to label names — team, labels, and assignee all resolve by name
 - Returns `gitBranchName` for branch creation
 
 **GitHub Issues** (via `packs/github-issues/`):

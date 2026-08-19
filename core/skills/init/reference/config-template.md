@@ -88,11 +88,11 @@ Based on Q2, include the appropriate commented-out tracker template:
 
 ```yaml
 ## Linear
-# team-id: your-team-uuid
+# team: ENG
 # labels:
-#   feature: uuid
-#   bug: uuid
-#   task: uuid
+#   feature: Feature
+#   bug: Bug
+#   task: Task
 ```
 
 **jira:**
