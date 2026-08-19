@@ -11,7 +11,7 @@
       "description": "Full lifecycle pipeline: discover, plan, execute, review, ship, learn — with brainstorm and debug as on-demand discovery tools",
       "source": "./",
       "strict": true,
-      "version": "1.1.0"
+      "version": "1.1.1"
     }
   ]
 }
