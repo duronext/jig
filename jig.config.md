@@ -62,7 +62,7 @@ filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | plan
 
 ```yaml
 swarm-tiers:
-  fast-pass: [security, dead-code, error-handling]
+  fast-pass: [security, dependency-scan, dead-code, error-handling]
   full: all
 deep-review-model: opus
 specialist-model-default: haiku
@@ -72,7 +72,7 @@ specialist-model-default: haiku
 
 ```yaml
 prd-swarm-tiers:
-  fast-pass: [data-dependency, ui-conflict, blast-radius, state-completeness]
+  fast-pass: [data-dependency, ui-conflict, blast-radius, state-completeness, security-design]
   full: all
 ```
 
@@ -80,7 +80,7 @@ prd-swarm-tiers:
 
 ```yaml
 plan-swarm-tiers:
-  fast-pass: [task-dependency, migration-safety, blast-radius, state-completeness]
+  fast-pass: [task-dependency, migration-safety, blast-radius, state-completeness, security-design]
   full: all
 plan-deep-review-model: opus
 design-review-model: sonnet
