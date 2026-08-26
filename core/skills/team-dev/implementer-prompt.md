@@ -40,6 +40,10 @@ Task tool (general-purpose):
     Once you're clear on requirements:
     1. Mark your task as in_progress in the task list (TaskUpdate)
     2. If the task has testable logic, write tests first (TDD).
+       **Derive test cases from the task requirements above** — each
+       requirement, behavior, and edge case in the spec becomes a test.
+       Do NOT invent tests from the code you plan to write. The spec
+       is the source of truth for what to test.
        If it's pure schema/config/boilerplate with no logic, skip to step 3.
     3. Implement exactly what the task specifies
     4. Verify implementation works (run tests, build check, or equivalent)
@@ -101,7 +105,9 @@ Task tool (general-purpose):
     **Testing (if applicable):**
     - Do tests verify behavior (not just mock it)?
     - Did I follow TDD where the task had testable logic?
-    - Are tests comprehensive?
+    - Does every requirement in the task spec have a corresponding test?
+    - Did I test what the spec says should NOT happen (negative cases)?
+    - Are tests derived from the spec, not from my implementation?
 
     If you find issues during self-review, fix them before reporting.
 
