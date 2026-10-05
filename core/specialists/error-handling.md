@@ -48,11 +48,13 @@ You are reviewing a code diff for error handling issues. This review is language
 - Scripts and tooling (non-production code)
 - Intentional error suppression with clear documentation explaining why
 - Logging concerns (that's a separate review concern)
+- Code the diff does not add or change. Untouched base code is not a finding on this diff, even when it looks wrong; flag only lines the diff adds or modifies
 
 ## Report Format
 
 For each finding:
 - **File**: path:line_number
+- **Line**: the exact line you are flagging, quoted from the diff, plus the next line if the handler continues there (a catch whose following line reports the error is not swallowing it)
 - **Pattern**: which error handling rule is violated
 - **Fix**: the correct pattern to use, with a brief code example if helpful
 

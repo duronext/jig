@@ -67,6 +67,8 @@ This is scratch work — not a separate doc. It anchors the rest of the transpos
 
 **The only floor is three.** If you cannot articulate at least 3 bullets from available context, stop — you don't have enough to plan. Return to the user: "I don't have a clear contract for what to build. Want to capture a PRD with `/prd`, or talk through it with `/brainstorm` first?"
 
+**Parity or port work.** When the ticket says to match a reference ("make X look or behave like Y"), list the reference's rendered values (size, colour, weight, spacing) before drafting tasks, read from its CSS or from the running reference, and put them in the plan as the contract. Porting the shapes while choosing the values by eye is the usual miss.
+
 ### 1b. Group by Layer
 
 Bucket every contract item into its layer:

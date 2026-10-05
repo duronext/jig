@@ -336,6 +336,8 @@ When a specialist's prompt grows too large:
 ### With `code-review` agent
 The agent fetches `git diff origin/{main-branch}...HEAD`, then follows this skill's pipeline with `tier: all`.
 
+A clean report covers the head it ran on. Run the swarm again on the final head after the last commit, and after any rebase that touches specs or docs; a clean round on an older head is stale.
+
 ### With `team-dev`
 The lead dispatches this skill as a subagent after spec compliance passes. Diff is scoped to the task's commits (BASE_SHA..HEAD_SHA). Uses `tier: fast-pass`.
 

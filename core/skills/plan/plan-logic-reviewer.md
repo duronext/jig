@@ -60,7 +60,7 @@ For each task and for the plan as a whole, apply these 7 reasoning patterns. Use
 - For each schema claim ("column X has type Y"): verify against the actual schema
 - For each import: does the module export what the plan expects?
 
-**What breaks**: Plan says "modify `src/models/user.ts`" but the file is at `src/entities/user.ts`. Plan says "add field to User type" but the User type is an interface, not a class. Plan says "column has no foreign keys" but three tables reference it.
+**What breaks**: Plan says "modify `src/models/user.ts`" but the file is at `src/entities/user.ts`. Plan says "add field to User type" but the User type is an interface, not a class. Plan says "column has no foreign keys" but three tables reference it. Plan runs a script that picks the tests to run (an "affected" command) and expects the branch's own changes, but the script diffs against a default base branch while this branch is cut from a feature branch, so it selects the wrong tests.
 
 ### 4. Test the Stated Goal
 
@@ -73,7 +73,7 @@ For each task and for the plan as a whole, apply these 7 reasoning patterns. Use
 - Are there acceptance criteria with no corresponding task?
 - Are there tasks that do not map to any acceptance criterion?
 
-**What breaks**: PRD requires 8 acceptance criteria. Plan covers 6. Two UI criteria have no task. Alternatively: Plan has a task for "admin notification" that the PRD never mentioned (scope creep).
+**What breaks**: PRD requires 8 acceptance criteria. Plan covers 6. Two UI criteria have no task. Alternatively: Plan has a task for "admin notification" that the PRD never mentioned (scope creep). A manual verify step says to expect one branch of a flow, but the default flags or fixtures in the app lead to a different branch, so following the step verbatim never reaches the behavior it claims to verify.
 
 ### 5. Question the Scope
 

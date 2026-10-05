@@ -40,3 +40,4 @@ Read and follow the `review` skill (`core/skills/review/SKILL.md`) for the compl
 - Use each specialist's declared `model` from frontmatter (haiku, sonnet, or opus)
 - Score caps are HARD -- no exceptions
 - The Specialist Summary table must distinguish: dispatched / skipped / N/A / clean
+- Never hand back an interim report. The report is complete only after the logic reviewer (Stage 5) has run and the score (Stage 6) is computed. If specialists are still running, wait for them, then dispatch the logic reviewer. If you truly cannot finish, label the report INCOMPLETE and list which specialists and stages have not run, instead of presenting a partial report as the result

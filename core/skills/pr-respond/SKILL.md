@@ -299,6 +299,7 @@ All feedback has been addressed:
 - [ ] Tests pass
 - [ ] Changes committed
 - [ ] Changes pushed to remote
+- [ ] Review swarm re-run on the final head after the last commit (and after any rebase that touches specs); a clean round on an older head is stale
 - [ ] Reply posted to every addressed comment
 - [ ] Every addressed thread resolved via GraphQL
 - [ ] No unresolved threads remaining (unless intentionally deferred)

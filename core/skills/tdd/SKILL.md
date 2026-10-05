@@ -169,6 +169,8 @@ Confirm:
 
 **Other tests broke?** Fix them now, before moving on.
 
+**Mutation check.** For each new assertion that guards a behavior (a style binding, a branch, a flag, a guard clause), remove or break the code it guards, confirm the test now fails, then restore the code. A test that still passes with its guard removed asserts nothing.
+
 ### REFACTOR -- Clean Up
 
 After green only:
@@ -316,6 +318,7 @@ Before marking work complete:
 - [ ] Watched each test fail before implementing
 - [ ] Each test failed for the expected reason (feature missing, not typo)
 - [ ] Wrote minimal code to pass each test
+- [ ] Removed the code each new assertion guards and watched the test fail (then restored it)
 - [ ] All tests pass
 - [ ] Output is clean (no errors, warnings)
 - [ ] Tests use real code (mocks only if unavoidable)

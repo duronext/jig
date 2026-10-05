@@ -58,7 +58,7 @@ For each meaningful change in the diff, apply these 7 reasoning patterns. You do
 - For `??` defaults: it only handles null/undefined — is that sufficient?
 - For if/else: is the else branch actually reachable?
 
-**What breaks**: Silent fallthrough to default. Valid falsy values triggering the fallback. Unreachable else branches that look like error handling but never execute.
+**What breaks**: Silent fallthrough to default. Valid falsy values triggering the fallback. Unreachable else branches that look like error handling but never execute. A dev-only fallback that swallows a failed request (mock data on error) lets tests pass while the real request path is broken; check that the tests exercise the failure with the fallback off.
 
 ### 4. Assume It's Null
 
@@ -82,8 +82,9 @@ For each meaningful change in the diff, apply these 7 reasoning patterns. You do
 - Check: does the code below actually match the assertion?
 - Check: is the comment stale from a previous iteration?
 - Check TODOs: is the described limitation still accurate?
+- A claim about wiring ("X closes through Y", "Z is translated by W") is a claim about a caller: open the caller and read the line. Do this for claims in specs, plans and PR text too, and never repeat a wiring claim from another reviewer's report without reading it yourself
 
-**What breaks**: Comment says "retries N times" but code has no counter. Comment describes behavior that was refactored away. Stale TODO describing a bug that was already fixed differently.
+**What breaks**: Comment says "retries N times" but code has no counter. Comment describes behavior that was refactored away. Stale TODO describing a bug that was already fixed differently. A spec says a modal's close is translated by one helper while its opener passes a callback that handles the close directly, so the described path never runs; the sentence was copied from an earlier review without opening the opener.
 
 ### 6. Follow the Lifecycle
 
@@ -95,8 +96,11 @@ For each meaningful change in the diff, apply these 7 reasoning patterns. You do
 - Are subscriptions/timers/observers cleaned up properly?
 - Are resources released on BOTH success AND failure paths?
 - Do cached values hold references that should be fresh?
+- Can the same event fire twice (a repeated visibility or proximity report, a duplicate subscription callback)? Does the handler restart or duplicate work when it does?
+- Is a value read before an `await` or a microtask still current when it is used after?
+- When async work resolves, was its request superseded or its owning store reset in the meantime? Does it still commit?
 
-**What breaks**: State persisting across context changes. Resources not cleaned up on error path. Infinite polling because cleanup runs on a condition that never re-triggers. Memory leaks from unsubscribed listeners. Deferred callbacks (timers, rAF, promises) that fire after the owning context has been torn down — the callback mutates state that was already reset, corrupting the system.
+**What breaks**: State persisting across context changes. Resources not cleaned up on error path. Infinite polling because cleanup runs on a condition that never re-triggers. Memory leaks from unsubscribed listeners. Deferred callbacks (timers, rAF, promises) that fire after the owning context has been torn down — the callback mutates state that was already reset, corrupting the system. A repeated lifecycle event (a duplicate "near" or visibility report) restarts work that was already in flight. A value captured before an `await` is stale by the time it is used. An async load that resolves after a store reset or a newer request commits its result over the current state.
 
 ### 7. Test the Stated Goal
 
@@ -108,7 +112,7 @@ For each meaningful change in the diff, apply these 7 reasoning patterns. You do
 - Check: could an external dependency defeat the optimization?
 - Check: does a parent/container/caller undermine the fix?
 
-**What breaks**: Optimization defeated by the caller recreating objects every invocation. Cache bypassed because the key computation is wrong. Guard that checks the right condition but at the wrong point in the lifecycle.
+**What breaks**: Optimization defeated by the caller recreating objects every invocation. Cache bypassed because the key computation is wrong. Guard that checks the right condition but at the wrong point in the lifecycle. A test stubs a network response with the test framework's route interception, but in an Electron renderer the response can arrive with status 0, so the code under test sees a failure the stub never meant; the stub has to answer from the main process (for example with a protocol handler) for the test to reach the path it claims to. Text read with Playwright's `allTextContents` and compared untrimmed against a literal always fails because of template whitespace; trim it, or use `toHaveText`.
 
 ## Proactive Exploration
 

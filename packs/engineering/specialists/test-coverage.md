@@ -1,7 +1,7 @@
 ---
 name: test-coverage
 description: Reviews changed code for missing test coverage -- new functions without tests, untested error paths, missing branch coverage
-model: haiku
+model: sonnet
 tier: full-only
 globs:
   - "**/*"
@@ -33,6 +33,10 @@ If the diff adds if/else, switch/case, ternary expressions, or early returns, ch
 ### Changed behavior without updated tests
 
 If the diff modifies the behavior of an existing function (changed return value, different side effects, altered conditional logic), check whether the corresponding tests were updated to reflect the new behavior. Stale tests that still pass but test the old behavior are a coverage gap.
+
+### New tests that only repeat an existing test
+
+If the diff adds a test or test block, check whether an existing test already makes the same assertions on the same code path. A new block that only repeats assertions an existing test already makes adds run time and maintenance without coverage; flag it, and name the existing test.
 
 ## What to Ignore
 
