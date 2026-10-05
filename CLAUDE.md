@@ -37,7 +37,7 @@ Work type (bug/feature/improvement/task) determines which stages run and at what
 
 - **Direct invocation** — workflow skills invoke each other by name (`kickoff` → `prd` → `plan`)
 - **Concerns checklist** — `jig.config.md` maps engineering concerns to skills. `prd` reads the config and loads relevant skills during PRD authoring.
-- **Specialist dispatch** — `review` discovers specialist `.md` files from all three directories, filters by glob match, and dispatches as parallel subagents.
+- **Specialist dispatch** — `review` discovers specialist `.md` files from the team, user (`~/.claude/specialists/`, `~/.agents/specialists/`), pack and core directories, filters by glob match, and dispatches as parallel subagents.
 
 ## Inventory
 

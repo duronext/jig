@@ -33,16 +33,20 @@ This is how teams customize without editing framework files. Like CSS specificit
 Specialists for the review swarm follow the same pattern:
 
 ```
-1. team/specialists/     ← Team's domain-specific reviewers
-2. packs/*/specialists/  ← Pack reviewers
-3. core/specialists/     ← Framework's generic reviewers
+1. team/specialists/       ← Team's domain-specific reviewers
+2. ~/.claude/specialists/  ← User-level reviewers, apply to every project
+   ~/.agents/specialists/     (same tier; ~/.claude/ wins on a name clash)
+3. packs/*/specialists/    ← Pack reviewers
+4. core/specialists/       ← Framework's generic reviewers
 ```
+
+The user tier belongs to the person running the review, not to the project, so it travels with them across repos. A directory that does not exist is skipped without error.
 
 ### Process
 
-1. **Scan** all three directories for `*.md` files
+1. **Scan** every directory above for `*.md` files, skipping any that do not exist
 2. **Parse** specialist frontmatter (name, model, tier, globs, severity)
-3. **Deduplicate** by `name` — highest priority origin wins
+3. **Deduplicate** by `name` — highest priority origin wins (team > user > pack > core)
 4. **Filter** by glob intersection with changed files (specialists whose globs don't match any changed file are skipped)
 5. **Filter** by swarm tier from `jig.config.md` (fast-pass vs full)
 6. **Dispatch** matching specialists as parallel subagents
@@ -51,8 +55,8 @@ Specialists for the review swarm follow the same pattern:
 
 `review` handles dispatch:
 - Reads `swarm-tiers` from `jig.config.md` to determine which tier to run
-- Collects specialists from all three directories
-- Deduplicates (team > pack > core)
+- Collects specialists from every discovery directory
+- Deduplicates (team > user > pack > core)
 - Filters by glob match against changed files
 - Filters by tier (fast-pass for per-task review, full for pre-PR)
 - Spawns matching specialists as parallel subagents with appropriate model

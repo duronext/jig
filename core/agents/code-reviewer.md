@@ -26,7 +26,7 @@ Follow the `review` skill pipeline exactly:
 ## Skill Reference
 
 Read and follow the `review` skill (`core/skills/review/SKILL.md`) for the complete pipeline:
-- Stage 1: DISCOVER specialists (scan `team/specialists/`, `packs/*/specialists/`, `core/specialists/` for `*.md`, parse frontmatter, filter by tier)
+- Stage 1: DISCOVER specialists (scan `team/specialists/`, `~/.claude/specialists/`, `~/.agents/specialists/`, `packs/*/specialists/`, `core/specialists/` for `*.md`, skipping missing directories; parse frontmatter, filter by tier)
 - Stage 2: PREPARE the diff (extract changed files, intersect with specialist globs)
 - Stage 3: DISPATCH matching specialists in parallel (Agent tool, one per specialist)
 - Stage 4: COLLECT results (findings or N/A)

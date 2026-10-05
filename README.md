@@ -131,6 +131,8 @@ Dispatched by `/review` as parallel subagents. Language-agnostic:
 
 Teams add their own specialists in `.claude/specialists/` (e.g., `typeorm.md`, `i18n.md`, `graphql-contracts.md`). The swarm discovers them automatically.
 
+Specialists you want in every project go in your user directory, `~/.claude/specialists/` (or `~/.agents/specialists/`). The priority is team > user > pack > core, so a team specialist with the same name wins, and a missing directory is skipped.
+
 ### Engineering Starter Pack
 
 Ships with Jig. Three skills + one specialist for universal engineering practices:

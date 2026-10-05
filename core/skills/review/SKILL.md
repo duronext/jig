@@ -41,12 +41,12 @@ alwaysApply: false
 
 ### Stage 1: DISCOVER Specialists
 
-Collect specialists from all three discovery directories (see `framework/DISCOVERY.md`):
+Collect specialists from every discovery directory (see `framework/DISCOVERY.md`):
 
-1. Scan `team/specialists/`, `packs/*/specialists/`, and `core/specialists/` for `*.md` files
+1. Scan `team/specialists/`, the user directories `~/.claude/specialists/` and `~/.agents/specialists/`, `packs/*/specialists/`, and `core/specialists/` for `*.md` files. Skip any directory that does not exist, without error
 2. Read each file and parse the YAML frontmatter
 3. Extract: `name`, `description`, `model`, `tier`, `stage`, `globs`, `severity`
-4. Deduplicate by `name` (team > pack > core)
+4. Deduplicate by `name` (team > user > pack > core; within the user tier, `~/.claude/specialists/` wins over `~/.agents/specialists/`)
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - `mode: prd` → include specialists where `stage: prd` or `stage: both`
