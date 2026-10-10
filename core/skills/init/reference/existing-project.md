@@ -13,6 +13,7 @@ If found:
 
 1. Warn: "Found existing `jig.config.md`."
 2. Present options:
+   - **(u) Upgrade to 2.0** — offered first when the config has no `spec-swarm-tiers`; follow `upgrade.md`
    - **(a) Overwrite** — proceed with init, generate fresh config
    - **(b) Edit manually** — stop init, suggest direct edits instead
    - **(c) Abort** — stop init entirely

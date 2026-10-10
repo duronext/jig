@@ -4,8 +4,8 @@ This project uses **Jig** for development workflow management.
 See `jig.config.md` for pipeline configuration.
 
 <!-- ==========================================================================
-     Jig handles: pipeline orchestration, code review, brainstorming, parallel
-     execution, PR creation, and post-mortems. You do NOT need to document
+     Jig handles: pipeline orchestration, PRDs and specs, code review,
+     brainstorming, parallel execution, PR creation, and post-mortems. You do NOT need to document
      those workflows here. They live in jig.config.md and the Jig skill set.
 
      This file is for PROJECT-SPECIFIC context that Jig cannot know:

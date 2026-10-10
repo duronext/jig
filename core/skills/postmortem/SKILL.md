@@ -252,6 +252,8 @@ Edit skill and specialist files directly. Follow the existing style of each file
 
 ## Step 8: Report and Hand Off
 
+If the merged work has a live PRD (`> **PRD:**` in its plan or spec), add one `learn` entry to its log naming the one or two lessons that changed a skill or specialist, in plain words. See `framework/LIVE_PRD.md`.
+
 Present a structured summary:
 
 ```markdown

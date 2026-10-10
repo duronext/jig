@@ -2,8 +2,8 @@
 name: kickoff
 description: >
   Use when starting development work on a bug, feature, improvement, or task.
-  Guides engineers through the full development pipeline: discover, brainstorm,
-  plan, execute, review, ship. Invoked by "let's work on", "I need to build",
+  Guides engineers through the full development pipeline: discover, PRD, spec,
+  plan, build, review, ship, learn. Invoked by "let's work on", "I need to build",
   "fix this bug", "start a new task", or /kickoff.
 tier: workflow
 alwaysApply: false
@@ -47,19 +47,24 @@ graph LR
   classify["CLASSIFY<br/>work type"] --> discover["DISCOVER<br/>ticket + branch"]
   discover -.->|tool| brainstorm["BRAINSTORM<br/>ideation (optional)"]
   discover -.->|tool| debug["DEBUG<br/>root cause (bugs)"]
-  discover --> prd["PRD<br/>requirements (optional)"]
+  discover --> prd["PRD<br/>product doc (features)"]
   prd --> review_prd["REVIEW:prd<br/>tier all"]
-  review_prd --> plan["PLAN<br/>transpose + tasks"]
+  review_prd --> spec["SPEC<br/>technical contract"]
+  discover --> spec
+  spec --> review_spec["REVIEW:spec<br/>tier all"]
+  review_spec --> plan["PLAN<br/>transpose + tasks"]
   discover --> plan
   plan --> review_plan["REVIEW:plan<br/>tier all"]
   review_plan --> build["BUILD<br/>execute + test"]
   build -.->|fast tier<br/>while building| review_code_fast["REVIEW:code<br/>tier fast-pass"]
   build --> review_code["REVIEW:code<br/>tier all"]
-  review_code --> ship["SHIP<br/>PR + merge"]
+  review_code --> prd_check["PRD CHECK<br/>outcomes, from the user's side"]
+  prd_check --> ship["SHIP<br/>PR + merge"]
   ship --> learn["LEARN<br/>postmortem"]
 
   review_plan -.->|plan wrong| plan
-  review_code -.->|scope changed| prd
+  review_code -.->|scope changed| spec
+  build -.->|product question| prd
   build -.->|blocked| plan
 ```
 
@@ -67,7 +72,9 @@ Each stage has a **gate**. You don't move forward until the gate is satisfied.
 
 `BRAINSTORM` and `DEBUG` are **discovery-time tools**, not stages — they hang off `DISCOVER` and are invoked on demand (by the user or offered by kickoff) when the work benefits from exploration or root-cause investigation. They produce understanding, not artifacts, and return control to the workflow when done.
 
-`REVIEW` is a **multi-stage gate engine**: it runs after PRD (`tier: all`), after PLAN (`tier: all`), and during/after BUILD (`tier: fast-pass` per-task during, `tier: all` pre-ship). The same skill, three modes. See `core/skills/review/SKILL.md`.
+`REVIEW` is a **multi-stage gate engine**: it runs after PRD, after SPEC and after PLAN (`tier: all`), and during/after BUILD (`tier: fast-pass` per-task during, `tier: all` pre-ship). The same skill, four modes: `prd`, `spec`, `plan`, `code`. See `core/skills/review/SKILL.md`.
+
+**The PRD is a live document.** When it is published as an artifact, every later stage keeps it current: `spec` opens decisions it finds, `build` ticks milestones and writes to the log, the PRD check fills in the trace, and `finish` ticks the ship milestone. See `framework/LIVE_PRD.md`. When the PRD is a plain `*-prd.md`, the same updates are written into the file (file mode). With no PRD, they are skipped.
 
 The pipeline stages and work type overrides are configurable in `jig.config.md`. Read the config at the start of each session to determine which stages to run.
 
@@ -80,9 +87,9 @@ Before anything else, determine the work type. This controls pipeline depth.
 ```mermaid
 graph TD
   start{"What kind of work?"}
-  start -->|broken / incorrect| bug["BUG<br/>Discovery tool: debug<br/>Plan: 1-3 tasks<br/>Execute: sequential<br/>Learn: optional"]
-  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tool: brainstorm (optional)<br/>Plan: standard<br/>Execute: SDD or team-dev<br/>Learn: optional"]
-  start -->|new capability| feature["FEATURE<br/>Discovery tool: brainstorm (recommended)<br/>PRD: recommended<br/>Plan: detailed<br/>Execute: team-dev<br/>Learn: yes"]
+  start -->|broken / incorrect| bug["BUG<br/>Discovery tool: debug<br/>Spec: light (optional)<br/>Plan: 1-3 tasks<br/>Execute: sequential<br/>Learn: optional"]
+  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tool: brainstorm (optional)<br/>PRD: one-pager if large<br/>Spec: light or full<br/>Plan: standard<br/>Execute: SDD or team-dev<br/>Learn: optional"]
+  start -->|new capability| feature["FEATURE<br/>Discovery tool: brainstorm (recommended)<br/>PRD: recommended<br/>Spec: full<br/>Plan: detailed<br/>Execute: team-dev<br/>Learn: yes"]
   start -->|config / chore / refactor| task["TASK / CHORE<br/>Skip discovery tools<br/>Plan: minimal<br/>Execute: direct<br/>Learn: no"]
 ```
 
@@ -123,20 +130,37 @@ Before proceeding, confirm:
 
 ---
 
-## Step 2b: REQUIREMENTS (optional)
+## Step 2b: PRD (features, large improvements)
 
-**Gate**: PRD exists or user opted to skip.
+**Gate**: An approved PRD exists, or the user opted to skip.
 
-For **features** and **large improvements**, prompt: "Want to capture requirements first with `/prd`?"
+For **features**, prompt: "Want to write the PRD first with `/prd`? It's the plain-language version people can read, tick off and sign." For **large improvements**, offer the one-pager PRD. A PM may already have one: accept a PRD file path or a PRD artifact link and skip authoring.
 
-If yes: **INVOKE `jig:prd` using the Skill tool.** Do not write the PRD inline — the `prd` skill has the full process (tier selection, 12-section structure, acceptance checklist format). Wait for it to complete before proceeding.
+If yes: **INVOKE `jig:prd` using the Skill tool.** Do not write the PRD inline. The `prd` skill has the full process (interview, phases and MVP cut, the Jig page, the live log). Wait for it to complete before proceeding.
 
-For **bugs**, **tasks**, and **small improvements**: skip this step. Users can still invoke `/prd` manually if needed.
+For **bugs**, **tasks**, and **small improvements**: skip this step. Users can still invoke `/prd` manually.
 
 ### Gate Check
 
-- [ ] PRD saved to the path resolved from `jig.config.md` (`plans-directory` + `filename-format`, default `docs/plans/YYYY-MM-DD-<topic>-prd.md`) OR user opted to skip
-- [ ] If PRD exists, acceptance checklist has `[ ]` items tagged by layer
+- [ ] PRD saved (`{plans-directory}/YYYY-MM-DD-<topic>-prd.md`) and, where artifacts are available, published as a live page; OR user opted to skip
+- [ ] The PRD has a one-sentence thesis, phases with an MVP cut line, and outcome IDs (`MVP.1` ...)
+- [ ] Every sign-off listed for the current rev is recorded, or the user chose to proceed while sign-off is pending
+
+---
+
+## Step 2c: SPEC
+
+**Gate**: A spec exists for the phase being built, or the user opted to skip.
+
+For **features** and **improvements**: **INVOKE `jig:spec` using the Skill tool.** If a PRD exists, pass its path or artifact link: "PRD is at `...`. Spec the MVP phase." The `spec` skill has the full process (tier selection, 12-section structure, acceptance checklist format, PRD tracing).
+
+For **bugs**: offer the light spec when the fix touches more than one layer; otherwise skip. For **tasks**: skip.
+
+### Gate Check
+
+- [ ] Spec saved to the path resolved from `jig.config.md` (`plans-directory` + `filename-format`, default `docs/plans/YYYY-MM-DD-<topic>-spec.md`) OR user opted to skip
+- [ ] If the spec exists, its acceptance checklist has `[ ]` items tagged by layer
+- [ ] If a PRD exists, every in-scope PRD outcome is served by at least one spec item
 
 ---
 
@@ -160,7 +184,7 @@ If user accepts, **INVOKE `jig:debug` using the Skill tool.** It returns control
 
 ### Gate Check
 
-These are tools, not stages. There's no gate — the user moves on when they're ready. Kickoff proceeds to the next stage (PRD or PLAN) when the user signals readiness.
+These are tools, not stages. There's no gate — the user moves on when they're ready. Kickoff proceeds to the next stage (PRD, SPEC or PLAN) when the user signals readiness.
 
 ---
 
@@ -168,9 +192,9 @@ These are tools, not stages. There's no gate — the user moves on when they're 
 
 **Gate**: A numbered plan exists with tasks, files, and verification steps.
 
-**INVOKE `jig:plan` using the Skill tool.** The `plan` skill's Step 1 is TRANSPOSE — it distills the available source (PRD, ticket, conversation) into a layered contract, derives file structure, sequences by dependency, and decomposes into TDD bite-sized tasks. Kickoff does not transpose; it hands off.
+**INVOKE `jig:plan` using the Skill tool.** The `plan` skill's Step 1 is TRANSPOSE — it distills the available source (spec, ticket, conversation) into a layered contract, derives file structure, sequences by dependency, and decomposes into TDD bite-sized tasks. Kickoff does not transpose; it hands off.
 
-If a PRD was created in Step 2b, mention it when invoking: "PRD is at `{plans-directory}/YYYY-MM-DD-<topic>-prd.md`." Otherwise plan will transpose from the ticket + conversation context.
+If a spec was created in Step 2c, mention it (and the PRD, if any) when invoking: "Spec is at `{plans-directory}/YYYY-MM-DD-<topic>-spec.md`. PRD is at `...`." Otherwise plan will transpose from the ticket + conversation context.
 
 ### Gate Check
 
@@ -179,7 +203,8 @@ Before proceeding, confirm:
 - [ ] Tasks have clear file paths and skill references
 - [ ] Dependencies identified
 - [ ] Plan saved to the path resolved from `jig.config.md` (`plans-directory` + `filename-format`)
-- [ ] Every contract item (PRD `[ ]` or inline) maps to at least one task
+- [ ] Every contract item (spec `[ ]` or inline) maps to at least one task
+- [ ] If a PRD exists, the plan has a Milestone Map
 
 ---
 
@@ -214,6 +239,19 @@ Before proceeding, confirm:
 
 ---
 
+## Step 6b: PRD CHECK (when a PRD exists)
+
+**Gate**: Every in-scope PRD outcome is verified from the user's side, or explicitly deferred.
+
+**INVOKE `jig:prd` using the Skill tool in check mode** ("Check the PRD at `...` against the build"). The spec reviewer already asked "did we build what the spec says"; this asks "can a person now do what the PRD promised". The `prd` skill walks each in-scope outcome's "you'll know it works when" line, records proof or a gap, and fills in the PRD's trace. On a live PRD, it writes the results to the trace and the log.
+
+### Gate Check
+
+- [ ] Every in-scope outcome is `verified` with proof, or deferred with a reason the PRD owner accepted
+- [ ] No outcome is marked `built` without being watched working
+
+---
+
 ## Step 7: SHIP
 
 **Gate**: PR created and merged.
@@ -222,6 +260,7 @@ Before proceeding, confirm:
 2. **Create PR**: **INVOKE `jig:pr-create` using the Skill tool.** It runs the review swarm, analyzes commits, and creates the PR.
 3. **Address feedback**: **INVOKE `jig:pr-respond` using the Skill tool** for any reviewer comments.
 4. **Merge**: After approval
+5. **Live PRD**: `finish` ticks any milestone the merge completes and logs the PR link (see `framework/LIVE_PRD.md`)
 
 ### Gate Check
 
@@ -248,15 +287,19 @@ CLASSIFY
          ├╌╌╌> BRAINSTORM (optional tool, returns to DISCOVER)
          ├╌╌╌> DEBUG (optional tool, returns to DISCOVER)
          │
-         ├──> PRD (features, large improvements — optional)
-         │    └──> REVIEW:prd → PLAN
+         ├──> PRD (features, large improvements)
+         │    └──> REVIEW:prd → SPEC
+         │
+         ├──> SPEC (features, improvements; light for bugs)
+         │    └──> REVIEW:spec → PLAN
          │
          └──> PLAN (always — transposes whatever source is available)
                 └──> REVIEW:plan → BUILD
                        └──> REVIEW:code (fast, per-task during build)
                               └──> REVIEW:code (full, pre-ship)
-                                     └──> SHIP
-                                            └──> LEARN (features, complex improvements)
+                                     └──> PRD CHECK (when a PRD exists)
+                                            └──> SHIP
+                                                   └──> LEARN (features, complex improvements)
 ```
 
 ### Looping Back
@@ -264,7 +307,8 @@ CLASSIFY
 The pipeline isn't strictly linear. You may loop back when:
 
 - **Plan is wrong** → Return to Plan, revise tasks
-- **Scope changed during execution** → Return to Brainstorm, update design
+- **Scope changed during execution** → Return to Spec (or Brainstorm), update the contract
+- **Build hits a product question** → Open a decision on the PRD; pause only the tasks it blocks
 - **Review finds design issues** → Return to Plan or Brainstorm depending on severity
 - **PR feedback requires significant changes** → Return to Execute
 
@@ -277,7 +321,8 @@ When looping back, update the plan document to reflect changes.
 | Mistake | Consequence | Fix |
 |---------|------------|-----|
 | Skipping Discover | No ticket, no branch convention, no tracking | Always start with the ticket |
-| Skipping Requirements for features | Vague scope, acceptance criteria discovered mid-implementation | Run `/prd` before brainstorming |
+| Skipping the PRD for features | Nobody outside engineering can read or sign the scope | Run `/prd`, or accept the PM's PRD link |
+| Skipping the spec | Acceptance criteria discovered mid-implementation | Run `/spec` before planning |
 | Skipping Plan for "simple" features | Can't parallelize, ad-hoc execution | Even 2-task plans help |
 | Skipping Review | AI-generated bugs ship to production | Self-audit is non-negotiable |
 | Skipping Learn | Same review feedback on every PR | Run postmortem on complex features |
@@ -293,11 +338,13 @@ When looping back, update the plan document to reflect changes.
 |-------|----------------------|--------|
 | Classify | (kickoff handles directly) | Work type determined |
 | Discover | (kickoff handles directly) | Ticket + branch |
-| Requirements | `Skill: jig:prd` | PRD with acceptance checklist |
+| PRD | `Skill: jig:prd` | Live PRD page + `*-prd.md` |
+| Spec | `Skill: jig:spec` | `*-spec.md` with acceptance checklist |
 | Brainstorm (tool) | `Skill: jig:brainstorm` | Understanding, no artifact |
 | Debug (tool) | `Skill: jig:debug` | Root cause, no artifact |
 | Plan | `Skill: jig:plan` | `{plans-directory}/*-plan.md` |
 | Execute | `Skill: jig:build` | Implemented + tested code |
 | Review | `Skill: jig:review` | Audited code |
+| PRD check | `Skill: jig:prd` (check mode) | Outcomes verified, trace filled |
 | Ship | `Skill: jig:pr-create` | Merged PR |
 | Learn | `Skill: jig:postmortem` | Updated skills |

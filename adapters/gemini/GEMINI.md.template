@@ -9,9 +9,9 @@ See `jig.config.md` for pipeline configuration.
      Jig skills are platform-agnostic markdown. This file bridges Jig's skill
      system to Gemini CLI's context loading mechanism.
 
-     Jig handles: pipeline orchestration, code review, brainstorming, parallel
-     execution, PR creation, and post-mortems. Document project-specific
-     context below. Pipeline configuration lives in jig.config.md.
+     Jig handles: pipeline orchestration, PRDs and specs, code review,
+     brainstorming, parallel execution, PR creation, and post-mortems.
+     Document project-specific context below. Pipeline configuration lives in jig.config.md.
      ========================================================================== -->
 
 ## Jig Integration

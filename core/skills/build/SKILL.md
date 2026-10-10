@@ -21,7 +21,7 @@ alwaysApply: false
 ## When to Use
 
 - "Build this", "execute the plan", "let's build", "implement this"
-- After `plan` produces an implementation plan from a PRD, ticket, or conversation context
+- After `plan` produces an implementation plan from a spec, ticket, or conversation context
 - When you have a plan file at `docs/plans/*.md` and want to execute it
 - When you're not sure whether to use `team-dev` or `sdd`
 
@@ -136,9 +136,19 @@ After all tasks complete (regardless of strategy):
 
 ---
 
-## PRD Integration
+## Spec and PRD Integration
 
-If the plan references a PRD (`> **PRD:** docs/plans/...`), the spec reviewers in both `team-dev` and `sdd` will automatically load the PRD's acceptance checklist and verify each `[ ]` item against the implementation. You don't need to do anything extra — the link in the plan header is enough.
+If the plan references a spec (`> **Spec:** docs/plans/...`), the spec reviewers in both `team-dev` and `sdd` will automatically load the spec's acceptance checklist and verify each `[ ]` item against the implementation. You don't need to do anything extra — the link in the plan header is enough.
+
+### Live PRD updates
+
+If the plan references a PRD (`> **PRD:**`, a page link or a `*-prd.md`) and has a Milestone Map, keep the PRD current as work lands. Follow `framework/LIVE_PRD.md`, which covers both the page (artifact mode) and a plain `*-prd.md` (file mode):
+
+- **When a milestone's last task passes review**, tick that milestone and add a `build` log entry naming the tasks and the commit.
+- **When a task uncovers a product question** (the spec is silent and the answer changes what a user sees), open a decision on the PRD instead of guessing, and pause only the tasks it blocks.
+- **When the plan finishes**, add one `build` entry summarizing what landed and what is left for `finish`.
+
+If a write is refused, or the PRD cannot be found, carry on and say once, in the final summary, that the PRD was not updated and why. Never block the build on a PRD write.
 
 ---
 
@@ -169,7 +179,8 @@ If the plan references a PRD (`> **PRD:** docs/plans/...`), the spec reviewers i
 
 **Related:**
 - `plan` — creates the plan that this skill executes
-- `prd` — produces acceptance checklists that spec reviewers verify during execution
+- `spec` — produces acceptance checklists that spec reviewers verify during execution
+- `prd` — the live product document that build keeps current (milestones, decisions, log)
 - `kickoff` — the full pipeline orchestrator that routes here at the EXECUTE stage
 
 ---

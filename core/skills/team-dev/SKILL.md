@@ -18,7 +18,7 @@ Execute implementation plans by spawning implementer teammates that work in para
 
 ```mermaid
 flowchart TD
-    A{Have implementation<br/>plan?} -->|No| B[Use prd +<br/>plan first]
+    A{Have implementation<br/>plan?} -->|No| B[Use spec +<br/>plan first]
     A -->|Yes| C{3+ independent<br/>tasks?}
     C -->|No| D[Use sdd<br/>sequential]
     C -->|Yes| E{Tasks touch mostly<br/>different files?}
@@ -124,6 +124,9 @@ An implementer does NOT start their next task until both reviews pass on their c
 ### Lead Dispatches All Reviews
 Reviewers are subagents (not teammates). They report to the lead, who decides next steps. This keeps the lead as the single quality gatekeeper.
 
+### Lead Keeps the PRD Current
+Only the lead writes to the live PRD, never implementers or reviewers. When a task passes both reviews and it is the last task of a milestone in the plan's Milestone Map, the lead ticks the milestone and logs it. Product questions raised by implementers become PRD decisions. Batch writes and follow `framework/LIVE_PRD.md`; never block the team on a PRD write.
+
 ### Dynamic Implementer Count
 
 | Independent Task Count | Recommended Implementers |
@@ -171,7 +174,7 @@ The lead groups tasks by file surface area before spawning. Tasks touching the s
 ## Integration
 
 **Required workflow (in order):**
-1. **prd** — capture requirements as acceptance contract
+1. **spec** — capture requirements as acceptance contract (from a PRD when one exists)
 2. **plan** — create the numbered implementation plan
 3. **team-dev** — execute in parallel with quality gates
 4. **finish** — merge/PR when all tasks pass
