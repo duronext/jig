@@ -282,6 +282,26 @@
       margin-bottom: 0 !important;
     }
 
+    /* ── Sign-off ──────────────────────────────────────────── */
+    .signoff {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2.5rem 0 2.5rem;
+    }
+    .signoff .author-avatar { width: 48px; height: 48px; }
+    .signoff-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+    .signoff-role {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+
     /* ── Postscript ────────────────────────────────────────── */
     .postscript {
       font-size: 0.85rem;
@@ -878,6 +898,13 @@
 
         <p>Run <code>/jig:init</code> to start. On 1.x already? Run it and choose <strong>Upgrade to 2.0</strong>.</p>
 
+        <div class="signoff">
+          <img src="avatars/dustin.jpg" alt="" class="author-avatar">
+          <div>
+            <div class="signoff-name">Dustin Diaz</div>
+            <div class="signoff-role">Head of Engineering, <a href="https://www.duro.us">Duro</a></div>
+          </div>
+        </div>
       </div>
 
       <div class="postscript">
