@@ -401,7 +401,7 @@
       label: 'PRD',
       duration: 9000,
       layout: 'single',
-      audio: null, // no voiceover recorded for this section yet
+      audio: 'prd', // docs/audio/voiceover-prd.mp3, script in docs/audio/SCRIPTS.md; silent until recorded
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
         { t: 0, type: 'line', html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:prd</span>', typing: true },
@@ -423,7 +423,7 @@
     {
       id: 'spec',
       label: 'Spec',
-      audio: null, // the 1.x recording for this slot narrates the old PRD; re-record
+      audio: 'spec', // docs/audio/voiceover-spec.mp3, script in docs/audio/SCRIPTS.md; silent until recorded
       duration: 16000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
@@ -642,12 +642,15 @@
     // Audio files are numbered in recording order. A section can name its
     // file with `audio` (null means no voiceover); otherwise files follow
     // section order, skipping sections that have none.
+    // A missing file (a section whose voiceover is not recorded yet) is
+    // dropped on load error, so that section plays silently.
     let n = 0;
-    voiceovers = SECTIONS.map((s) => {
+    voiceovers = SECTIONS.map((s, i) => {
       if (s.audio === null) return null;
       n += 1;
       const audio = new Audio('audio/voiceover-' + (s.audio || n) + '.mp3');
       audio.preload = 'auto';
+      audio.addEventListener('error', () => { if (voiceovers[i] === audio) voiceovers[i] = null; });
       return audio;
     });
   }
