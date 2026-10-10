@@ -20,7 +20,10 @@
   function docRef(path) {
     return { id: path.split("/").pop(), path: path,
       get: function () { var snap = snapDoc(path); return later(function () { return snap; }); },
-      set: function (d) { d = clone(d); return later(function () { maybeFail("set:" + path.split("/")[0]); store[path] = d; notify(); }); },
+      set: function (d) { d = clone(d); return later(function () {
+        var c = path.split("/")[0], f = failNext["set-after-write:" + c];
+        if (f) { delete failNext["set-after-write:" + c]; store[path] = d; notify(); var e = new Error(f); e.code = f; throw e; }
+        maybeFail("set:" + c); store[path] = d; notify(); }); },
       update: function (d) { d = clone(d); return later(function () { maybeFail("update:" + path.split("/")[0]);
         if (store[path] === undefined) { var e = new Error("missing"); e.code = "invalid_argument"; throw e; }
         var c = clone(store[path]); Object.keys(d).forEach(function (k) { c[k] = d[k]; }); store[path] = c; notify(); }); },

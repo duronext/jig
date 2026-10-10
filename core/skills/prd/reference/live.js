@@ -213,18 +213,21 @@
     if (e && e.code === "invalid_argument") { say(where, "That change was too large or malformed to save."); return; }
     say(where, "That didn't save. Try again in a moment.");
   }
-  async function addLog(kind, text, ref) {
-    await db.collection("log").add({ at: now(), by: meId, actor: "person", kind: kind, text: text, ref: ref || null });
+  /* One entry per action: the id is minted once, so a retry overwrites the
+     same entry instead of adding a second one. */
+  async function addLog(kind, text, ref, docRef) {
+    await (docRef || db.collection("log").doc()).set({ at: now(), by: meId, actor: "person", kind: kind, text: text, ref: ref || null });
   }
   /* The page's database has no multi-document batch, so a change and its log
      entry are two writes. The change is the one that matters: if only the log
      entry fails, say so instead of claiming the change failed. */
   async function logAfter(where, kind, text, ref) {
-    try { await addLog(kind, text, ref); }
+    var entry = db.collection("log").doc();
+    try { await addLog(kind, text, ref, entry); }
     catch (e) {
       if (e && e.code === "unavailable") {
         await new Promise(function (r) { setTimeout(r, 200 + Math.random() * 300); });
-        try { await addLog(kind, text, ref); return; } catch (e2) { e = e2; }
+        try { await addLog(kind, text, ref, entry); return; } catch (e2) { e = e2; }
       }
       say(where, "Saved. The log entry for it did not save" + (e && e.code === "quota_exceeded" ? ": the page's storage is full." : "."));
     }
@@ -235,8 +238,12 @@
      to exist; the first write to a new document uses set(). */
   async function merge(path, patch) {
     var ref = db.doc(path);
-    try { await ref.update(patch); }
-    catch (e) { if (e && e.code === "invalid_argument" && !(await ref.get()).exists) await ref.set(patch); else throw e; }
+    try { await ref.update(patch); return; }
+    catch (e) {
+      if (!e || e.code !== "invalid_argument") throw e;
+      if ((await ref.get()).exists) await ref.update(patch);   // another writer created it meanwhile
+      else await ref.set(patch);
+    }
   }
   async function guarded(key, where, fn) {
     if (busy[key] || mode !== "live") { render(); return; }

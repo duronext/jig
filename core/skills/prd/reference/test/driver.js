@@ -58,10 +58,16 @@
     check("a note lands in the log", logTexts().indexOf("Finance agreed to 1, 3, 7 on the call") >= 0);
     check("the log renders newest first", /Finance agreed/.test(($("#log-items .entry") || {}).textContent || ""));
 
-    T.failNext["add:log"] = "quota_exceeded";
+    T.failNext["set:log"] = "quota_exceeded";
     click($("#ms-m2")); await wait(200);
     check("a log-only failure keeps the change", T.store["milestones/m2"] && T.store["milestones/m2"].done === true);
     check("a log-only failure says the change saved", /^Saved\./.test(($('[data-msg="ms"]') || {}).textContent || ""), ($('[data-msg="ms"]') || {}).textContent);
+
+    var before = logTexts().length;
+    T.failNext["set-after-write:log"] = "unavailable";
+    click($("#ms-m6")); await wait(1000);
+    var m6Logs = logTexts().filter(function (t) { return /On for everyone/.test(t); }).length;
+    check("a retried log write is not duplicated", m6Logs === 1 && logTexts().length === before + 1, m6Logs + " entries");
 
     T.failNext["set:milestones"] = "unavailable";
     click($("#ms-m4")); await wait(200);
