@@ -365,7 +365,7 @@
         { t: 800, type: 'line', html: '<span class="wt-label">  \u25B8 Work type:</span> <span class="wt-value">feature</span>' },
         { t: 1100, type: 'line', html: '<span class="wt-label">  \u25B8 Summary:</span>  <span class="wt-value">Add commenting system to articles</span>' },
         { t: 1400, type: 'line', html: '<span class="wt-label">  \u25B8 Stack:</span>    <span class="wt-muted">GraphQL API \u00B7 Postgres \u00B7 React \u00B7 Design System</span>' },
-        { t: 1800, type: 'line', html: '<span class="wt-label">  \u25B8 Pipeline:</span> <span class="wt-muted">discover \u2192 brainstorm \u2192 prd \u2192 plan \u2192 build \u2192 review \u2192 ship \u2192 learn</span>' },
+        { t: 1800, type: 'line', html: '<span class="wt-label">  \u25B8 Pipeline:</span> <span class="wt-muted">discover \u2192 prd \u2192 spec \u2192 plan \u2192 build \u2192 review \u2192 ship \u2192 learn</span>' },
         { t: 2400, type: 'line', html: '<span class="wt-label">  \u25B8 Branch:</span>   <span class="wt-value">eng/comments-42-article-commenting</span>' },
         { t: 2800, type: 'line', html: '<span class="wt-label">  \u25B8 Ticket:</span>   <span class="wt-success">COMMENTS-42 created \u2713</span>' },
         { t: 3200, type: 'cursor' },
@@ -399,12 +399,36 @@
     {
       id: 'prd',
       label: 'PRD',
+      duration: 9000,
+      layout: 'single',
+      audio: null, // no voiceover recorded for this section yet
+      tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
+      frames: [
+        { t: 0, type: 'line', html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:prd</span>', typing: true },
+        { t: 700, type: 'line', html: '<span class="wt-label">  \u25B8 PRD:</span> <span class="wt-value">Article Commenting</span> <span class="wt-muted">(plain language, no code)</span>' },
+        { t: 1300, type: 'break' },
+        { t: 1400, type: 'line', html: '<span class="wt-label">  Phases:</span>' },
+        { t: 1800, type: 'line', html: '<span class="wt-muted">  \u25B8 Phase 1 (MVP):</span> <span class="wt-value">Readers can comment and reply</span>' },
+        { t: 2200, type: 'line', html: '<span class="wt-muted">  \u25B8 Phase 2:</span>       <span class="wt-value">Live updates and moderation tools</span>' },
+        { t: 2600, type: 'line', html: '<span class="wt-muted">  \u25B8 MVP cut line:</span>  <span class="wt-value">after Phase 1</span>' },
+        { t: 3200, type: 'break' },
+        { t: 3300, type: 'line', html: '<span class="wt-label">  Rule:</span> <span class="wt-value">A reply can sit at most three levels deep</span>' },
+        { t: 3800, type: 'line', html: '<span class="wt-muted">    You\u2019ll know it works when a fourth-level reply attaches to its parent</span>' },
+        { t: 4500, type: 'break' },
+        { t: 4600, type: 'line', html: '<span class="wt-label">  \u25B8 Milestones:</span> <span class="wt-value">3</span> <span class="wt-muted">\u00B7 sign-off: product, design, eng</span>' },
+        { t: 5200, type: 'line', html: '<span class="wt-success">  \u25B8 Published as a live page \u2713</span> <span class="wt-muted">the team ticks milestones; Jig logs build progress</span>' },
+        { t: 5800, type: 'cursor' },
+      ]
+    },
+    {
+      id: 'spec',
+      label: 'Spec',
       duration: 16000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
-        { t: 0, type: 'line', html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:prd</span>', typing: true },
-        { t: 700, type: 'line', html: '<span class="wt-label">  \u25B8 PRD:</span> <span class="wt-value">Article Commenting System</span>' },
+        { t: 0, type: 'line', html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:spec</span>', typing: true },
+        { t: 700, type: 'line', html: '<span class="wt-label">  \u25B8 Spec:</span> <span class="wt-value">Article Commenting System</span> <span class="wt-muted">(from the PRD link)</span>' },
         { t: 1100, type: 'line', html: '<span class="wt-label">  \u25B8 Tier:</span> <span class="wt-muted">Full (12 sections)</span>' },
         { t: 1700, type: 'break' },
         { t: 1800, type: 'line', html: '<span class="wt-label">  Acceptance criteria:</span>' },
@@ -452,7 +476,7 @@
     },
     {
       id: 'execute',
-      label: 'Execute',
+      label: 'Build',
       duration: 26000,
       layout: 'split',
       tabs: ['\u2217 Team Lead \u2318\u0031', '\u2192 frontend \u2318\u0032', '\u2192 backend \u2318\u0033', '\u2192 tests \u2318\u0034'],
@@ -609,8 +633,14 @@
   let audioUnlocked = false;
 
   function preloadVoiceovers() {
-    voiceovers = SECTIONS.map((_, i) => {
-      const audio = new Audio('audio/voiceover-' + (i + 1) + '.mp3');
+    // Audio files are numbered in recording order. A section can name its
+    // file with `audio` (null means no voiceover); otherwise files follow
+    // section order, skipping sections that have none.
+    let n = 0;
+    voiceovers = SECTIONS.map((s) => {
+      if (s.audio === null) return null;
+      n += 1;
+      const audio = new Audio('audio/voiceover-' + (s.audio || n) + '.mp3');
       audio.preload = 'auto';
       return audio;
     });
@@ -653,7 +683,7 @@
   }
 
   function pauseVoiceover() {
-    voiceovers.forEach(v => { if (!v.paused) v.pause(); });
+    voiceovers.forEach(v => { if (v && !v.paused) v.pause(); });
   }
 
   function resumeVoiceover() {
@@ -665,7 +695,7 @@
   }
 
   function stopAllVoiceovers() {
-    voiceovers.forEach(v => { v.pause(); v.currentTime = 0; });
+    voiceovers.forEach(v => { if (v) { v.pause(); v.currentTime = 0; } });
   }
 
   function updateMuteIcon() {
@@ -705,7 +735,7 @@
     navBar.className = 'wt-nav';
     navBar.setAttribute('role', 'tablist');
     navBar.setAttribute('aria-label', 'Walkthrough sections');
-    const sectionLabels = ['Kickoff', 'Brainstorm', 'PRD', 'Plan', 'Execute', 'Review', 'Ship', 'Learn'];
+    const sectionLabels = ['Kickoff', 'Brainstorm', 'PRD', 'Spec', 'Plan', 'Build', 'Review', 'Ship', 'Learn'];
     sectionLabels.forEach((label, i) => {
       const btn = document.createElement('button');
       btn.className = 'wt-nav-item' + (i === 0 ? ' active' : '');
