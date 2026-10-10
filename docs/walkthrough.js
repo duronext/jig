@@ -401,7 +401,6 @@
       label: 'PRD',
       duration: 11500,
       layout: 'single',
-      audio: 'prd.m4a', // macOS voice for now; see docs/audio/SCRIPTS.md to re-record in the ElevenLabs voice
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
         { t: 0, type: 'line', html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:prd</span>', typing: true },
@@ -423,7 +422,6 @@
     {
       id: 'spec',
       label: 'Spec',
-      audio: 'spec.m4a', // macOS voice for now; see docs/audio/SCRIPTS.md to re-record in the ElevenLabs voice
       duration: 16000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
@@ -448,7 +446,6 @@
     },
     {
       id: 'plan',
-      audio: 4,
       label: 'Plan',
       duration: 14000,
       layout: 'single',
@@ -478,7 +475,6 @@
     },
     {
       id: 'execute',
-      audio: 5,
       label: 'Build',
       duration: 26000,
       layout: 'split',
@@ -549,7 +545,6 @@
     },
     {
       id: 'review',
-      audio: 6,
       label: 'Review',
       duration: 13000,
       layout: 'single',
@@ -578,7 +573,6 @@
     },
     {
       id: 'ship',
-      audio: 7,
       label: 'Ship',
       duration: 14500,
       layout: 'single',
@@ -608,7 +602,6 @@
     },
     {
       id: 'learn',
-      audio: 8,
       label: 'Learn',
       duration: 10500,
       layout: 'single',
