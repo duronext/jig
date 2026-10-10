@@ -25,7 +25,7 @@ Report what you find before changing anything:
   a suggestion to rename; rename them if the user agrees.
 - **References** to those files anywhere in the repo: `> **PRD:**` plan
   headers, plain `**PRD:**` lines in design docs, Markdown links
-  (`[x](./x-prd.md)`), and paths in backticks.
+  whose target is the old file name, and paths in backticks.
 - **Team specialists** in `team/specialists/` with `stage: prd` or
   `stage: both`.
 - **Team skills or docs** that tell people to run `/prd` for technical
