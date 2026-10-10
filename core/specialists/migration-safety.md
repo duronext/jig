@@ -19,7 +19,7 @@ You have full codebase access via Read, Grep, and Glob tools. Use them proactive
 
 You receive:
 1. **The full implementation plan** — tasks with files, dependencies, and steps
-2. **The PRD** (if exists) — for cross-referencing data model requirements
+2. **The spec** (if exists) — for cross-referencing data model requirements
 3. **Section hints** — which sections are most relevant to your concern
 4. **Codebase access** — Read, Grep, Glob tools to verify claims
 

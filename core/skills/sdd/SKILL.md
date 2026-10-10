@@ -153,6 +153,8 @@ After spec compliance passes, dispatch the code quality review:
 
 After both reviews pass, mark the task as complete and proceed to the next task.
 
+**Live PRD:** if the plan has a Milestone Map and this was the last task of a milestone, tick that milestone on the PRD and log it, following `framework/LIVE_PRD.md`. If the spec reviewer or implementer raised a product question the spec does not answer, open a decision on the PRD and pause only the tasks it blocks. Never block the run on a PRD write.
+
 ### Step 3: Final Review
 
 After all tasks are complete, dispatch a final review of the entire implementation:
@@ -325,7 +327,7 @@ Final reviewer: All requirements met, cross-task integration clean.
 
 **Called by:**
 - `plan` (execution handoff) -- when user chooses sequential execution
-- `kickoff` during the EXECUTE stage
+- `kickoff` during the BUILD stage (config key `execute`)
 
 **Terminal state:**
 - **REQUIRED**: Invoke `finish` after all tasks pass final review

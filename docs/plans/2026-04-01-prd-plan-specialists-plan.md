@@ -1,6 +1,6 @@
 # PRD & PLAN Specialist Dispatch — Implementation Plan
 
-> **PRD:** docs/plans/2026-04-01-prd-plan-specialists-prd.md
+> **Spec:** docs/plans/2026-04-01-prd-plan-specialists-spec.md
 > **Design:** docs/plans/2026-04-01-prd-plan-specialists-design.md
 > **For agents:** Use team-dev (parallel) or sdd (sequential) to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 

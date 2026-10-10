@@ -1,5 +1,5 @@
 ---
-description: "Use when capturing product requirements for features, improvements, or bugs"
+description: "Use when writing a plain-language product requirements document with phases, milestones and sign-off"
 ---
 
 Use the `jig:prd` skill to handle this request.

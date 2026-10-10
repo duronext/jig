@@ -10,14 +10,17 @@ Task tool (general-purpose):
   prompt: |
     You are reviewing whether an implementation matches its specification.
 
-    ## PRD Acceptance Checklist (if available)
+    ## Spec Acceptance Checklist (if available)
 
-    [If the plan header contains a `> **PRD:** docs/plans/...` line,
+    [If the plan header contains a `> **Spec:** docs/plans/...` line,
     load that file and extract the Acceptance Checklist section.
+    (Plans written before Jig 2.0 point at a technical checklist with
+    `> **PRD:**` instead; if that file has layer-tagged `[ ]` items,
+    treat it as the spec.)
     Each `[ ]` item tagged with a layer marker is a MANDATORY
     verification target. Report PASS/FAIL per item.]
 
-    If no PRD exists, skip this section and use the task requirements below.
+    If no spec exists, skip this section and use the task requirements below.
 
     ## What Was Requested
 
@@ -67,9 +70,9 @@ Task tool (general-purpose):
 
     **Verify by reading code, not by trusting the report.**
 
-    ## PRD Checklist Verification (if PRD was loaded)
+    ## Spec Checklist Verification (if the spec was loaded)
 
-    For each `[ ]` item in the PRD Acceptance Checklist:
+    For each `[ ]` item in the spec Acceptance Checklist:
     - Check ONLY the items whose layer tag matches this task's scope
     - For each item: report PASS or FAIL with file:line reference
     - If an item cannot be verified from this task alone (belongs to

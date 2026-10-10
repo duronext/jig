@@ -21,13 +21,13 @@ alwaysApply: false
 
 Invoke this skill when:
 - You have an approved design from `brainstorm`
-- You have requirements (from a PRD, ticket, or conversation) for a multi-step task
+- You have a spec (from `spec`), or requirements from a ticket or conversation, for a multi-step task
 - `kickoff` routes here during the PLAN stage
 - The user says "write a plan", "create an implementation plan", or "/plan"
 
 **Do NOT use when:**
 - The task is a single atomic change (just do it)
-- You have no source material at all — not a PRD, not a ticket, not a clear conversation. In that case, invoke `/brainstorm` or `/prd` first to produce *something* to transpose from.
+- You have no source material at all — not a spec, not a PRD, not a ticket, not a clear conversation. In that case, invoke `/brainstorm`, `/prd` or `/spec` first to produce *something* to transpose from.
 
 **Announce at start:** "I'm using the plan skill to create the implementation plan."
 
@@ -35,7 +35,7 @@ Invoke this skill when:
 
 ## Scope Check
 
-If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during PRD authoring. If it was not, suggest breaking this into separate plans -- one per subsystem. Each plan should produce working, testable software on its own.
+If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during spec authoring. If it was not, suggest breaking this into separate plans -- one per subsystem. Each plan should produce working, testable software on its own.
 
 ---
 
@@ -45,11 +45,14 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 ### 1a. Identify the Contract
 
-**If a PRD exists** (referenced by the user, present in `{plans-directory}/`, or named in the ticket):
-- Load it. Your contract is the `[ ]` acceptance items — already layer-tagged.
+**If a spec exists** (referenced by the user, present in `{plans-directory}/`, or named in the ticket):
+- Load it. Your contract is the `[ ]` acceptance items — already layer-tagged, and traced to PRD outcomes like `(MVP.2)` when a PRD exists.
+- If the spec header names a PRD, load that too. You need its milestones for the Milestone Map below.
 - Skip to Step 1b.
 
-**If no PRD exists**, extract an *implicit contract* from available context:
+**If only a PRD exists** (no spec): stop and offer `/spec` first. The PRD is written for people; plans transpose from the spec's contract.
+
+**If neither exists**, extract an *implicit contract* from available context:
 - Read the ticket body and acceptance criteria
 - Scan recent conversation (brainstorm output, user statements)
 - For bugs: use the reproduction + expected behavior as the contract
@@ -63,9 +66,9 @@ Write the implicit contract inline as bullets, tagged by layer — one per requi
 [UI] Order detail page shows notes in a collapsed section
 ```
 
-This is scratch work — not a separate doc. It anchors the rest of the transposition. If the contract grows large enough that it's hard to hold in your head, that's a signal the work warrants a formal PRD — offer `/prd` — but an inline contract of any length is valid.
+This is scratch work — not a separate doc. It anchors the rest of the transposition. If the contract grows large enough that it's hard to hold in your head, that's a signal the work warrants a formal spec — offer `/spec` — but an inline contract of any length is valid.
 
-**The only floor is three.** If you cannot articulate at least 3 bullets from available context, stop — you don't have enough to plan. Return to the user: "I don't have a clear contract for what to build. Want to capture a PRD with `/prd`, or talk through it with `/brainstorm` first?"
+**The only floor is three.** If you cannot articulate at least 3 bullets from available context, stop — you don't have enough to plan. Return to the user: "I don't have a clear contract for what to build. Want to write a spec with `/spec`, or talk through it with `/brainstorm` first?"
 
 ### 1b. Group by Layer
 
@@ -82,7 +85,7 @@ Items spanning layers (e.g., a permission check that's both API and LOGIC) go in
 
 ### 1c. Derive File Structure
 
-For each layer, list the files that need to be created or modified. This is where the PRD becomes a build artifact:
+For each layer, list the files that need to be created or modified. This is where the spec becomes a build artifact:
 
 - DATA items → migration files + entity/schema files
 - API items → controller / resolver / handler files + input/output type files
@@ -121,7 +124,8 @@ Now and only now, expand each contract item into the 5-step TDD task template (e
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **PRD:** docs/plans/YYYY-MM-DD-<topic>-prd.md *(include if a PRD exists)*
+> **Spec:** docs/plans/YYYY-MM-DD-<topic>-spec.md *(include if a spec exists)*
+> **PRD:** docs/plans/YYYY-MM-DD-<topic>-prd.md or the PRD artifact link *(include if a PRD exists)*
 > **Design:** docs/plans/YYYY-MM-DD-<topic>-design.md *(include if a design doc exists)*
 > **For agents:** Use team-dev (parallel) or sdd (sequential) to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -134,7 +138,22 @@ Now and only now, expand each contract item into the 5-step TDD task template (e
 ---
 ```
 
-The `> **PRD:**` and `> **Design:**` lines are how downstream spec reviewers find the acceptance checklist and design decisions. Always include them when those documents exist.
+The `> **Spec:**`, `> **PRD:**` and `> **Design:**` lines are how downstream agents find the acceptance checklist, the product outcomes and the design decisions. Always include them when those documents exist.
+
+### Milestone Map (when a PRD exists)
+
+Directly after the header, map the PRD's milestones to the tasks that complete them. `build`, `team-dev` and `sdd` use this table to tick milestones on a live PRD as work lands (see `framework/LIVE_PRD.md`).
+
+```markdown
+## Milestone Map
+
+| Milestone | Done when | Last tasks |
+|-----------|-----------|------------|
+| m3 · Retry works on staging | Tasks 4-9 pass review | 9 |
+| m4 · Beta on for 20 customers | Ships (out of plan scope) | — |
+```
+
+Tasks are referred to as `T<n>` (Task 4 is `T4`) in the Milestone Map, the PRD's trace and log entries. Only list milestones this plan can complete. Milestones that need a release, a demo or a human call are marked out of plan scope and are ticked by a person or by `finish`.
 
 ---
 
@@ -264,7 +283,7 @@ For tasks that are purely structural (creating directories, config files, boiler
 
 After writing the complete plan, review it with fresh eyes. This is a checklist you run yourself -- not a subagent dispatch.
 
-**1. Transpose coverage:** For every `[ ]` item in the contract (PRD acceptance checklist or inline contract from Step 1a), point to the task(s) that implement it. If any item has no task, add one. If any task has no contract item, justify it or remove it.
+**1. Transpose coverage:** For every `[ ]` item in the contract (spec acceptance checklist or inline contract from Step 1a), point to the task(s) that implement it. If any item has no task, add one. If any task has no contract item, justify it or remove it.
 
 **2. Placeholder scan:** Search the plan for red flags -- any of the patterns from the "No Placeholders" section above. Fix them.
 
@@ -284,7 +303,7 @@ After self-review, invoke the review swarm to scrutinize the implementation plan
 
 **Automatic dispatch**: Run the swarm for all medium-to-large features and improvements. Skip only for clearly trivial work.
 
-**INVOKE `jig:review` using the Skill tool with mode: plan.** Pass the plan document path. The review skill discovers PLAN specialists (stage: plan or both), dispatches them in parallel with the full plan + PRD + section hints + codebase access. After the specialist swarm, a plan logic reviewer (Opus) performs deep correctness analysis. Findings are scored and returned as a unified report.
+**INVOKE `jig:review` using the Skill tool with mode: plan.** Pass the plan document path. The review skill discovers plan specialists (`stage` includes `plan`), dispatches them in parallel with the full plan + spec + section hints + codebase access. After the specialist swarm, a plan logic reviewer (Opus) performs deep correctness analysis. Findings are scored and returned as a unified report.
 
 Present the swarm findings to the user **before asking for approval**:
 
@@ -350,7 +369,8 @@ Read `jig.config.md` for `parallel-threshold` and `default-strategy` to inform t
 - Offer execution choice (team-dev or sdd). User chooses.
 
 **Related skills:**
-- `prd` — primary input source; produces the acceptance checklist that Step 1 transposes
+- `spec` — primary input source; produces the acceptance checklist that Step 1 transposes
+- `prd` — the product document behind the spec; supplies the milestones for the Milestone Map
 - `brainstorm` — optional pre-cursor when the user wants to explore approaches before locking in a plan
 - `tdd` — implementers follow TDD during execution
 - `team-dev` / `sdd` — execution engines
@@ -368,4 +388,5 @@ Read `jig.config.md` for `parallel-threshold` and `default-strategy` to inform t
 | Missing dependencies | Task fails because prerequisite not built | Declare `blockedBy` for every dependent task |
 | Inconsistent naming across tasks | Runtime errors, undefined references | Self-review checks type consistency |
 | Skipping self-review | Spec gaps ship, plans have contradictions | Always run the 5-point self-review |
-| No PRD/design reference in header | Spec reviewers cannot find acceptance criteria | Include reference lines when documents exist |
+| No spec/PRD/design reference in header | Spec reviewers cannot find acceptance criteria | Include reference lines when documents exist |
+| No Milestone Map when a PRD exists | The live PRD never shows progress | Map each milestone this plan completes to its last tasks |

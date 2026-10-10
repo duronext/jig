@@ -57,6 +57,23 @@ These ship with Jig. Teams add their own in `team/specialists/`.
 | async-safety | sonnet | major | full-only | Race conditions, premature state, resource leaks |
 | performance | haiku | minor | full-only | Algorithmic issues, unbounded operations |
 
+### Document review specialists
+
+These carry a `stage` and only run in document review modes.
+
+| Name | Stage | Severity | Focus |
+|------|-------|----------|-------|
+| plain-language | prd | major | Jargon, code and Claude-speak a non-engineer could not follow |
+| mvp-cut | prd | major | An MVP that cannot stand alone; phases with no demo |
+| testable-outcomes | prd | major | Outcomes and milestones nobody could check |
+| missing-moments | prd | major | First-run, failure, permission, notification and other skipped moments |
+| data-dependency | spec | major | Schema dependencies, cascades, migration prerequisites |
+| ui-conflict | spec | major | Feature flag collisions, layout conflicts, entry point overlaps |
+| blast-radius | spec, plan | major | Cross-layer ripple effects, underestimated scope |
+| state-completeness | spec, plan | major | Missing transitions, asymmetric paths |
+| task-dependency | plan | major | Ordering errors, implicit dependencies |
+| migration-safety | plan | blocking | Migration ordering, rollback, destructive operations |
+
 ## Logic Reviewer
 
 The logic reviewer is NOT a specialist — it's a reasoning agent that runs after the swarm.

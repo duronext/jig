@@ -1,0 +1,946 @@
+<title>Jig Artifact Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="base.css">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="clamp" viewBox="0 0 64 64">
+      <path d="M9 27V14a5 5 0 0 1 5-5h13" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M55 37v13a5 5 0 0 1-5 5H37" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="20" y="20" width="24" height="24" rx="3.5" fill="var(--accent)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Contents"></nav>
+<div class="sheet">
+  <div class="zones" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+  <div class="wrap">
+
+  <!-- ═════════ HERO ═════════ -->
+  <header class="hero">
+    <div class="meta">
+      <svg class="mark-svg" role="img" aria-label="Jig"><use href="#clamp"/></svg>
+      <span class="eyebrow ac">Artifact kit</span>
+      <span class="eyebrow">PRD</span>
+      <span class="eyebrow">Rev C · 2026-10-09</span>
+      <span class="eyebrow mk">Mock data</span>
+    </div>
+    <h1>Jig artifact kit</h1>
+    <div class="deck">One sheet. Every part a PRD can use.</div>
+    <p class="lede">This page is the kit. Every component a Jig PRD can use is drawn here, and each section is built from the part it describes. The running example is a made-up billing feature called <b>Self-healing invoices</b>, so every part holds something real enough to judge.</p>
+
+    <div class="thesis clamped" role="group" aria-label="Thesis plate">
+      <span class="eyebrow p-dim">The one sentence</span>
+      <div class="thesis-line"><span class="p-amb">When a card fails,</span> <span class="p-acc">the invoice</span> <span class="p-ok">fixes itself</span> <span class="p-dim">before anyone has to chase it.</span></div>
+      <div class="legend">
+        <div><b class="p-amb">when</b>The moment it starts. Something a person would notice.</div>
+        <div><b class="p-acc">the work</b>The thing this PRD builds. Indigo everywhere on the page.</div>
+        <div><b class="p-ok">the outcome</b>What is different once it ships. You could check it.</div>
+        <div><b class="p-dim">who it saves</b>The person who stops doing something by hand.</div>
+      </div>
+    </div>
+    <div class="kit"><b>thesis</b><span>The plate under every hero. If the PRD cannot be said in one sentence like this, it goes back to brainstorm.</span></div>
+  </header>
+
+  <!-- ═════════ INDEX ═════════ -->
+  <section id="index" aria-labelledby="h-index">
+    <div class="sec-head">
+      <div class="row"><span class="eyebrow">Sheet index</span></div>
+      <h2 id="h-index">Twenty-four parts, pick the seven you need</h2>
+      <p class="stand">A real PRD rarely needs more than seven sections. This sheet uses every part once so you can see them side by side. Merge before you add an eighth. Parts marked live save for everyone who opens the page.</p>
+    </div>
+    <nav class="index" aria-label="Sheet index">
+      <a href="#rules"><span>01</span>Rules<small>principles</small></a>
+      <a href="#tokens"><span>02</span>Colour<small>swatches</small></a>
+      <a href="#type"><span>03</span>Type<small>specimen</small></a>
+      <a href="#anatomy"><span>04</span>Section anatomy<small>balloons</small></a>
+      <a href="#glance"><span>05</span>At a glance<small>facts</small></a>
+      <a href="#today"><span>06</span>Today<small>before / after</small></a>
+      <a href="#people"><span>07</span>People<small>persona cards</small></a>
+      <a href="#moments"><span>08</span>Moments<small>mocks</small></a>
+      <a href="#flow"><span>09</span>Flow<small>figure</small></a>
+      <a href="#require"><span>10</span>What it does<small>rules + pseudo plate</small></a>
+      <a href="#phases"><span>11</span>Phases<small>ladder + cut line</small></a>
+      <a href="#schedule"><span>12</span>Schedule<small>gantt + live milestones</small></a>
+      <a href="#scope"><span>13</span>Scope<small>in / waits / never</small></a>
+      <a href="#touches"><span>14</span>What it touches<small>map + impact table</small></a>
+      <a href="#measures"><span>15</span>Measures<small>baseline → target</small></a>
+      <a href="#decisions"><span>16</span>Open decisions<small>recorded, timestamped</small></a>
+      <a href="#callouts"><span>17</span>Callouts<small>four kinds</small></a>
+      <a href="#history"><span>18</span>How we got here<small>timeline</small></a>
+      <a href="#revs"><span>19</span>Revisions<small>rev table + delta</small></a>
+      <a href="#log"><span>20</span>Log<small>live changelog</small></a>
+      <a href="#trace"><span>21</span>Trace<small>outcome → proof</small></a>
+      <a href="#handoff"><span>22</span>Handoff<small>pipeline + terminal</small></a>
+      <a href="#stake"><span>23</span>Who signs off<small>stakeholders + approvals</small></a>
+      <a href="#signoff"><span>24</span>Close<small>words, stamps, title block</small></a>
+    </nav>
+  </section>
+
+  <!-- ═════════ 01 RULES ═════════ -->
+  <section id="rules" aria-labelledby="h-rules">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">01</span><span class="eyebrow ac">Rules</span></div>
+      <h2 id="h-rules">Four rules every PRD page follows</h2>
+    </div>
+    <div class="principles">
+      <div><span class="p-num">RULE 01</span><h3>One sentence first</h3><p>The thesis plate is written before anything else. No sentence, no page.</p></div>
+      <div><span class="p-num">RULE 02</span><h3>Colour means something</h3><p>Indigo is the work, pink is a change or a decision, dashed grey is outside. Nothing is coloured to look nice.</p></div>
+      <div><span class="p-num">RULE 03</span><h3>Say it where it is</h3><p>Mock, planned and unchecked are marked in the row itself, not in a note three sections away.</p></div>
+      <div><span class="p-num">RULE 04</span><h3>Anyone can read it</h3><p>If a step needs logic, write plain steps. A reader who has never coded should follow every line.</p></div>
+    </div>
+    <div class="kit"><b>principles</b><span>Three or four cells. Only for decisions that would change the page if you broke them.</span></div>
+  </section>
+
+  <!-- ═════════ 02 TOKENS ═════════ -->
+  <section id="tokens" aria-labelledby="h-tokens">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">02</span><span class="eyebrow ac">Colour</span></div>
+      <h2 id="h-tokens">Colour borrows from the drafting table</h2>
+      <p class="stand">Indigo is the part being made. The markup pen is pink, the way revisions are marked on a drawing. Things that belong to someone else are drawn as phantom lines. Green, amber and red mean status and nothing else.</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:var(--accent)"></i><div><b>--accent</b><span>The work. What this PRD builds, the current stage, links.</span></div></div>
+      <div class="sw"><i style="background:var(--mark)"></i><div><b>--mark</b><span>The markup pen. Changed in this rev, open decisions, the cut line.</span></div></div>
+      <div class="sw dash"><i></i><div><b>--phantom</b><span>Outside or later. Other teams' systems, deferred work, unchecked.</span></div></div>
+      <div class="sw"><i style="background:var(--ink)"></i><div><b>--ink</b><span>Headings, values, the title block frame.</span></div></div>
+      <div class="sw"><i style="background:var(--ok)"></i><div><b>--ok</b><span>Status only. Done, verified, the outcome.</span></div></div>
+      <div class="sw"><i style="background:var(--warn)"></i><div><b>--warn</b><span>Status only. In progress, in review, the trigger.</span></div></div>
+      <div class="sw"><i style="background:var(--bad)"></i><div><b>--bad</b><span>Status only. Missing, risk, out for good.</span></div></div>
+      <div class="sw"><i style="background:var(--sheet-2);border-bottom:1px solid var(--rule)"></i><div><b>--paper · --sheet</b><span>Ground and surfaces. The faint grid is drafting paper.</span></div></div>
+    </div>
+    <div class="kit"><b>swatches</b><span>Both themes are designed. Machine plates and chat mocks stay dark in both.</span></div>
+  </section>
+
+  <!-- ═════════ 03 TYPE ═════════ -->
+  <section id="type" aria-labelledby="h-type">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">03</span><span class="eyebrow ac">Type</span></div>
+      <h2 id="h-type">One family for reading, one mono for labels</h2>
+    </div>
+    <div class="specimen">
+      <div><span class="lbl">h1 · Inter 800 · -5%</span><span style="font:800 46px/1 var(--display);letter-spacing:-.05em;color:var(--ink)">Self-healing invoices</span></div>
+      <div><span class="lbl">h2 · Inter 700 · a claim</span><span style="font:700 26px/1.2 var(--display);letter-spacing:-.028em;color:var(--ink)">The cut line is the MVP</span></div>
+      <div><span class="lbl">deck · mono caps</span><span class="deck">A failed card retries before anyone notices.</span></div>
+      <div><span class="lbl">body · Inter 400 · 16/1.6</span><span>Finance spends about two hours a day chasing failed cards by hand. Most of them would have gone through on a second try.</span></div>
+      <div><span class="lbl">eyebrow · mono 500 caps</span><span class="eyebrow ac">What it touches</span></div>
+      <div><span class="lbl">label · mono 400</span><span class="mono" style="font-size:12.5px;color:var(--ink)">INV-2042 · Rev C · 2026-10-09 · 3 of 3</span></div>
+    </div>
+    <div class="kit"><b>specimen</b><span>The h2 is a sentence a colleague would say. "The cut line is the MVP", not "Phases".</span></div>
+  </section>
+
+  <!-- ═════════ 04 ANATOMY ═════════ -->
+  <section id="anatomy" aria-labelledby="h-anat">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">04</span><span class="eyebrow ac">Section anatomy</span></div>
+      <h2 id="h-anat">Every section is a label, a claim and a reason</h2>
+      <p class="stand">Balloons are how drawings point at a part. Use them to annotate any mock or figure, numbered in the order a reader should look.</p>
+    </div>
+    <div class="anno">
+      <div class="anno-sample">
+        <div class="ln"><span class="balloon">1</span><span class="eyebrow ac">Phases</span></div>
+        <div class="ln"><span class="balloon">2</span><h2 style="font-size:26px">The cut line is the MVP</h2></div>
+        <div class="ln"><span class="balloon">3</span><p class="stand" style="font-size:15.5px">Everything above the line ships to twenty beta customers on Nov 17. Everything below waits for what they tell us.</p></div>
+        <div class="ln"><span class="balloon">4</span><span class="chip new">One or two components</span></div>
+      </div>
+      <div class="anno-key">
+        <div><span class="balloon">1</span><span><b>Eyebrow.</b> A noun that would work as a menu label.</span></div>
+        <div><span class="balloon">2</span><span><b>Headline.</b> The claim. If a skimmer reads only this, they still learn something.</span></div>
+        <div><span class="balloon">3</span><span><b>Standfirst.</b> The reason, in two sentences at most.</span></div>
+        <div><span class="balloon">4</span><span><b>Body.</b> One or two parts from this kit. More than that means two sections.</span></div>
+      </div>
+    </div>
+    <div class="kit"><b>balloon</b><span>Numbered circles for annotation. Numbers mean reading order, so only use them when order matters.</span></div>
+  </section>
+
+  <!-- ═════════ 05 FACTS ═════════ -->
+  <section id="glance" aria-labelledby="h-glance">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">05</span><span class="eyebrow ac">At a glance</span></div>
+      <h2 id="h-glance">The facts block answers who, when and how big</h2>
+    </div>
+    <div class="facts">
+      <div class="row"><span>Owner</span><span>Maya Ortiz, product</span></div>
+      <div class="row"><span>Status</span><span><span class="chip warn">In review</span></span></div>
+      <div class="row"><span>Phase</span><span>MVP, to 20 beta customers</span></div>
+      <div class="row"><span>Target</span><span class="tnum">Everyone by 2026-12-08</span></div>
+      <div class="row"><span>Who it reaches</span><span class="tnum">~4,100 accounts on card billing</span></div>
+      <div class="row"><span>Ticket</span><span class="mono" style="font-size:13px">BILL-212</span></div>
+      <div class="row"><span>Started from</span><span><code>Dunning notes.docx</code> from finance</span></div>
+      <div class="row"><span>Code checked</span><span><span class="chip ok">Yes, 2026-10-09</span></span></div>
+    </div>
+    <div class="kit"><b>facts</b><span>Six to eight rows under the hero. "Code checked" says whether the PRD was written with the codebase open.</span></div>
+  </section>
+
+  <!-- ═════════ 06 BEFORE / AFTER ═════════ -->
+  <section id="today" aria-labelledby="h-today">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">06</span><span class="eyebrow ac">Today</span></div>
+      <h2 id="h-today">Today a failed card costs a person two hours</h2>
+      <p class="stand">Most failed cards go through on a second try. Today nobody tries again until someone in finance notices.</p>
+    </div>
+    <div class="ba">
+      <div class="before">
+        <h4>Today</h4>
+        <ol>
+          <li>The card fails overnight. Nothing happens.</li>
+          <li>The customer gets an automatic "payment failed" email every day.</li>
+          <li>Finance finds the invoice in a weekly export.</li>
+          <li>Someone emails the customer, waits, and retries by hand.</li>
+        </ol>
+        <div class="cost">~2 h a day of finance time · 5 emails per customer</div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="after">
+        <h4 style="color:var(--accent)">With this</h4>
+        <ol>
+          <li>The card fails overnight. It is tried again the next day.</li>
+          <li>Most invoices are paid on the second or third try. Nobody is told.</li>
+          <li>Only if all three tries fail does the customer get one email.</li>
+          <li>The email's link lets them fix the card from their phone.</li>
+        </ol>
+        <div class="cost">0 finance time for the first three tries · 1 email</div>
+      </div>
+    </div>
+    <div class="kit"><b>before / after</b><span>Same number of steps on each side so the reader can compare line by line. The cost line carries units.</span></div>
+  </section>
+
+  <!-- ═════════ 07 PEOPLE ═════════ -->
+  <section id="people" aria-labelledby="h-people">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">07</span><span class="eyebrow ac">People</span></div>
+      <h2 id="h-people">Three people feel this, one of them never sees it</h2>
+    </div>
+    <div class="people">
+      <div class="person">
+        <div class="who"><span class="av">RK</span><div><b>Rae, finance lead</b><small>chases failed payments</small></div></div>
+        <dl><div><dt>Today</dt><dd>Spends mornings in a spreadsheet of failed invoices.</dd></div><div><dt>Needs</dt><dd>To hear only about the ones a person has to handle.</dd></div></dl>
+      </div>
+      <div class="person">
+        <div class="who"><span class="av">JP</span><div><b>Jo, customer admin</b><small>pays the bill at a customer</small></div></div>
+        <dl><div><dt>Today</dt><dd>Gets a "payment failed" email every day until someone fixes it.</dd></div><div><dt>Needs</dt><dd>One clear email and a way to fix it without hunting for a password.</dd></div></dl>
+      </div>
+      <div class="person quiet">
+        <div class="who"><span class="av">—</span><div><b>Every other customer</b><small>card fails once, then works</small></div></div>
+        <dl><div><dt>Today</dt><dd>Gets a scary email about a problem that fixes itself.</dd></div><div><dt>Needs</dt><dd>Nothing. With this, they never hear about it.</dd></div></dl>
+      </div>
+    </div>
+    <div class="kit"><b>person</b><span>Role first, then today and needs. A dashed card is someone who benefits by not noticing anything.</span></div>
+  </section>
+
+  <!-- ═════════ 08 MOMENTS ═════════ -->
+  <section id="moments" aria-labelledby="h-moments">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">08</span><span class="eyebrow ac">Moments</span></div>
+      <h2 id="h-moments">Four moments show the whole feature</h2>
+      <p class="stand">Each moment is something a person sees. The dashed indigo outline marks the one new thing on each screen. People and amounts are mock data.</p>
+    </div>
+    <div class="moments">
+
+      <div class="moment" id="moment-1" data-sub="Finance sees a retry">
+        <div class="moment-copy">
+          <span class="step-n">MOMENT 1</span>
+          <h3>Finance sees a retry, not a failure</h3>
+          <p>The invoice list gains one new status. A failed card shows which try it is on, so nobody steps in early.</p>
+        </div>
+        <div class="app" role="img" aria-label="Invoice list mock with one invoice showing Retrying, 2 of 3">
+          <div class="app-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">billing.northwind.app/invoices</span></div>
+          <div class="app-body">
+            <div class="side"><span class="on">Invoices</span><span>Customers</span><span>Payouts</span><span>Settings</span></div>
+            <div class="main">
+              <div class="main-h"><b>Invoices</b><span class="btn ghost">Export</span></div>
+              <div class="inv"><span class="mono">INV-2041</span><span>Hollis &amp; Co</span><span class="amt">$1,240</span><span class="chip ok">Paid</span></div>
+              <div class="inv"><span class="mono">INV-2042</span><span>Pine Labs</span><span class="amt">$380</span><span class="pin"><span class="chip warn new-ring">Retrying · 2 of 3</span></span></div>
+              <div class="inv"><span class="mono">INV-2043</span><span>Ferro Studio</span><span class="amt">$96</span><span class="chip ok">Paid</span></div>
+              <div class="inv"><span class="mono">INV-2044</span><span>Orbit Freight</span><span class="amt">$2,900</span><span class="chip bad">Needs card</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="moment" id="moment-2" data-sub="One email, not five">
+        <div class="moment-copy">
+          <span class="step-n">MOMENT 2</span>
+          <h3>The customer gets one email, not five</h3>
+          <p>It only goes out after the third try fails. It says what happened, how much, and has one button.</p>
+        </div>
+        <div class="mail" role="img" aria-label="Email mock asking the customer to update their card">
+          <div class="mail-h"><div><span>From</span> <b>Northwind Billing</b></div><div><span>Subject</span> <b>Your card didn't go through for INV-2044</b></div></div>
+          <div class="mail-b">
+            <p>Hi Jo, we tried your Visa ending 4242 three times for <b>$2,900</b> and it was declined each time. Nothing else is affected.</p>
+            <span class="btn new-ring" style="border-radius:6px">Update card</span>
+            <small>The link works for 14 days and doesn't need a password.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="moment" id="moment-3" data-sub="Fix it from a phone">
+        <div class="moment-copy">
+          <span class="step-n">MOMENT 3</span>
+          <h3>They fix it from their phone in under a minute<span class="delta">B</span></h3>
+          <p>The link opens one page: the invoice, a card field and a pay button. The invoice is tried again as soon as they save.</p>
+        </div>
+        <div class="phone-wrap">
+          <div class="phone" role="img" aria-label="Phone mock showing the fix-it page with a card field and a pay button">
+            <div class="screen">
+              <h5>Update your card</h5>
+              <p>INV-2044 for Orbit Freight · $2,900.00</p>
+              <div class="field">4242 4242 4242 4242<span>12/28</span></div>
+              <div class="go">Save and pay $2,900</div>
+              <small>No sign-in needed · link expires Oct 23</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="moment" id="moment-4" data-sub="Weekly to finance">
+        <div class="moment-copy">
+          <span class="step-n">MOMENT 4</span>
+          <h3>Finance hears about it once a week<span class="delta">C</span></h3>
+          <p>A Monday message lists only the invoices that could not recover. Everything else stays quiet. This moment is in Next, not the MVP.</p>
+        </div>
+        <div class="chat" role="img" aria-label="Chat mock of a weekly finance summary message">
+          <div class="chat-bar"><span># finance</span><span>12 members</span></div>
+          <div class="msg">
+            <span class="av">N</span>
+            <div>
+              <div class="who-l"><b>Northwind Billing</b><span class="app-tag">APP</span><time>Mon 9:00</time></div>
+              <p style="margin-top:4px">3 invoices could not recover last week, $4,520 in total.</p>
+              <div class="msg-rows">
+                <div><span class="mono">INV-2044</span><span>Orbit Freight</span><span class="r">$2,900</span></div>
+                <div><span class="mono">INV-2051</span><span>Lark Dental</span><span class="r">$1,240</span></div>
+                <div><span class="mono">INV-2063</span><span>Ferro Studio</span><span class="r">$380</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="kit"><b>app · mail · phone · chat</b><span>Real structure, illustrative people. One dashed indigo outline per mock, on the thing being proposed.</span></div>
+  </section>
+
+  <!-- ═════════ 09 FLOW ═════════ -->
+  <section id="flow" aria-labelledby="h-flow">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">09</span><span class="eyebrow ac">Flow</span></div>
+      <h2 id="h-flow">One loop, and a person only shows up at the end</h2>
+    </div>
+    <figure>
+      <div class="fig clamped">
+        <svg viewBox="0 0 960 390" role="img" aria-label="Flow: the card processor reports a failed charge. We wait a day and try the card again. If it is paid, the invoice is marked paid. If not, and it was not the third try, we wait again with a longer gap. After the third failed try we email the customer a fix-it link.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah"/></marker>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah-acc"/></marker>
+          </defs>
+          <line class="cl" x1="10" y1="182" x2="950" y2="182"/>
+          <!-- processor: outside -->
+          <rect class="box ph" x="20" y="150" width="160" height="64" rx="8"/>
+          <text class="t" x="100" y="178" text-anchor="middle">Card processor</text>
+          <text class="s" x="100" y="198" text-anchor="middle">outside · says it failed</text>
+          <!-- wait -->
+          <rect class="box acc" x="236" y="150" width="150" height="64" rx="8"/>
+          <text class="t" x="311" y="178" text-anchor="middle">Wait</text>
+          <text class="s" x="311" y="198" text-anchor="middle">1, then 3, then 7 days</text>
+          <!-- try -->
+          <rect class="box acc" x="440" y="150" width="160" height="64" rx="8"/>
+          <text class="t" x="520" y="178" text-anchor="middle">Try the card again</text>
+          <text class="s" x="520" y="198" text-anchor="middle">same card, no email</text>
+          <!-- paid? -->
+          <polygon class="dia" points="700,138 752,182 700,226 648,182"/>
+          <text class="t" x="700" y="187" text-anchor="middle">Paid?</text>
+          <!-- ok -->
+          <rect class="box ok" x="792" y="40" width="150" height="64" rx="8"/>
+          <text class="t" x="867" y="68" text-anchor="middle">Mark it paid</text>
+          <text class="s" x="867" y="88" text-anchor="middle">nobody is told</text>
+          <!-- third? -->
+          <polygon class="dia" points="700,284 756,322 700,360 644,322"/>
+          <text class="t" x="700" y="327" text-anchor="middle">3rd try?</text>
+          <!-- email -->
+          <rect class="box acc" x="792" y="290" width="150" height="64" rx="8"/>
+          <text class="t" x="867" y="318" text-anchor="middle">Email a fix-it link</text>
+          <text class="s" x="867" y="338" text-anchor="middle">one email, 14 days</text>
+          <!-- edges -->
+          <line class="ln ph" x1="180" y1="182" x2="232" y2="182" marker-end="url(#ah)"/>
+          <line class="ln acc" x1="386" y1="182" x2="436" y2="182" marker-end="url(#ah2)"/>
+          <line class="ln" x1="600" y1="182" x2="644" y2="182" marker-end="url(#ah)"/>
+          <path class="ln" d="M700 138V72H788" marker-end="url(#ah)"/>
+          <text class="k" x="712" y="110">yes</text>
+          <line class="ln" x1="700" y1="226" x2="700" y2="280" marker-end="url(#ah)"/>
+          <text class="k" x="712" y="258">no</text>
+          <path class="ln" d="M644 322H311V218" marker-end="url(#ah)"/>
+          <text class="k" x="400" y="312">no · wait longer</text>
+          <line class="ln" x1="756" y1="322" x2="788" y2="322" marker-end="url(#ah)"/>
+          <text class="k" x="762" y="312">yes</text>
+        </svg>
+      </div>
+      <figcaption><b>Three tries, then one email.</b> The processor on the left belongs to someone else, so it is drawn as a phantom line. Indigo boxes are what this PRD builds. When the customer saves a new card from the email, the next try runs right away.</figcaption>
+    </figure>
+    <div class="kit"><b>figure</b><span>Inline SVG, 960 wide, scrolls on a phone instead of shrinking. Clamp corners mark the one figure that matters most on the page. The first sentence of the caption is bold.</span></div>
+  </section>
+
+  <!-- ═════════ 10 REQUIREMENTS ═════════ -->
+  <section id="require" aria-labelledby="h-req">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">10</span><span class="eyebrow ac">What it does</span></div>
+      <h2 id="h-req">Each rule says how you will know it works</h2>
+      <p class="stand">These IDs travel. The spec points at them, the plan points at the spec, and the final check reads them back from the user's side.</p>
+    </div>
+    <div class="rules" id="rules-table" data-sub="The rules" role="table" aria-label="Requirements">
+      <div class="rule-row head" role="row"><div>ID</div><div>The rule</div><div class="know">You'll know it works when</div></div>
+      <div class="rule-row" role="row"><div><span class="id">MVP.1</span></div><div>A failed card is tried again after 1 day, then 3 days, then 7 days.</div><div class="know">An invoice that fails Monday shows "Retrying · 1 of 3" and is tried Tuesday.</div></div>
+      <div class="rule-row" role="row"><div><span class="id">MVP.2</span></div><div>The customer gets one email, and only after the third try fails.</div><div class="know">No customer email exists for any invoice that recovered.</div></div>
+      <div class="rule-row" role="row"><div><span class="id">MVP.3</span></div><div>The email's link opens a page where the card can be changed without signing in.<span class="delta">B</span></div><div class="know">The link works on a phone and stops working after 14 days.</div></div>
+      <div class="rule-row" role="row"><div><span class="id">MVP.4</span></div><div>Saving a new card tries the invoice straight away.</div><div class="know">The invoice shows Paid within a minute of saving.</div></div>
+      <div class="rule-row later" role="row"><div><span class="id next">NEXT.1</span></div><div>Finance gets one Monday summary of what did not recover.<span class="delta">C</span></div><div class="know">A message lists each unrecovered invoice with its amount.</div></div>
+    </div>
+
+    <div class="plate" id="pseudo" data-sub="Plain steps">
+      <div class="plate-bar"><span class="dots"><i></i><i></i><i></i></span><span>The retry rule, in plain steps</span><span class="tag">pseudo, not code</span></div>
+<pre><span class="p-acc">when</span> a charge fails
+  <span class="p-acc">try again</span> after <span class="p-amb">1 day</span>, then <span class="p-amb">3 days</span>, then <span class="p-amb">7 days</span>
+  <span class="p-acc">if</span> any try works
+    mark the invoice <span class="p-ok">paid</span>                 <span class="p-dim"># nobody is told</span>
+  <span class="p-acc">if</span> all three fail
+    email the customer <span class="p-fg">one</span> fix-it link
+    mark the invoice <span class="p-bad">needs card</span>
+
+<span class="p-acc">when</span> the customer saves a new card
+  <span class="p-acc">try again</span> right away</pre>
+    </div>
+    <div class="kit"><b>rules · pseudo plate</b><span>One behaviour per row. Pseudo plates use plain words, lowercase keywords in indigo, and never real code.</span></div>
+  </section>
+
+  <!-- ═════════ 11 PHASES ═════════ -->
+  <section id="phases" aria-labelledby="h-phases">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">11</span><span class="eyebrow ac">Phases</span></div>
+      <h2 id="h-phases">The cut line is the MVP</h2>
+      <p class="stand">Everything above the line ships to twenty beta customers on Nov 17. Everything below waits for what they tell us.</p>
+    </div>
+    <div class="ladder">
+      <div class="rung"><span class="tag mvp">MVP</span><p><b>Retry three times, then one email.</b> The loop in the flow above, with the new status in the invoice list.</p><span class="id">MVP.1–2</span></div>
+      <div class="rung"><span class="tag mvp">MVP</span><p><b>Fix-it page without sign-in.</b> One page, one card field, works on a phone.</p><span class="id">MVP.3–4</span></div>
+      <div class="cut" role="separator" aria-label="MVP cut line"><span class="end">A</span><span class="line"></span><span>MVP SHIPS NOV 17 · 20 CUSTOMERS</span></div>
+      <div class="rung"><span class="tag next">NEXT</span><p><b>Weekly summary to finance.</b> Moved here in rev C so the MVP ships a week sooner.<span class="delta">C</span></p><span class="id next">NEXT.1</span></div>
+      <div class="rung later"><span class="tag later">LATER</span><p><b>Text-message reminders.</b> Needs a phone number we don't collect yet.</p><span class="chip ph">needs data</span></div>
+      <div class="rung later"><span class="tag later">LATER</span><p><b>Customers pick their own retry days.</b> Only if beta customers ask.</p><span class="chip ph">if asked</span></div>
+    </div>
+    <div class="kit"><b>ladder · cut line</b><span>Up to six rungs. One cut line, drawn like a section line on a drawing. Every rung above it must be usable on its own.</span></div>
+  </section>
+
+  <!-- ═════════ 12 SCHEDULE ═════════ -->
+  <section id="schedule" aria-labelledby="h-sched">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">12</span><span class="eyebrow ac">Schedule</span></div>
+      <h2 id="h-sched">Nine weeks, six milestones, three demos</h2>
+      <p class="stand">Each diamond is something you can watch work. Tick a milestone when it is done: it saves for everyone, with your name and the time, and lands in the log.</p>
+      <div><span class="live" data-live>Connecting</span></div>
+    </div>
+    <div class="tscroll" id="gantt" data-sub="Week by week">
+      <div class="gantt" role="table" aria-label="Schedule by week">
+        <div class="lab hdr" style="font:500 10.5px/1 var(--mono);letter-spacing:.14em;color:var(--muted)">WEEK OF</div>
+        <div class="wk now">OCT 13</div><div class="wk">OCT 20</div><div class="wk">OCT 27</div><div class="wk">NOV 3</div><div class="wk">NOV 10</div><div class="wk">NOV 17</div><div class="wk">NOV 24</div><div class="wk">DEC 1</div><div class="wk">DEC 8</div>
+
+        <div class="lab">PRD and spec</div>
+        <div class="cell" style="grid-column:2 / 4"><span class="bar done">done by Oct 24</span></div>
+
+        <div class="lab">Build the MVP</div>
+        <div class="cell" style="grid-column:3 / 7"><span class="bar acc">retry loop · email · fix-it page</span></div>
+
+        <div class="lab">Beta, 20 customers</div>
+        <div class="cell" style="grid-column:7 / 9"><span class="bar soft">watch recovery rate</span></div>
+
+        <div class="lab">Everyone</div>
+        <div class="cell" style="grid-column:10 / 11"><span class="bar acc">on</span></div>
+
+        <div class="lab">Next: finance summary</div>
+        <div class="cell" style="grid-column:9 / 11"><span class="bar ph">after beta</span></div>
+
+        <div class="lab">Demos</div>
+        <div class="cell ms" style="grid-column:3 / 4"><i data-ms="m2"></i></div>
+        <div class="cell ms" style="grid-column:6 / 7"><i data-ms="m3"></i></div>
+        <div class="cell ms" style="grid-column:9 / 10"><i data-ms="m5"></i></div>
+      </div>
+    </div>
+    <div id="milestones" data-sub="Milestones"></div>
+    <div class="msg-line" data-msg="ms"></div>
+    <div class="kit"><b>gantt · milestones</b><span>Weeks across, workstreams down. Solid bars are the work, dashed bars are later. Diamonds are demos and turn green when their milestone is ticked. Overdue milestones turn red on their own. Jig ticks milestones too, as the build reaches them.</span></div>
+  </section>
+
+  <!-- ═════════ 13 SCOPE ═════════ -->
+  <section id="scope" aria-labelledby="h-scope">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">13</span><span class="eyebrow ac">Scope</span></div>
+      <h2 id="h-scope">What is in, what waits, and what we won't build</h2>
+    </div>
+    <div class="scope">
+      <div class="in"><h4 style="color:var(--accent)">In the MVP</h4><ul><li>Three retries on a fixed schedule</li><li>One email after the last try</li><li>A fix-it page without sign-in</li><li>A new "Retrying" status in the invoice list</li></ul></div>
+      <div class="wait"><h4>Waits</h4><ul><li>Weekly finance summary <span>· Next</span></li><li>Text reminders <span>· needs phone numbers</span></li><li>Custom retry days <span>· only if asked</span></li></ul></div>
+      <div class="never"><h4 style="color:var(--bad)">Not building</h4><ul><li>Retrying a different card on file <span>· customers never agreed to it</span></li><li>Pausing the account on failure <span>· a separate decision for finance</span></li></ul></div>
+    </div>
+    <div class="kit"><b>scope</b><span>Three columns, always in this order. Every "waits" and "not building" item says why in grey.</span></div>
+  </section>
+
+  <!-- ═════════ 14 TOUCHES ═════════ -->
+  <section id="touches" aria-labelledby="h-touch">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">14</span><span class="eyebrow ac">What it touches</span></div>
+      <h2 id="h-touch">It changes three screens and leans on two outside services</h2>
+      <p class="stand">This section is filled in from the codebase when it is open. When it is not, every row says so instead of guessing.</p>
+    </div>
+    <div class="map" id="touch-map" data-sub="Map">
+      <div class="region ours">
+        <h4 style="color:var(--accent)">Ours</h4>
+        <div class="nodes">
+          <div class="node"><b>Invoice list</b><small>new status</small></div>
+          <div class="node"><b>Customer emails</b><small>one new email</small></div>
+          <div class="node"><b>Billing settings</b><small>retry days, read only</small></div>
+          <div class="node new"><b>Fix-it page</b><small>new</small></div>
+          <div class="node ph"><b>Revenue reports</b><small>not checked</small></div>
+        </div>
+      </div>
+      <div class="region outside">
+        <h4>Outside</h4>
+        <div class="nodes">
+          <div class="node ph"><b>Card processor</b><small>runs the charge</small></div>
+          <div class="node ph"><b>Email delivery</b><small>sends the email</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>Area</th><th>What changes for people</th><th>Effect</th><th>Checked</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="4">Screens</td></tr>
+          <tr><td class="k">Invoice list</td><td>Shows "Retrying · 2 of 3" instead of "Failed".</td><td><span class="chip warn">changes</span></td><td><span class="chip ok">in code</span></td></tr>
+          <tr><td class="k">Fix-it page</td><td>A new page reached only from the email link.</td><td><span class="chip new">new</span></td><td><span class="chip ok">in code</span></td></tr>
+          <tr><td class="k">Billing settings</td><td>Shows the retry days so support can answer questions.</td><td><span class="chip warn">changes</span></td><td><span class="chip ok">in code</span></td></tr>
+          <tr class="grp"><td colspan="4">Side effects</td></tr>
+          <tr><td class="k">Customer emails</td><td>The daily "payment failed" email stops for card invoices.</td><td><span class="chip bad">removed</span></td><td><span class="chip ok">in code</span></td></tr>
+          <tr><td class="k">Revenue reports</td><td>A retried invoice might count twice in the monthly total.</td><td><span class="chip mk">decide</span></td><td><span class="chip ph">not checked</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="kit"><b>map · impact table</b><span>The solid region is ours, the dashed region is someone else's. "Not checked" is a finding, not a gap to hide.</span></div>
+  </section>
+
+  <!-- ═════════ 15 MEASURES ═════════ -->
+  <section id="measures" aria-labelledby="h-meas">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">15</span><span class="eyebrow ac">Measures</span></div>
+      <h2 id="h-meas">Two numbers decide whether it worked</h2>
+      <p class="stand">Each measure has today's value, the target and the date we read it. The guardrail is the number that must not get worse.</p>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>Measure</th><th>Today</th><th></th><th>Target</th><th>Read on</th><th>Kind</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Failed charges that recover with nobody touching them</td><td class="num">31%</td><td class="to">→</td><td class="num">60%</td><td class="mono">2027-01-31</td><td><span class="chip new">goal</span></td></tr>
+          <tr><td class="k">Finance time spent chasing cards</td><td class="num">~10 h / week</td><td class="to">→</td><td class="num">under 2 h</td><td class="mono">2027-01-31</td><td><span class="chip new">goal</span></td></tr>
+          <tr><td class="k">Complaints about being charged again</td><td class="num">0 / month</td><td class="to">→</td><td class="num">under 5</td><td class="mono">every month</td><td><span class="chip warn">guardrail</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="kit"><b>measures</b><span>Numbers travel with units and dates. Two goals and one guardrail is the usual shape.</span></div>
+  </section>
+
+  <!-- ═════════ 16 DECISIONS ═════════ -->
+  <section id="decisions" aria-labelledby="h-dec">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">16</span><span class="eyebrow mk">Open decisions</span></div>
+      <h2 id="h-dec">Two choices are open, each with an owner and a date</h2>
+      <p class="stand">Pick an option to record the decision. It is stamped with who and when, and the log keeps the history if it is ever reopened.</p>
+      <div><span class="live" data-live>Connecting</span></div>
+    </div>
+    <div class="decisions" id="decision-cards"></div>
+    <div class="msg-line" data-msg="dec"></div>
+    <div class="kit"><b>decision</b><span>Markup pink while open, green once recorded. Two options at most, one recommended, an owner, a due date and what it blocks. Recording one writes who, when and which option to the log.</span></div>
+  </section>
+
+  <!-- ═════════ 17 CALLOUTS ═════════ -->
+  <section id="callouts" aria-labelledby="h-call">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">17</span><span class="eyebrow ac">Callouts</span></div>
+      <h2 id="h-call">Four callouts, one meaning each</h2>
+    </div>
+    <div class="callouts">
+      <div class="callout note"><span class="eyebrow">Note · indigo</span><h3>A retry never charges twice</h3><p>Each try checks the invoice is still unpaid before it charges. If the customer paid some other way, the try is skipped.</p></div>
+      <div class="callout mk"><span class="eyebrow">Changed in rev C · pink</span><h3>The finance summary moved to Next</h3><p>Cutting it ships the MVP a week sooner. Finance agreed on 2026-10-08 as long as the invoice list shows the new status.</p></div>
+      <div class="callout ph"><span class="eyebrow">Outside · phantom</span><h3>The card processor decides what "declined" means</h3><p>We don't control their reasons or their timing. Some declines, like a stolen card, should never be retried, and the processor tells us which.</p></div>
+      <div class="callout bad"><span class="eyebrow">Risk · red</span><h3>A retry on an account that just closed</h3><p>If a customer cancels between tries, the next try could charge a closed account. Each try checks the account is still active.</p></div>
+    </div>
+    <div class="kit"><b>callout</b><span>Note, changed, outside, risk. Do not invent a fifth. The eyebrow names the kind so it reads without colour too.</span></div>
+  </section>
+
+  <!-- ═════════ 18 HISTORY ═════════ -->
+  <section id="history" aria-labelledby="h-hist">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">18</span><span class="eyebrow ac">How we got here</span></div>
+      <h2 id="h-hist">Why this is on the list now</h2>
+      <p class="stand">Requirements with a history get taken seriously. Name the tickets and the people who raised them.</p>
+    </div>
+    <div class="timeline">
+      <div class="tl ctx"><span class="when">2026-06</span><p><b>Support tickets about repeat emails.</b> 41 tickets in a month from customers getting daily "payment failed" emails.</p></div>
+      <div class="tl ctx"><span class="when">2026-08-12</span><p><b>Finance measures the cost.</b> About two hours a day, mostly on invoices that would have paid on a second try.</p></div>
+      <div class="tl"><span class="when">2026-09-24</span><p><b>Rae writes <code>Dunning notes.docx</code>.</b> Twelve bullets. This PRD started from them.</p></div>
+      <div class="tl"><span class="when">2026-10-01</span><p><b>Brainstorm.</b> Three options compared. Retry-then-email chosen over a dunning vendor.</p></div>
+      <div class="tl now"><span class="when">2026-10-09</span><p><b>Rev C.</b> Finance summary moved to Next. Two decisions open.</p></div>
+    </div>
+    <div class="kit"><b>timeline</b><span>Dates in mono, one line each. Grey dots are context, indigo dots are this work, the pink dot is now.</span></div>
+  </section>
+
+  <!-- ═════════ 19 REVISIONS ═════════ -->
+  <section id="revs" aria-labelledby="h-revs">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">19</span><span class="eyebrow ac">Revisions</span></div>
+      <h2 id="h-revs">Every change carries its letter</h2>
+      <p class="stand">On a drawing, a small triangle with the rev letter sits beside anything that changed. This kit does the same. Look for <span class="delta">C</span> on this page to see what moved in the latest revision.</p>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>Rev</th><th>Date</th><th>By</th><th>What changed</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">A</td><td class="mono">2026-09-28</td><td>Maya Ortiz</td><td>First draft, from <code>Dunning notes.docx</code>.</td><td>All</td></tr>
+          <tr><td class="mono">B <span class="delta">B</span></td><td class="mono">2026-10-03</td><td>Review swarm, Maya</td><td>Added the fix-it page. The <b>mvp-cut</b> reviewer found the email led nowhere a customer could act.</td><td>MVP.3, moment 3</td></tr>
+          <tr><td class="mono">C <span class="delta">C</span></td><td class="mono">2026-10-09</td><td>Maya Ortiz</td><td>Weekly finance summary moved from MVP to Next.</td><td>NEXT.1, moment 4, phases</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="kit"><b>rev table · delta</b><span>Letters, not numbers. Only the latest rev's deltas stay on the page; older ones live in this table.</span></div>
+  </section>
+
+  <!-- ═════════ 20 LOG ═════════ -->
+  <section id="log" aria-labelledby="h-log">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">20</span><span class="eyebrow ac">Log</span></div>
+      <h2 id="h-log">The log is everything that happened, newest first</h2>
+      <p class="stand">Revisions record changes to the document. The log records progress: milestones ticked, decisions made, sign-offs given, notes added. People write to it from this page, and Jig writes to it as the spec, plan and build move along.</p>
+      <div><span class="live" data-live>Connecting</span></div>
+    </div>
+    <div class="log">
+      <form class="log-add" id="log-form" autocomplete="off">
+        <input id="log-note" name="note" maxlength="280" placeholder="Add a note, like &quot;Finance agreed to 1, 3, 7 on the call&quot;" aria-label="Add a note to the log" disabled>
+        <button class="act solid" id="log-btn" type="submit" disabled>Add to log</button>
+      </form>
+      <div class="log-items" id="log-items" aria-live="polite">
+        <div class="log-empty"><b>Nothing logged yet.</b><span>Tick a milestone, record a decision or add a note, and it shows up here with a name and a time.</span></div>
+      </div>
+    </div>
+    <div class="msg-line" data-msg="log"></div>
+    <div class="kit"><b>log</b><span>Live, newest first, time in the reader's own clock. A clamp face means Jig wrote the entry. Names are looked up when the page renders, so they stay current.</span></div>
+  </section>
+
+  <!-- ═════════ 20 TRACE ═════════ -->
+  <section id="trace" aria-labelledby="h-trace">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">21</span><span class="eyebrow ac">Trace</span></div>
+      <h2 id="h-trace">Every outcome traces to the work that proves it</h2>
+      <p class="stand">Jig fills this in during the build and the PRD check. It is how the PRD's promises get checked from the user's side before anything ships.</p>
+      <div><span class="live" data-live>Connecting</span></div>
+    </div>
+    <div class="tscroll" id="trace-table" data-sub="Trace table">
+      <table>
+        <thead><tr><th>Outcome</th><th>Spec items</th><th>Plan tasks</th><th>Status</th><th>Proof</th></tr></thead>
+        <tbody id="trace-rows"></tbody>
+      </table>
+    </div>
+    <div class="kit"><b>trace</b><span>Status chips only. "Built" is not "verified": verified means someone watched it work and wrote down how.</span></div>
+  </section>
+
+  <!-- ═════════ 21 HANDOFF ═════════ -->
+  <section id="handoff" aria-labelledby="h-hand">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">22</span><span class="eyebrow ac">Handoff</span></div>
+      <h2 id="h-hand">The page is the handoff</h2>
+      <p class="stand">The PRD's source travels inside this page. An engineer passes the link to Jig and the spec starts from here, with the codebase open.</p>
+    </div>
+    <div class="pipeline" aria-label="Pipeline, current stage PRD">
+      <span class="stage done">DISCOVER</span><span class="sep">→</span>
+      <span class="stage here">PRD</span><span class="sep">→</span>
+      <span class="stage">SPEC</span><span class="sep">→</span>
+      <span class="stage">PLAN</span><span class="sep">→</span>
+      <span class="stage">BUILD</span><span class="sep">→</span>
+      <span class="stage">REVIEW</span><span class="sep">→</span>
+      <span class="stage">SHIP</span><span class="sep">→</span>
+      <span class="stage">LEARN</span>
+    </div>
+    <div class="plate">
+      <div class="plate-bar"><span class="dots"><i></i><i></i><i></i></span><span>Engineer, in the repo</span><span class="tag">illustrative output</span></div>
+<pre><span class="p-dim">$</span> <span class="p-acc">/jig:spec</span> <span class="p-amb">https://claude.ai/artifact/…</span>        <span class="p-dim"># this page</span>
+
+  <span class="p-ok">read</span>    PRD rev C · 4 MVP outcomes · 2 open decisions
+  <span class="p-ok">scan</span>    invoice list · customer emails · billing settings
+  <span class="p-mark">found</span>   revenue reports may count retried invoices twice
+          <span class="p-dim">→ added to the PRD as decision 2, owner Maya</span>
+  <span class="p-ok">wrote</span>   docs/plans/2026-10-14-self-healing-invoices-spec.md
+          <span class="p-dim">12 spec items, each pointing at an MVP outcome</span></pre>
+    </div>
+    <div class="kit"><b>pipeline · terminal plate</b><span>The strip shows where this document sits, with clamp corners on the current stage. Terminal output that was not really run is labelled illustrative in the bar.</span></div>
+  </section>
+
+  <!-- ═════════ 23 STAKEHOLDERS ═════════ -->
+  <section id="stake" aria-labelledby="h-stake">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">23</span><span class="eyebrow ac">Who signs off</span></div>
+      <h2 id="h-stake">Three people sign off, four more are kept in the loop</h2>
+      <p class="stand">A sign-off is for one revision. When the PRD moves to a new rev, the page asks again. Each sign-off records who pressed the button and when.</p>
+      <div><span class="live" data-live>Connecting</span></div>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>Person</th><th>What they check</th><th>Sign-off</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="3">Signs off · rev C</td></tr>
+        </tbody>
+        <tbody id="approvers"></tbody>
+        <tbody>
+          <tr class="grp"><td colspan="3">Gives input</td></tr>
+          <tr><td><div class="who-cell"><span class="av ph">AR</span><div><b>Ana Ruiz</b><small>security</small></div></div></td><td>The fix-it link that works without a password.</td><td><span class="chip warn">reviewing</span></td></tr>
+          <tr><td><div class="who-cell"><span class="av ph">DM</span><div><b>Dev Mehta</b><small>legal</small></div></div></td><td>That retrying a card is covered by the customer terms.</td><td><span class="chip ok">no concerns, 10-06</span></td></tr>
+          <tr class="grp"><td colspan="3">Kept posted</td></tr>
+          <tr><td><div class="who-cell"><span class="av ph">CS</span><div><b>Customer success</b><small>team</small></div></div></td><td>Gets the log each Friday.</td><td><span class="chip ph">informed</span></td></tr>
+          <tr><td><div class="who-cell"><span class="av ph">SA</span><div><b>Sales</b><small>team</small></div></div></td><td>Hears when it is on for everyone.</td><td><span class="chip ph">informed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="msg-line" data-msg="appr"></div>
+    <div class="kit"><b>stakeholders · sign-off</b><span>Three groups, always in this order: signs off, gives input, kept posted. Only the first group has buttons. When all of them sign the current rev, the title block below stamps it approved.</span></div>
+  </section>
+
+  <!-- ═════════ 22 SIGN-OFF ═════════ -->
+  <section id="signoff" aria-labelledby="h-sign">
+    <div class="sec-head">
+      <div class="row"><span class="sheetno">24</span><span class="eyebrow ac">Close</span></div>
+      <h2 id="h-sign">The title block closes every PRD</h2>
+      <p class="stand">Engineering drawings end with who drew it, who checked it and who approved it. So does every Jig PRD. The stamp says what the page is good for right now.</p>
+    </div>
+
+    <dl class="terms" id="words" data-sub="Words">
+      <dt>Dunning</dt><dd>Chasing an unpaid invoice. Today it is a person; with this it is a schedule.</dd>
+      <dt>Retry</dt><dd>Charging the same card again, a few days later, without asking the customer.</dd>
+      <dt>Fix-it link</dt><dd>A link in the email that opens one page for changing the card, no password needed.</dd>
+      <dt>Recovered</dt><dd>An invoice that was declined at first and paid later with nobody stepping in.</dd>
+    </dl>
+
+    <div>
+      <details><summary>Will a customer ever be charged twice?</summary><p>No. Each try checks the invoice is still unpaid first. See the note in the callouts.</p></details>
+      <details><summary>Can a customer turn retries off?</summary><p>Not in the MVP. It is on the Later list and only gets built if beta customers ask for it.</p></details>
+      <details><summary>What about invoices already failing today?</summary><p>They stay with finance. Retries only start for charges that fail after launch.</p></details>
+    </div>
+
+    <div class="stamps" id="stamps" data-sub="Stamps" aria-label="Stamp examples">
+      <span class="stamp draft">Draft</span>
+      <span class="stamp review">In review</span>
+      <span class="stamp approved">Approved for spec</span>
+      <span class="stamp super">Superseded</span>
+    </div>
+
+    <div class="titleblock" id="titleblock" data-sub="Title block" role="group" aria-label="Title block">
+      <div><svg class="mark-svg" aria-hidden="true"><use href="#clamp"/></svg><div style="display:grid;gap:6px"><span class="lab">Title</span><span class="nm">Self-healing invoices</span><span style="font-size:11px;color:var(--muted)">Northwind Billing · BILL-212</span></div></div>
+      <div><span class="lab">Drawn</span><span>Maya Ortiz</span><span style="color:var(--muted);font-size:11px">2026-09-28</span></div>
+      <div><span class="lab">Checked</span><span>Review swarm</span><span style="color:var(--muted);font-size:11px">2026-10-09 · 4 notes</span></div>
+      <div><span class="lab">Approved</span><span class="stamp review" id="tb-approved" style="font-size:10px;padding:6px 8px;justify-self:start">0 of 3</span></div>
+      <div><span class="lab">Sheet</span><span>1 of 1</span></div>
+      <div><span class="lab">Rev</span><span class="big">C</span></div>
+    </div>
+    <div class="kit"><b>glossary · questions · stamps · title block</b><span>The glossary is for words a non-engineer might not know. Questions are ones people really asked. The title block is always last.</span></div>
+  </section>
+
+  <footer>
+    <span>The long version lives in <code>docs/plans/2026-09-28-self-healing-invoices-prd.md</code>.</span>
+    <span>Mock data: Northwind, its people, invoices and numbers are made up for this kit.</span>
+    <span>Jig artifact kit · rev C · 2026-10-09</span>
+  </footer>
+
+  </div>
+</div>
+</div>
+
+<button class="toc-fab" id="toc-fab" type="button" aria-haspopup="dialog" aria-controls="toc-drawer"><span class="n" id="fab-n">00</span><span class="lbl" id="fab-l">Contents</span></button>
+<div class="toc-scrim" id="toc-scrim" hidden></div>
+<div class="toc-drawer" id="toc-drawer" role="dialog" aria-modal="true" aria-label="Contents" hidden>
+  <div class="grip" aria-hidden="true"></div>
+  <div class="dh"><span class="eyebrow ac">Contents</span><button type="button" id="toc-close">Close</button></div>
+  <div id="toc-drawer-list"></div>
+</div>
+
+<script type="application/json" id="prd-data">
+{
+ "title": "Self-healing invoices",
+ "kind": "PRD",
+ "rev": "C",
+ "milestones": [
+  {
+   "id": "m1",
+   "title": "PRD approved",
+   "sub": "All three sign-offs on rev C",
+   "due": "2026-10-17"
+  },
+  {
+   "id": "m2",
+   "title": "Spec walked through",
+   "sub": "Against this page, with engineering",
+   "due": "2026-10-24",
+   "kind": "DEMO 1"
+  },
+  {
+   "id": "m3",
+   "title": "Retry works on staging",
+   "sub": "A real failed card retries three times, then one email",
+   "due": "2026-11-14",
+   "kind": "DEMO 2"
+  },
+  {
+   "id": "m4",
+   "title": "Beta on for 20 customers",
+   "sub": "The MVP above the cut line",
+   "due": "2026-11-17"
+  },
+  {
+   "id": "m5",
+   "title": "Beta numbers in",
+   "sub": "How many invoices recovered with nobody touching them",
+   "due": "2026-12-05",
+   "kind": "DEMO 3"
+  },
+  {
+   "id": "m6",
+   "title": "On for everyone",
+   "sub": "~4,100 accounts on card billing",
+   "due": "2026-12-08"
+  }
+ ],
+ "decisions": [
+  {
+   "id": "d1",
+   "question": "Should the retry gaps be 1, 3 and 7 days, or 1, 2 and 4?",
+   "recommended": "A",
+   "owner": "Rae, finance",
+   "due": "2026-10-16",
+   "blocks": "MVP.1",
+   "options": {
+    "A": {
+     "label": "1, 3, 7 days",
+     "why": "Matches when most payrolls land. The last try is a week after the first."
+    },
+    "B": {
+     "label": "1, 2, 4 days",
+     "why": "Faster email to the customer. More tries land before payday."
+    }
+   }
+  },
+  {
+   "id": "d2",
+   "question": "Do retried invoices count once or twice in revenue reports?",
+   "recommended": "A",
+   "owner": "Maya, product",
+   "due": "2026-10-20",
+   "blocks": "MVP.2",
+   "source": "spec",
+   "options": {
+    "A": {
+     "label": "Once, on the day it is paid",
+     "why": "Matches how finance closes the month."
+    },
+    "B": {
+     "label": "Leave reports alone",
+     "why": "Faster, but the monthly total may run high in beta."
+    }
+   }
+  }
+ ],
+ "approvers": [
+  {
+   "id": "finance",
+   "name": "Rae Kim",
+   "role": "finance lead",
+   "checks": "Retry days, what finance still sees, the Monday summary."
+  },
+  {
+   "id": "eng",
+   "name": "Sam Lee",
+   "role": "engineering lead",
+   "checks": "That the MVP fits the nine weeks and the spec can start."
+  },
+  {
+   "id": "support",
+   "name": "Priya Shah",
+   "role": "head of support",
+   "checks": "The email wording and what support says when asked."
+  }
+ ],
+ "outcomes": [
+  {
+   "id": "MVP.1",
+   "text": "A failed card is tried again after 1, 3 and 7 days.",
+   "spec": [
+    "S-4",
+    "S-5"
+   ],
+   "tasks": [
+    "T3",
+    "T4"
+   ]
+  },
+  {
+   "id": "MVP.2",
+   "text": "One email, only after the third try fails.",
+   "spec": [
+    "S-7"
+   ],
+   "tasks": [
+    "T6"
+   ]
+  },
+  {
+   "id": "MVP.3",
+   "text": "The email link changes the card without signing in.",
+   "spec": [
+    "S-9",
+    "S-10"
+   ],
+   "tasks": [
+    "T7",
+    "T8",
+    "T9"
+   ]
+  },
+  {
+   "id": "MVP.4",
+   "text": "Saving a new card tries the invoice straight away.",
+   "spec": [
+    "S-6"
+   ],
+   "tasks": [
+    "T5"
+   ]
+  }
+ ]
+}
+</script>
+<script type="text/markdown" id="prd-source">
+# Self-healing invoices
+
+> When a card fails, the invoice fixes itself before anyone has to chase it.
+
+Rev C · 2026-10-09 · Owner: Maya Ortiz · Mock data for the Jig artifact kit.
+
+## What it does
+- **MVP.1** A failed card is tried again after 1 day, then 3 days, then 7 days. You'll know it works when an invoice that fails Monday shows "Retrying · 1 of 3" and is tried Tuesday.
+- **MVP.2** The customer gets one email, and only after the third try fails. You'll know it works when no customer email exists for any invoice that recovered.
+- **MVP.3** The email's link opens a page where the card can be changed without signing in. You'll know it works when the link works on a phone and stops working after 14 days.
+- **MVP.4** Saving a new card tries the invoice straight away. You'll know it works when the invoice shows Paid within a minute of saving.
+- **NEXT.1** Finance gets one Monday summary of what did not recover.
+
+## Phases
+- MVP (ships 2026-11-17 to 20 customers): MVP.1-4
+- Next: NEXT.1
+- Later: text-message reminders; customers pick their own retry days
+</script>
+<script src="live.js"></script>
+<script src="toc.js"></script>

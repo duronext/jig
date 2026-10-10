@@ -208,6 +208,16 @@ git worktree remove <worktree-path>
 
 **For Option 3:** Keep the worktree intact.
 
+### Step 6: Update the Live PRD
+
+If the plan or spec header names a PRD (`> **PRD:**`), follow `framework/LIVE_PRD.md`:
+
+- **Option 1 (merged locally) or 2 (PR created):** log a `ship` entry with the branch and the PR link. Tick any milestone in the Milestone Map marked as completed by shipping, once the merge has actually happened.
+- **Option 3 (keep):** nothing to write.
+- **Option 4 (discard):** log a `ship` entry saying the branch was discarded and why, so the PRD's readers are not left waiting.
+
+Skip quietly if there is no PRD or the write is refused, and say so once.
+
 ---
 
 ## Quick Reference

@@ -15,9 +15,12 @@ ticket-system: github
 ```yaml
 stages:
   - discover
+  - prd
+  - spec
   - plan
   - execute
   - review
+  - prd-check
   - ship
   - learn
 ```
@@ -26,10 +29,10 @@ stages:
 
 ```yaml
 bug:
-  skip: [learn]
+  skip: [prd, learn]
   review: light
 task:
-  skip: [learn]
+  skip: [prd, spec, learn]
   review: light
 ```
 
@@ -44,8 +47,9 @@ main-branch: main
 
 ```yaml
 plans-directory: docs/plans
-filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | plan
+filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | spec | plan
 # prd-sync: none            # none | linear | jira | github (pack-driven)
+# spec-sync: none
 # plan-sync: none
 ```
 
@@ -68,10 +72,24 @@ deep-review-model: opus
 specialist-model-default: haiku
 ```
 
+## PRD
+
+```yaml
+prd-publish: artifact       # artifact | file — artifact publishes the live Jig page where the platform supports it
+```
+
 ## PRD Review
 
 ```yaml
 prd-swarm-tiers:
+  fast-pass: [plain-language, mvp-cut, testable-outcomes, missing-moments]
+  full: all
+```
+
+## Spec Review
+
+```yaml
+spec-swarm-tiers:
   fast-pass: [data-dependency, ui-conflict, blast-radius, state-completeness]
   full: all
 ```

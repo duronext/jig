@@ -14,6 +14,7 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://duronext.github.io/jig/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2308080d%22/%3E %3Cg transform=%22translate(6.4 6.4) scale(.8)%22%3E %3Cpath d=%22M9 27V14a5 5 0 0 1 5-5h13%22 fill=%22none%22 stroke=%22%23ececf4%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E %3Cpath d=%22M55 37v13a5 5 0 0 1-5 5H37%22 fill=%22none%22 stroke=%22%23ececf4%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E %3Crect x=%2220%22 y=%2220%22 width=%2224%22 height=%2224%22 rx=%223.5%22 fill=%22%23818cf8%22/%3E %3C/g%3E %3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -92,6 +93,18 @@
         0 0 120px rgba(99,102,241, .12);
       line-height: 1;
       margin-bottom: 1.5rem;
+    }
+    /* Clamp mark beside the wordmark. The 0.8em box puts the visible mark
+       at about 0.9x the cap height; the offsets cancel the mark's built-in
+       padding so its edges line up with the text baseline and left margin. */
+    .wordmark-mark {
+      display: inline-block;
+      width: 0.8em;
+      height: 0.8em;
+      margin: 0 0.23em 0 -0.072em;
+      vertical-align: -0.072em;
+      color: var(--text-primary);
+      filter: drop-shadow(0 0 0.35em rgba(99,102,241, .35));
     }
     .subtitle {
       font-size: clamp(1rem, 2.5vw, 1.2rem);
@@ -276,6 +289,10 @@
       text-align: center;
       font-size: 0.8rem;
       color: var(--text-tertiary);
+    }
+    .pipeline-live {
+      max-width: 540px;
+      margin: 0.75rem auto 0;
     }
 
     /* ── Skills Band ───────────────────────────────────────── */
@@ -603,6 +620,13 @@
       padding: 3rem 0 4rem;
       text-align: center;
     }
+    .footer-mark {
+      display: block;
+      width: 22px;
+      height: 22px;
+      margin: 0 auto 0.85rem;
+      color: var(--text-tertiary);
+    }
     .footer-text {
       font-size: 0.65rem;
       color: var(--text-tertiary);
@@ -764,6 +788,20 @@
       opacity: 1;
       pointer-events: auto;
     }
+    .toc-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin: 0 0 1rem 0.85rem;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: -0.05em;
+      color: var(--text-primary);
+      border: none;
+    }
+    .toc-brand:hover { color: var(--text-primary); border: none; }
+    .toc-brand svg { width: 1.1rem; height: 1.1rem; }
+    .toc-mobile .toc-brand { margin: 0.15rem 0 0.5rem 1rem; }
     .toc-list {
       list-style: none;
       border-left: 1px solid rgba(99,102,241, .1);
@@ -1229,6 +1267,7 @@
 
 <!-- ── Table of Contents (desktop: right margin, mobile: FAB drawer) ── -->
 <nav class="toc" aria-label="Table of contents">
+  <a href="#" class="toc-brand" aria-label="Jig, back to top"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M9 27V14a5 5 0 0 1 5-5h13" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M55 37v13a5 5 0 0 1-5 5H37" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="20" y="20" width="24" height="24" rx="3.5" fill="#818cf8"/></svg>Jig</a>
   <ul class="toc-list">
     <li><a href="#problem" class="toc-link">The Problem</a></li>
     <li><a href="#pipeline" class="toc-link">The Pipeline</a></li>
@@ -1244,6 +1283,7 @@
   <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 <div class="toc-mobile" aria-label="Table of contents">
+  <a href="#" class="toc-brand" aria-label="Jig, back to top"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M9 27V14a5 5 0 0 1 5-5h13" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M55 37v13a5 5 0 0 1-5 5H37" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="20" y="20" width="24" height="24" rx="3.5" fill="#818cf8"/></svg>Jig</a>
   <ul class="toc-list">
     <li><a href="#problem" class="toc-link">The Problem</a></li>
     <li><a href="#pipeline" class="toc-link">The Pipeline</a></li>
@@ -1394,7 +1434,7 @@
     </div>
 
     <div class="fade-in">
-      <h1 class="wordmark">Jig</h1>
+      <h1 class="wordmark"><svg class="wordmark-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M9 27V14a5 5 0 0 1 5-5h13" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M55 37v13a5 5 0 0 1-5 5H37" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="20" y="20" width="24" height="24" rx="3.5" fill="#818cf8"/></svg>Jig</h1>
     </div>
     <div class="fade-in">
       <p class="subtitle">The AI engineering workflow framework for teams.</p>
@@ -1477,13 +1517,17 @@
       <div class="pipeline">
         <span class="stage-pill">DISCOVER</span>
         <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
-        <span class="stage-pill">BRAINSTORM</span>
+        <span class="stage-pill">PRD</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
+        <span class="stage-pill">SPEC</span>
         <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">PLAN</span>
         <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
-        <span class="stage-pill">EXECUTE</span>
+        <span class="stage-pill">BUILD</span>
         <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">REVIEW</span>
+        <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
+        <span class="stage-pill">PRD CHECK</span>
         <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
         <span class="stage-pill">SHIP</span>
         <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
@@ -1496,6 +1540,12 @@
     <div class="fade-in">
       <p class="pipeline-sub">Work type &mdash; bug, feature, improvement, task &mdash;
         determines which stages run and how deep they go.</p>
+    </div>
+    <div class="fade-in">
+      <p class="pipeline-sub pipeline-live">The PRD is written for the whole team,
+        engineers or not. Jig publishes it as a live page: the team ticks
+        milestones, records decisions and signs off, and Jig logs progress
+        as the build moves along.</p>
     </div>
   </section>
 
@@ -1519,17 +1569,25 @@
             <div class="skill-name">kickoff</div>
             <div class="skill-desc">Classifies work, routes through the pipeline</div>
           </div>
+          <div class="skill-item">
+            <div class="skill-name">brainstorm</div>
+            <div class="skill-desc">Explores approaches and compares options</div>
+          </div>
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 4 12.9V17H8v-2.1A7 7 0 0 1 12 2z"/></svg></span>Brainstorm</div>
-          <div class="skill-item">
-            <div class="skill-name">brainstorm</div>
-            <div class="skill-desc">Design exploration with concerns checklist</div>
-          </div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><polyline points="9 14 11 16 15 12"/></svg></span>PRD</div>
           <div class="skill-item">
             <div class="skill-name">prd</div>
-            <div class="skill-desc">Structured requirements with acceptance criteria</div>
+            <div class="skill-desc">Product doc anyone can read, kept as a live page</div>
+          </div>
+        </div>
+
+        <div class="skills-card">
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>Spec</div>
+          <div class="skill-item">
+            <div class="skill-name">spec</div>
+            <div class="skill-desc">Technical contract every task is checked against</div>
           </div>
         </div>
 
@@ -1537,12 +1595,12 @@
           <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Plan</div>
           <div class="skill-item">
             <div class="skill-name">plan</div>
-            <div class="skill-desc">Designs to bite-sized TDD tasks</div>
+            <div class="skill-desc">Spec to bite-sized TDD tasks</div>
           </div>
         </div>
 
         <div class="skills-card">
-          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>Execute</div>
+          <div class="skills-stage-label"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>Build</div>
           <div class="skill-item">
             <div class="skill-name">build</div>
             <div class="skill-desc">Picks parallel or serial, runs the plan</div>
@@ -1750,7 +1808,7 @@
 <pre><span class="t-line" style="transition-delay:0ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:kickoff</span></span>
 <span class="t-line" style="transition-delay:80ms"><span class="t-label">  ▸ Work type:</span> <span class="t-value">feature</span></span>
 <span class="t-line" style="transition-delay:160ms"><span class="t-label">  ▸ Summary:</span>  <span class="t-value">Add user notification preferences</span></span>
-<span class="t-line" style="transition-delay:240ms"><span class="t-label">  ▸ Pipeline:</span> <span class="t-muted">discover → brainstorm → prd → build → review → ship</span></span>
+<span class="t-line" style="transition-delay:240ms"><span class="t-label">  ▸ Pipeline:</span> <span class="t-muted">discover → prd → spec → plan → build → review → prd check → ship → learn</span></span>
 <span class="t-break"></span>
 <span class="t-line" style="transition-delay:500ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:brainstorm</span></span>
 <span class="t-line" style="transition-delay:600ms"><span class="t-label">  ▸ What problem does this solve for users?</span></span>
@@ -1760,25 +1818,29 @@
 <span class="t-break"></span>
 <span class="t-line" style="transition-delay:1150ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:prd</span></span>
 <span class="t-line" style="transition-delay:1250ms"><span class="t-label">  ▸ PRD:</span> <span class="t-value">User Notification Preferences</span></span>
-<span class="t-line" style="transition-delay:1350ms"><span class="t-label">  ▸ 12 acceptance criteria defined</span></span>
-<span class="t-line" style="transition-delay:1450ms"><span class="t-label">  ▸ Layer tags:</span> <span class="t-muted">[API] [DATA] [UI]</span></span>
-<span class="t-line" style="transition-delay:1550ms"><span class="t-label">  ▸ Approved</span> <span class="t-success">✓</span></span>
+<span class="t-line" style="transition-delay:1350ms"><span class="t-label">  ▸ 2 phases, MVP cut after phase 1, 3 milestones</span></span>
+<span class="t-line" style="transition-delay:1450ms"><span class="t-label">  ▸ Published as a live page</span> <span class="t-success">✓</span> <span class="t-muted">· signed off</span></span>
 <span class="t-break"></span>
-<span class="t-line" style="transition-delay:1800ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:build</span></span>
-<span class="t-line" style="transition-delay:1900ms"><span class="t-label">  ▸ Strategy:</span> <span class="t-value">parallel (4 tasks, 3 agents)</span></span>
-<span class="t-line" style="transition-delay:2050ms"><span class="t-label">  ▸ Agent 1: Data model + migrations  </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2050ms"></span></span> <span class="t-success">done</span></span>
-<span class="t-line" style="transition-delay:2200ms"><span class="t-label">  ▸ Agent 2: API endpoints            </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2200ms"></span></span> <span class="t-success">done</span></span>
-<span class="t-line" style="transition-delay:2350ms"><span class="t-label">  ▸ Agent 3: UI components            </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2350ms"></span></span> <span class="t-success">done</span></span>
-<span class="t-line" style="transition-delay:2600ms"><span class="t-label">  ▸ Spec compliance:</span> <span class="t-success">passed ✓</span></span>
-<span class="t-line" style="transition-delay:2700ms"><span class="t-label">  ▸ Code quality:</span> <span class="t-success">passed ✓</span></span>
+<span class="t-line" style="transition-delay:1700ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:spec</span></span>
+<span class="t-line" style="transition-delay:1800ms"><span class="t-label">  ▸ 12 acceptance criteria defined</span></span>
+<span class="t-line" style="transition-delay:1900ms"><span class="t-label">  ▸ Layer tags:</span> <span class="t-muted">[API] [DATA] [UI]</span></span>
+<span class="t-line" style="transition-delay:2000ms"><span class="t-label">  ▸ Approved</span> <span class="t-success">✓</span></span>
 <span class="t-break"></span>
-<span class="t-line" style="transition-delay:2950ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:review</span></span>
-<span class="t-line" style="transition-delay:3050ms"><span class="t-label">  ▸ Dispatching 7 specialists...</span></span>
-<span class="t-line" style="transition-delay:3200ms"><span class="t-label">  ▸ security:</span> <span class="t-success">passed</span></span>
-<span class="t-line" style="transition-delay:3300ms"><span class="t-label">  ▸ async-safety:</span> <span class="t-success">passed</span></span>
-<span class="t-line" style="transition-delay:3400ms"><span class="t-label">  ▸ error-handling:</span> <span class="t-value">1 suggestion (minor)</span></span>
-<span class="t-line" style="transition-delay:3550ms"><span class="t-label">  ▸ Confidence:</span> <span class="t-success">94%</span> <span class="t-muted">— ready to ship</span></span>
-<span class="t-cursor" style="transition-delay:3700ms">▌</span></pre>
+<span class="t-line" style="transition-delay:2250ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:build</span></span>
+<span class="t-line" style="transition-delay:2350ms"><span class="t-label">  ▸ Strategy:</span> <span class="t-value">parallel (4 tasks, 3 agents)</span></span>
+<span class="t-line" style="transition-delay:2500ms"><span class="t-label">  ▸ Agent 1: Data model + migrations  </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2500ms"></span></span> <span class="t-success">done</span></span>
+<span class="t-line" style="transition-delay:2650ms"><span class="t-label">  ▸ Agent 2: API endpoints            </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2650ms"></span></span> <span class="t-success">done</span></span>
+<span class="t-line" style="transition-delay:2800ms"><span class="t-label">  ▸ Agent 3: UI components            </span><span class="t-progress"><span class="t-progress-fill" style="transition-delay:2800ms"></span></span> <span class="t-success">done</span></span>
+<span class="t-line" style="transition-delay:3050ms"><span class="t-label">  ▸ Spec compliance:</span> <span class="t-success">passed ✓</span></span>
+<span class="t-line" style="transition-delay:3150ms"><span class="t-label">  ▸ Code quality:</span> <span class="t-success">passed ✓</span></span>
+<span class="t-break"></span>
+<span class="t-line" style="transition-delay:3400ms"><span class="t-prompt">$</span> <span class="t-cmd">/jig:review</span></span>
+<span class="t-line" style="transition-delay:3500ms"><span class="t-label">  ▸ Dispatching 7 specialists...</span></span>
+<span class="t-line" style="transition-delay:3650ms"><span class="t-label">  ▸ security:</span> <span class="t-success">passed</span></span>
+<span class="t-line" style="transition-delay:3750ms"><span class="t-label">  ▸ async-safety:</span> <span class="t-success">passed</span></span>
+<span class="t-line" style="transition-delay:3850ms"><span class="t-label">  ▸ error-handling:</span> <span class="t-value">1 suggestion (minor)</span></span>
+<span class="t-line" style="transition-delay:4000ms"><span class="t-label">  ▸ Confidence:</span> <span class="t-success">94%</span> <span class="t-muted">— ready to ship</span></span>
+<span class="t-cursor" style="transition-delay:4150ms">▌</span></pre>
         </div>
       </div>
     </div>
@@ -1979,14 +2041,14 @@
     </div>
   </section>
 
-  </main>
-
-  <footer class="footer">
+  <footer class="footer" role="contentinfo">
+    <svg class="footer-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M9 27V14a5 5 0 0 1 5-5h13" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M55 37v13a5 5 0 0 1-5 5H37" fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="20" y="20" width="24" height="24" rx="3.5" fill="currentColor"/></svg>
     <p class="footer-text">MIT License &middot;
       <a href="https://github.com/duronext/jig">duronext/jig</a> &middot;
       WCAG 2.1 AA</p>
   </footer>
   </div>
+  </main>
 
 </div>
 

@@ -18,7 +18,7 @@ You have full codebase access via Read, Grep, Glob, and Agent tools. Use them pr
 
 You receive:
 1. **The full implementation plan** — all tasks, dependencies, files
-2. **The PRD** (if exists) — acceptance criteria the plan must cover
+2. **The spec** (if exists) — acceptance criteria the plan must cover
 3. **Swarm findings** — issues already caught by specialists (DO NOT re-flag these)
 4. **Tool access** — Read, Grep, Glob, Agent to explore the codebase
 
@@ -67,25 +67,25 @@ For each task and for the plan as a whole, apply these 7 reasoning patterns. Use
 **When**: Always — this is the whole-plan check.
 
 **How**:
-- Read the PRD acceptance checklist (if available)
+- Read the spec acceptance checklist (if available)
 - Mentally execute all tasks in dependency order
 - For each acceptance criterion: can you trace it to a task that implements it?
 - Are there acceptance criteria with no corresponding task?
 - Are there tasks that do not map to any acceptance criterion?
 
-**What breaks**: PRD requires 8 acceptance criteria. Plan covers 6. Two UI criteria have no task. Alternatively: Plan has a task for "admin notification" that the PRD never mentioned (scope creep).
+**What breaks**: The spec requires 8 acceptance criteria. Plan covers 6. Two UI criteria have no task. Alternatively: Plan has a task for "admin notification" that the spec never mentioned (scope creep).
 
 ### 5. Question the Scope
 
 **When**: The plan's task list seems too short or too long for the stated goal.
 
 **How**:
-- Count the plan's tasks against the PRD's acceptance criteria
+- Count the plan's tasks against the spec's acceptance criteria
 - Check for accepted requirements that have no plan coverage
 - Check for plan tasks that address no stated requirement
 - Read the design doc's architecture section — does the plan decompose the architecture as designed?
 
-**What breaks**: The design describes 4 components but the plan only creates 3. The PRD's "error handling" acceptance criteria are not covered by any task. A task adds an optimization not in the design.
+**What breaks**: The design describes 4 components but the plan only creates 3. The spec's "error handling" acceptance criteria are not covered by any task. A task adds an optimization not in the design.
 
 ### 6. Verify the Parallelism
 
@@ -147,7 +147,7 @@ Agent tool:
 Use sub-agents for:
 - Verifying many file paths at once
 - Tracing all consumers of a modified type/function
-- Cross-referencing PRD acceptance criteria against plan tasks
+- Cross-referencing spec acceptance criteria against plan tasks
 
 Do NOT use sub-agents for things you can check with a single Grep or Read.
 

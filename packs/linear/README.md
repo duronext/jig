@@ -148,9 +148,9 @@ mcp__linear__list_teams                          → team names
 mcp__linear__list_issue_labels with team: {team} → label names
 ```
 
-## PRD Document Sync
+## Document Sync
 
-When `prd-sync: linear` is set in `jig.config.md`, the `prd` skill calls into this pack to push the PRD content to a Linear document after saving locally.
+When `prd-sync: linear` or `spec-sync: linear` is set in `jig.config.md`, the `prd` and `spec` skills call into this pack to push the document to Linear after saving locally.
 
 ### Configuration
 
@@ -160,34 +160,39 @@ Add to `jig.config.md`:
 ## Documents
 plans-directory: docs/plans
 prd-sync: linear
+spec-sync: linear
 
 ## Linear
 team: ENG
-prd-project: Product Requirement Documents  # required for prd-sync — the dedicated PRD-collection project
+docs-project: Product Requirement Documents  # required for document sync; the dedicated documents project
 labels:
   ...
 ```
 
-`prd-project` is intentionally distinct from any ticket project: PRDs sync to a dedicated
-documents project, which is usually separate from where issues are filed.
+`docs-project` is intentionally distinct from any ticket project: documents sync to a dedicated
+documents project, which is usually separate from where issues are filed. Configs from Jig 1.x
+that set `prd-project` keep working; treat it as `docs-project`.
 
 ### Sync Behavior
 
-After `prd` writes the PRD locally, it calls Linear to create a document linked to the configured project:
+After `prd` or `spec` writes its document locally, it calls Linear to create a document linked to the configured project:
 
 ```
 mcp__linear__save_document with:
-  project:  {prd-project from jig.config.md}
-  title:    {PRD title — derived from filename or PRD overview}
-  content:  {markdown body of the local PRD file}
+  project:  {docs-project from jig.config.md}
+  title:    {document title, see below}
+  content:  {markdown body of the local file}
 ```
+
+For a PRD with a live page, put the page link on the first line of `content` (`Live page: https://claude.ai/artifact/...`).
+The page is where milestones, decisions and sign-off are tracked; the Linear document is a copy of the text.
 
 If the document already exists for this topic, update it in place rather than creating a
 duplicate. Search by title and confirm the match is in the configured project:
 
 ```
 mcp__linear__list_documents with query: {title}, fields: ["id", "title", "project"]
-  → find the entry whose project.name matches prd-project
+  → find the entry whose project.name matches docs-project
 mcp__linear__save_document with id: {that id}, content: {updated content}
 ```
 
@@ -196,16 +201,17 @@ UUID, and the whole point of this pack is not to make teams hunt for UUIDs.
 
 ### Topic-to-Document Mapping
 
-Use the PRD's filename stem (e.g., `2026-05-27-export-feature`) as the document's stable identifier. Format the document title for human readability — strip the date prefix:
+Use the filename stem (e.g., `2026-05-27-export-feature`) as the document's stable identifier. Format the document title for human readability — strip the date prefix and name the kind:
 
 ```
-2026-05-27-export-feature-prd.md  →  document title: "Export Feature — PRD"
+2026-05-27-export-feature-prd.md   →  document title: "Export Feature — PRD"
+2026-05-27-export-feature-spec.md  →  document title: "Export Feature — Spec"
 ```
 
 The mapping is convention-driven, not stored. To re-sync, look up by formatted title.
 
 ### Failure Modes
 
-- **`prd-project` missing in config** → skip sync, warn user: "PRD sync requested but no `prd-project` in `## Linear` config. Set it and re-run `/prd --sync`."
-- **Linear MCP unavailable** → skip sync, warn user: "Linear MCP not connected. PRD saved locally only."
+- **`docs-project` missing in config** → skip sync, warn user: "Document sync requested but no `docs-project` in `## Linear` config. Set it and re-run the sync."
+- **Linear MCP unavailable** → skip sync, warn user: "Linear MCP not connected. Saved locally only."
 - **Document creation fails** → save locally succeeded; surface the Linear error to the user and offer to retry.

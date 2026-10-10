@@ -1,404 +1,312 @@
 ---
 name: prd
 description: >
-  Use when capturing product requirements for features, improvements, or bugs
-  before brainstorming or implementation. Triggered by "create a PRD", "capture
-  requirements", "document requirements", "write a PRD", or /prd.
+  Use when writing a product requirements document that anyone can read: a PM,
+  finance, support or an executive, not only engineers. Turns a Word doc, a
+  bullet list, a brainstorm or a ticket into a plain-language PRD with phases,
+  an MVP cut line, milestones, open decisions and sign-off, published as a live
+  Jig page that people and Jig update as the work moves. Also checks a build
+  against its PRD before shipping. Triggered by "write a PRD", "turn this into a
+  PRD", "product requirements", "check the PRD", or /prd.
 tier: workflow
 alwaysApply: false
 ---
 
-# PRD Author
+# PRD
 
-**PURPOSE**: Collaboratively author structured Product Requirements Documents that serve as enforceable specs for both human reviewers and downstream AI agents (spec reviewers, team-dev quality gates).
+**PURPOSE**: Help someone get from a rough idea to a product document a whole
+team can read, argue with, sign and track. The PRD says what we are building,
+for whom, in what order, and how we will know it worked. It never says how the
+code works; that is the spec's job (`spec`).
 
-**PRINCIPLE**: API-first. The platform contract (data model, API surface, business rules) comes before UI. Sections are ordered by platform priority, not visual priority.
+**WHO RUNS IT**: A PM in Claude.ai or the desktop app with nothing but a Word
+doc, or an engineer in Claude Code with the repo open. Both paths are
+supported. With the repo open, the PRD gets a product-side blast radius (screens,
+names and permissions it touches); without it, those rows say "not checked".
 
-**CONFIGURATION**: Reads `jig.config.md` for `ticket-system` (sync target), `plans-directory` (local save location), `prd-sync` (optional remote document sync), and the `## Concerns Checklist` (concerns to walk through).
+**OUTPUT**: Two things from one source:
+1. `{plans-directory}/YYYY-MM-DD-<topic>-prd.md`, the master copy of the text.
+2. A live Jig page (an artifact) built from the kit in `reference/`, carrying
+   that Markdown inside it, where people tick milestones, record decisions and
+   sign off, and where Jig logs progress. See `framework/LIVE_PRD.md`.
+
+**CONFIGURATION**: Reads `jig.config.md` when present for `plans-directory`,
+`filename-format`, `prd-publish` (`artifact` | `file`), `prd-sync` and
+`prd-swarm-tiers`. With no config (a PM in Claude.ai), use the defaults:
+save to `docs/plans/` if a repo is open, publish as an artifact, review with
+the four PRD specialists.
+
+**READ FIRST**: `reference/voice.md` before writing a single sentence.
+`reference/components.md` before building the page.
 
 ---
 
-## When to Use
+## Modes
 
-- Starting a new feature or large improvement -- capture requirements before brainstorming approaches
-- Documenting a bug fix that touches multiple layers
-- Any time you want a structured spec that downstream agents can verify against
-- Invoked manually via `/prd` or prompted by `kickoff` for features
-
-**Do NOT use when:** The work is a trivial config change, chore, or single-line fix with obvious scope.
-
----
+| Mode | Trigger | Does |
+|------|---------|------|
+| **Write** (default) | "write a PRD", `/prd`, `/prd <file or link>` | Intake → interview → draft → review → page |
+| **Revise** | "update the PRD", "rev C", changed scope | Bumps the rev letter, marks changes, republishes to the same link |
+| **Check** | "check the PRD", kickoff's PRD CHECK stage | Walks each in-scope outcome from the user's side before shipping |
+| **Publish** | "publish this PRD", a `*-prd.md` with no page yet | Builds the page from an existing `*-prd.md` |
 
 ## Tiers
 
-Two tiers, selected by work type:
+| Work | Tier | Sections |
+|------|------|----------|
+| Feature | **Full** | All sections in the Markdown skeleton below; cut any that do not apply |
+| Large improvement | **One-pager** | Thesis, what it does, phases and milestones, scope, open decisions, who signs off, log |
 
-```
-What type of work?
-  |
-  +-- feature / large improvement --> Full PRD (12 sections)
-  |
-  +-- bug / small improvement / task --> Light PRD (5 sections)
-```
-
-- **Full**: Features and large improvements. 12 sections covering API, data, logic, UI, scope, and acceptance.
-- **Light**: Bugs and small improvements. 5 sections: problem, behavior, surface area, scope, acceptance.
-
-Auto-suggest the tier from context. Ask the user to confirm.
+Bugs and tasks do not get a PRD. Send them to `spec` (light tier) or `plan`.
 
 ---
 
-## Process
+## Write mode
 
-### Step 1: Gather Context
+### Step 1: Take in what they have
 
-Before asking the user anything, do your homework:
+Accept anything: a Word doc, a PDF, a Google Doc export, a Slack thread,
+bullet points, a ticket, a brainstorm summary, an old PRD. Read all of it, then
+tell the user in a short list:
 
-1. **Read the ticket** (if one exists) -- extract the problem statement, any existing requirements. Check `jig.config.md` for `ticket-system` to determine where to look.
-2. **Explore the codebase** -- look at relevant entities, services, components, APIs. What exists already?
-3. **Check recent plans/PRDs** -- scan `docs/plans/` for related prior work
+- **What I found**: the claims the source makes (who, problem, ideas, dates)
+- **What's missing**: the gaps the PRD needs filled (usually the MVP, how we'll
+  know it worked, and who signs off)
 
-Then ask **2-3 targeted questions** (not a form):
-- What tier does this feel like? (suggest one based on context)
-- Which layers are affected -- API, data model, business logic, UI? (suggest based on exploration)
-- Any existing infrastructure to build on? (reference what you found)
+Do not restate their document back to them.
 
-### Step 2: Determine Tier & Load Sections
+### Step 2: Look at the product (when the repo is open)
 
-Based on the user's answers and your context gathering:
-- Select Full or Light tier
-- Identify which sections are relevant vs N/A for this specific work
-- Use the section references below (Full PRD Sections or Light PRD Sections)
+If a codebase is available, spend a few minutes on the product side of it, not
+the implementation:
 
-### Step 3: Draft
+- Which screens, emails, settings or reports does this touch?
+- What does the product already call these things? Use those names.
+- Does something similar already exist? Say so before designing a second one.
+- Which permissions or plans does it inherit?
 
-Produce a **complete PRD draft** in one pass:
+Record what you find in "What it touches" with `Code checked: yes, <date>`.
+Without a repo, write `Code checked: no` and mark each row `not checked`.
+`/jig:spec` fills those in later and sends product questions back as decisions.
 
-- **Known sections**: fill from context, codebase exploration, and conversation
-- **Unknown sections**: flag with `TBD -- [what needs to be decided]`
-- **N/A sections**: mark explicitly with a one-line reason -- never silently omit
-- **Acceptance checklist**: always present, with `[ ]` items tagged by layer
+### Step 3: Find the one sentence
 
-**Draft quality bar**: The draft should be good enough that the user is refining and correcting, not writing from scratch. Leverage what you learned in Step 1.
+Write the thesis: the sentence a customer or colleague would say once this
+works. It names **when** it starts, **the work**, **the outcome**, and **who it
+saves**:
 
-### Step 3b: PRD Review Swarm
+> When a card fails, the invoice fixes itself before anyone has to chase it.
 
-After producing the draft, invoke the review swarm to scrutinize the requirements before the user refines them.
+If you cannot write it, the idea is not ready. Say so, and offer
+`/jig:brainstorm`. Do not draft a PRD around a missing sentence.
 
-**Automatic dispatch**: Run the swarm for all medium-to-large features and improvements. Skip only for clearly trivial work (config change, single-line fix, chore with obvious scope).
+### Step 4: Interview
 
-**INVOKE `jig:review` using the Skill tool with mode: prd.** Pass the PRD document path. The review skill discovers PRD specialists (stage: prd or both), dispatches them in parallel with the full document + section hints + codebase access, scores findings, and returns a unified report.
+Ask **one question at a time**, multiple choice when you can, **at most five
+per round**. Cover, in roughly this order, only what the sources left open:
 
-Present the swarm findings to the user **alongside the draft**:
+1. **Who** feels this today, and what do they do instead?
+2. **What is the smallest version someone would actually use?** This is the MVP.
+   Push here. "Everything in the doc" is not an MVP.
+3. **What can wait**, and what will we never build?
+4. **How will we know it worked?** One or two numbers with today's value, a
+   target and a date, plus one number that must not get worse.
+5. **When**: milestones a person could watch happen, with target dates.
+6. **Who signs off**, who gives input, and who just needs to hear about it.
 
-> "Here's the PRD draft. Before we refine, the review swarm found these concerns:"
->
-> {swarm report}
->
-> "Let's address these during refinement, or flag any you want to defer."
+When an answer needs a decision nobody can make now, do not block. Record it as
+an open decision with two options, a recommendation, an owner and a due date.
+Leave **no more than three** open decisions in a draft.
 
-The user then refines the draft (Step 4) informed by both their own review and the specialist findings.
+### Step 5: Shape the phases
 
-### Step 3c: Concerns Walk-Through
+Before drafting, check the plan holds together:
 
-After the swarm findings are presented but before refinement, walk through the `## Concerns Checklist` from `jig.config.md`.
+- **The MVP stands on its own.** Someone gets value from it with nothing below
+  the cut line. If not, move the cut.
+- **Each phase has a moment you can demo.** That demo is a milestone.
+- **Every rule has an ID and a phase**: `MVP.1`, `NEXT.1`, `LATER.1`. These IDs
+  travel: the spec traces to them, the build ticks them, the check verifies them.
+- **Every rule says how you'll know it works**, in words a person could check
+  by using the product.
 
-For each concern listed:
-- If marked **Yes** and mapped to a skill -> load that skill for guidance, then capture its implications as new acceptance items
-- If marked **Yes** and mapped to a specialist -> note the specialist's domain; the specialist will validate during `review:prd`
-- If marked **Yes** and mapped to `manual` -> add an acceptance item flagging human review
-- If marked **No** or **N/A** -> record the decision with brief rationale in an "Open Questions" or "Out of Scope" section
+### Step 6: Draft the Markdown
 
-Each `Yes` concern adds scope to the PRD acceptance checklist. The user must explicitly approve added scope.
+Write `*-prd.md` using the skeleton below. Follow `reference/voice.md`. Where a
+rule needs steps, write plain-language steps (`when`, `if`, `try again`), never
+code. Mark anything illustrative as mock data.
 
-**Work type behavior:**
-- Features and large improvements: full walk-through
-- Bugs and small improvements: only walk through concerns flagged relevant by the swarm or user
-- Tasks: skip
+### Step 7: Review
 
-**If no concerns checklist is configured in `jig.config.md`**, use minimal defaults: error-handling, security, test-strategy.
+**INVOKE `jig:review` using the Skill tool with mode: prd.** Pass the
+`*-prd.md` path. The PRD specialists read it as a non-engineer would:
+`plain-language`, `mvp-cut`, `testable-outcomes`, `missing-moments`.
 
-See `framework/CONCERNS_CHECKLIST.md` for full configuration documentation.
+Present the findings with the draft, fix what the user agrees with, and record
+the review in the Revisions table ("Checked: review swarm, N notes").
 
-### Step 4: Refine
+### Step 8: Build and publish the page
 
-Walk through the draft with the user:
-- Resolve TBD items collaboratively
-- Add details the user provides
-- Remove sections the user confirms are N/A
-- Iterate until the user approves
+Skip to Step 9 if `prd-publish: file` or the platform cannot publish artifacts.
 
-**Do NOT rush this step.** The PRD is only as good as the refinement. If the user spots gaps, dig into them.
+1. Copy `reference/template.html` into your scratchpad as `<topic>-prd.html`.
+   It is the standard page structure filled with the kit's example; replace
+   every word. Cut sections the PRD does not have. Keep the `.layout`, `#toc`,
+   contents drawer, `#prd-data` and script lines.
+2. Fill `#prd-data` from the PRD: `title`, `kind: "PRD"`, `rev`, `milestones`,
+   `decisions`, `approvers`, `outcomes` (shapes in `framework/LIVE_PRD.md`).
+3. Paste the full `*-prd.md` into `#prd-source`.
+4. Fill the moments with mocks that use the product's real structure and
+   illustrative people. One dashed indigo outline per mock, on the new thing.
+5. Run `bash reference/assemble.sh <topic>-prd.html > <topic>-prd.out.html`.
+   Take one look at the result if the session offers a preview, fix what is
+   visibly broken, then publish. Do not loop.
+6. Publish `<topic>-prd.out.html` with the Artifact tool: the PRD name as the
+   title, `icon: "blueprint"`, a one-sentence description, and
+   `capabilities: {db: {}, user: {scopes: ["profile"]}}`.
+7. Write the first log entries (`actor: jig`): a `rev` entry, "Rev A published.", and a `review` entry summarizing the `review:prd` findings and what changed because of them.
+8. Put the page link in the `*-prd.md` header (`Page:`).
 
-### Step 5: Save
+### Step 9: Save and hand off
 
-1. **Determine the local save path** — read `plans-directory` and `filename-format` from `jig.config.md` (defaults: `docs/plans/` and `{date}-{topic}-{kind}.md`). Resolve to e.g. `docs/plans/2026-05-27-export-feature-prd.md`.
-2. **Write the PRD** to the resolved path.
-3. **Check `prd-sync` in `jig.config.md`** — if set (e.g., `prd-sync: linear`), invoke the configured pack's doc-sync instructions. See the pack's README for the sync method (e.g., `packs/linear/README.md` → "PRD document sync").
-4. **Always offer ticket sync** — "Want to also sync these requirements to the ticket description?" If yes, push the PRD content to the ticket system configured in `jig.config.md` (separate from doc sync — ticket is the issue, doc is the standalone artifact).
-5. **Confirm all save locations** to the user.
+1. Save `*-prd.md` to `{plans-directory}` (when a repo is open). Do not commit
+   unless the user asks.
+2. If `prd-sync` is set, follow that pack's document sync.
+3. Give the user, in three lines or fewer: the page link, what it covers, and
+   what still needs a decision or a sign-off.
+4. Offer the next step: "Ready for engineering? `/jig:spec <link>` turns the
+   MVP into the technical contract."
 
 ---
 
-## Full PRD Sections (12 sections)
+## Revise mode
 
-Use for **features** and **large improvements**. Not every section applies to every PRD -- mark irrelevant sections as N/A with a brief reason. Sections are ordered by platform priority: API-first, UI last.
-
-### 1. Overview
-
-Orient any reader in 30 seconds.
-
-- 1-3 sentences: what is being built and why
-- Links to context: ticket, walkthrough, designs (when available)
-- Audience test: someone outside engineering should understand this paragraph
-
-**Good:** "A component export feature that lets users build custom export packages, select revisions, configure output settings, and receive the export via email or direct download."
-
-**Bad:** "We need to implement the mutation with a workflow and a new entity." (That is implementation, not requirements.)
-
-### 2. Background & Motivation
-
-Establish why this work matters.
-
-- What problem exists today? Who is affected?
-- What is the business or user impact of solving it?
-- Any prior art, customer requests, or competitive pressure?
-
-Skip if self-evident from the Overview. Keep to 2-4 sentences.
-
-### 3. API Contract
-
-Define the interface -- this is the platform contract.
-
-For each query, mutation, endpoint, or operation:
-- **Name** and **description** of the operation
-- **Input types** with field names, types, nullability, defaults
-- **Return types** with field names and types
-- **Auth/permission requirements** (which roles can call this?)
-- **Error cases** with expected error codes and conditions
-
-Format as a checklist for downstream verification:
-
-> - [ ] [API] `createOrder` endpoint: accepts `CreateOrderInput`, returns `Order`
-> - [ ] [API] Input field `items: [OrderItemInput!]!` -- required, non-empty array
-> - [ ] [API] Error `ORDER_EMPTY_ITEMS` thrown when items is empty
-> - [ ] [API] Requires `ORDER_CREATE` permission or admin role
-
-**What good looks like:** A backend engineer can implement the endpoint from this section alone without asking clarifying questions about the contract.
-
-### 4. Data Model
-
-Define new or modified entities, relationships, and schema changes.
-
-For each entity:
-- **Entity name** and purpose
-- **Fields** with name, type, nullability, defaults, constraints
-- **Relationships** (one-to-many, many-to-many, foreign keys)
-- **Indexes** worth calling out (unique constraints, frequently queried fields)
-- **Migration notes** (new table vs ALTER on existing)
-
-Format as a checklist:
-
-> - [ ] [DATA] `Order` entity: `id`, `status` (enum), `userId` (FK), `settings` (JSON), `total` (decimal)
-> - [ ] [DATA] `OrderItem` join entity: `orderId` (FK), `productId` (FK), `quantity` (int)
-> - [ ] [DATA] Migration handles existing databases with data
-
-### 5. Business Logic & Rules
-
-Define validations, state transitions, conditional behavior, and side effects.
-
-Cover:
-- **Validations** -- what inputs are rejected and why?
-- **State transitions** -- if entities have a status/lifecycle, document the state machine
-- **Conditional behavior** -- "if X then Y" rules
-- **Permissions** -- who can do what?
-- **Side effects** -- events published, background jobs initiated, emails sent, webhooks triggered
-
-Format as a checklist:
-
-> - [ ] [LOGIC] Order transitions: `DRAFT` -> `SUBMITTED` -> `APPROVED` | `REJECTED`
-> - [ ] [LOGIC] Only items the user has read access to can be added
-> - [ ] [LOGIC] Event `order.submitted` published on submission
-> - [ ] [LOGIC] Email sent to approver on submission
-
-### 6. Entry Points & User Flows
-
-Document how users reach this feature and what context they carry in.
-
-Each entry path gets its own subsection:
-
-> ### Path A -- Dashboard "New Order" Button
-> - User clicks "New Order" on dashboard
-> - Navigates to order creation page in **empty state**
->
-> ### Path B -- Product List (Multi-select)
-> - User selects products via checkboxes
-> - Opens Actions menu -> "Create Order"
-> - Navigates to order creation page with selected products **pre-populated**
-
-**What good looks like:** A frontend engineer knows every route into the feature and what state/data each path carries.
-
-### 7. UI States & Layout
-
-Define page structure and every visual state.
-
-Cover:
-- **Page layout** -- regions, panels, sidebars, their relationship
-- **States** -- empty, populated, loading, error, disabled
-- Each state: what is visible, what is hidden, what is disabled, what is actionable
-
-### 8. Component Behavior
-
-Specify interactive behavior for each non-trivial UI component.
-
-For each component cover:
-- **Trigger** -- what initiates interaction
-- **Behavior** -- what happens on interaction
-- **States** -- enabled, disabled, selected, already-added
-- **Defaults** -- what is selected/shown by default
-
-Components to document: modals, forms, dropdowns, pickers, sidebars, drawers, lists with selection, drag-and-drop, toggles.
-
-### 9. Settings & Configuration
-
-Document every user-configurable option.
-
-For each setting:
-- **Label** -- what the user sees
-- **Control type** -- dropdown, checkbox, radio, text input
-- **Options** -- all available values
-- **Default** -- what is selected when the user has not touched it
-- **Behavior** -- what changes when the setting is toggled
-
-### 10. Open Questions
-
-Make unresolved decisions visible, not hidden.
-
-Each open question should include:
-- The question itself
-- Enough context that someone could answer it without asking for more info
-- Who might need to weigh in (if known)
-
-Prefix each with `TBD` for scannability:
-
-> - TBD: How are download links handled for unauthenticated users? Needs input from security team.
-> - TBD: Exact polling UX for progress -- requires backend timing data to inform.
-
-### 11. Out of Scope
-
-Explicitly define what is NOT included in this work.
-
-- Features deferred to future tickets (with brief reasoning)
-- Adjacent features that might seem related but are not part of this effort
-- "Do not build" markers for things that appear in designs but are deferred
-
-### 12. Acceptance Checklist
-
-The enforceable contract. Downstream agents verify every item. See the Acceptance Checklist Format section below for rules.
+1. Read the current `*-prd.md` (or the page's `#prd-source`) and its live state.
+2. Make the change with the user. Bump the rev letter (A → B → C).
+3. Add a Revisions row: rev, date, who, what changed, where.
+4. Mark each changed item in the page with a delta (`<span class="delta">C</span>`).
+   Remove the previous rev's deltas; older changes live in the table.
+5. Update `#prd-data` (`rev`, and any new milestones, decisions or outcomes).
+   Keep existing ids so ticks, choices and sign-offs carry over.
+6. Republish to the **same** artifact link. Sign-offs for the old rev now show
+   "asks again" on their own.
+7. Log a `rev` entry naming what changed and that sign-off is needed again.
 
 ---
 
-## Light PRD Sections (5 sections)
+## Check mode (before shipping)
 
-Use for **bugs**, **small improvements**, or **tasks**. Keep it concise -- a light PRD should take minutes, not an hour.
+Called by `kickoff` at PRD CHECK, or directly. The spec reviewer already asked
+"did we build what the spec says". This asks "can a person now do what the PRD
+promised".
 
-### 1. Problem Statement
-
-What is broken or suboptimal, and who is affected?
-
-- 2-3 sentences max
-- Link to: ticket, error tracker, screenshot, reproduction URL
-- Be specific: "Clicking export with 0 items returns a 500" not "export is broken"
-
-### 2. Current vs Expected Behavior
-
-Make the gap between now and done crystal clear.
-
-> #### Current Behavior
-> What happens now. For bugs: reproduction steps. For improvements: current limitation.
->
-> #### Expected Behavior
-> What should happen instead. Concrete and testable.
-
-Keep it concrete -- "clicking X shows Y" not "the experience is degraded."
-
-### 3. Affected Surface Area
-
-Scope the change so implementers know where to look and agents know where to verify.
-
-- Which layers: API, database, business logic, UI
-- Existing files, entities, services, components involved
-- Note if the fix is isolated or has cross-cutting impact
-
-### 4. Scope Boundaries
-
-Prevent scope creep on what should be a focused change.
-
-- Out of scope / do not fix in this PR
-- Open questions (TBD) if any
-- Keep brief -- a few bullets max
-
-### 5. Acceptance Checklist
-
-The enforceable contract -- same rules as the full PRD. See the Acceptance Checklist Format section below.
+1. Load the PRD and its trace. List the in-scope outcomes (the phase being shipped).
+2. For each outcome, check its "you'll know it works when" line **from the
+   user's side**: run the app, use staging, read the test that exercises the
+   whole path, or watch the behaviour in a preview. Write down what you saw.
+3. Record each one in the trace (see `framework/LIVE_PRD.md`):
+   - `verified` with the proof ("Paid 22 s after saving a card on staging")
+   - `built` if the code exists but you could not watch it work, with why
+   - `deferred` only if the PRD owner agreed, with who and why
+4. Tick any milestone the check completes. Log one `check` entry with the counts.
+5. Report back: verified, built-not-verified, deferred. Anything `built` blocks
+   the gate until someone watches it work or the owner defers it.
 
 ---
 
-## Acceptance Checklist Format
+## The Markdown skeleton
 
-The acceptance checklist is the **enforceable contract**. Every item must be:
+```markdown
+# {Name}
 
-| Property | Rule |
-|----------|------|
-| **Atomic** | One verifiable behavior per checkbox |
-| **Testable** | An agent can determine pass/fail by reading code or running a test |
-| **Layer-tagged** | Prefixed with `[API]`, `[DATA]`, `[LOGIC]`, or `[UI]` |
-| **Concrete** | "Export button disabled when list empty" not "UI works correctly" |
+> {The one sentence}
 
-**Example:**
+Rev {A} · {YYYY-MM-DD} · Owner: {name} · Status: {Draft | In review | Approved}
+Page: {artifact link, once published}
 
-> ### API
-> - [ ] [API] `createOrder` mutation accepts `items` and `settings` input
-> - [ ] [API] Returns `Order` with `id`, `status`, `total`
-> - [ ] [API] Throws `ORDER_EMPTY_ITEMS` error when `items` is empty
->
-> ### Data
-> - [ ] [DATA] `Order` entity created with status, userId, settings columns
-> - [ ] [DATA] Migration runs cleanly on empty and populated databases
->
-> ### Logic
-> - [ ] [LOGIC] Background job initiated on submission
-> - [ ] [LOGIC] Only active items included when `activeOnly: true`
->
-> ### UI
-> - [ ] [UI] Submit button disabled when item list is empty
-> - [ ] [UI] Toast shown after submission
+## At a glance
+- **Who it reaches**: ...
+- **Phase**: MVP, to {who}
+- **Target**: {date}
+- **Ticket**: ...
+- **Started from**: {source doc, thread or brainstorm}
+- **Code checked**: {yes, date | no}
 
----
+## Today
+{How it works now, as numbered steps, and what it costs, with units.}
 
-## Downstream Agent Consumption
+## With this
+{The same steps after this ships.}
 
-When a PRD exists, implementation plans should reference it:
+## People
+- **{Role}**: today ... needs ...
 
-> **PRD:** docs/plans/YYYY-MM-DD-<topic>-prd.md
+## Moments
+### 1. {A claim about what the person sees}
+{Two sentences. The page shows the mock.}
 
-This pointer tells downstream agents (spec reviewers, team-dev quality gates) where to find the acceptance checklist. They load the PRD, extract the `[ ]` items, and verify each one against the implementation with file:line references.
+## What it does
+- **MVP.1** {One behaviour.} You'll know it works when {a person could check it}.
+- **NEXT.1** ...
 
----
+{Optional plain-language steps:}
+    when ...
+      if ...
 
-## Integration with kickoff
+## Phases
+- **MVP** (ships {date} to {who}): MVP.1–MVP.n
+- ---- cut line ----
+- **Next**: NEXT.1 ...
+- **Later**: ... ({why it waits})
 
-This skill sits inside the **DISCOVER** stage in the kickoff pipeline as an optional requirements-capture tool:
+## Milestones
+- [ ] m1 · {title} · {due} · {what a person would see}
 
-```
-CLASSIFY -> DISCOVER -> (PRD optional) -> PLAN -> EXECUTE -> REVIEW -> SHIP -> LEARN
+## Scope
+- **In the MVP**: ...
+- **Waits**: ... ({why})
+- **Not building**: ... ({why})
+
+## What it touches
+| Area | What changes for people | Effect | Checked |
+
+## Measures
+| Measure | Today | Target | Read on | Kind (goal/guardrail) |
+
+## Open decisions
+### d1 · {Question?}
+- **A (recommended)**: {option}. {why}
+- **B**: {option}. {why}
+- Owner: {name} · Due: {date} · Blocks: {MVP.n}
+
+## Who signs off
+- **Signs off**: {name, role, what they check}
+- **Gives input**: ...
+- **Kept posted**: ...
+
+## Trace
+| Outcome | Spec items | Plan tasks | Status | Proof |
+
+## Revisions
+| Rev | Date | By | What changed | Where |
+
+## Log
+- {YYYY-MM-DD HH:MM} · {who} · {kind} · {one sentence}
 ```
 
-- **Features**: kickoff prompts "Capture requirements with `/prd`?"
-- **Large improvements**: prompted
-- **Bugs/tasks**: skipped (invoke manually if needed)
+---
 
-The PRD becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the PRD's acceptance checklist and distills it into a build sequence. The PRD defines *what* the requirements are; `plan` decides *how* to satisfy them.
+## Running in Claude.ai or the desktop app
+
+The skill folder (`SKILL.md` + `reference/`) uploads as a standalone skill. In
+that setting:
+
+- There is no `jig.config.md`; use the defaults above.
+- There may be no repo; skip Step 2 and mark "Code checked: no".
+- Build and publish the page the same way. The `*-prd.md` lives inside the page
+  (`#prd-source`); offer it as a file if the user wants one.
+- People update the page directly. Jig's own log entries start once an engineer
+  runs `/jig:spec <link>` in Claude Code.
 
 ---
 
@@ -406,43 +314,40 @@ The PRD becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the PRD's
 
 | Mistake | Fix |
 |---------|-----|
-| Starting with UI sections | Lead with API contract and data model -- platform first |
-| Vague acceptance items | Every `[ ]` must be testable. "Works correctly" is never acceptable |
-| Skipping N/A sections silently | Mark them explicitly -- the absence of a section is a decision worth documenting |
-| Writing implementation details | The PRD captures *what*, not *how*. Save the *how* for brainstorming and planning |
-| Forgetting open questions | Flag unknowns with TBD -- unresolved questions are better visible than hidden |
-| Overly long PRDs for small work | Use the Light tier. Five focused sections beat twelve half-empty ones |
-| Not exploring the codebase first | The draft quality depends on context. Read the code before writing the spec |
-| Hardcoding ticket system references | Read `ticket-system` from `jig.config.md` -- do not assume any particular tool |
-| Acceptance items without layer tags | Every `[ ]` must be prefixed with `[API]`, `[DATA]`, `[LOGIC]`, or `[UI]` |
-| "The bug is fixed" as acceptance item | Be specific: what behavior changed? What inputs produce what outputs? |
-
----
+| Writing the spec | No endpoints, tables, fields or code. If a reader needs to know how, it belongs in `/jig:spec` |
+| An MVP that is "phase one of everything" | Cut until someone could use it alone, then demo it |
+| "Works correctly" as an outcome | Say what a person would see: "shows Paid within a minute of saving" |
+| Five open questions and no owners | Each open item is a decision with two options, an owner and a date. Three at most |
+| Drafting without the one sentence | Go back to brainstorm |
+| Asking ten questions at once | One at a time, five per round at most |
+| Restyling the page | The kit is the look. Colour means something; do not invent a fifth callout or a new hue |
+| Changing ids on revise | Keep milestone, decision, approver and outcome ids so live state carries over |
+| A new link for each rev | Republish to the same artifact link |
+| Claude-speak | Run every sentence past `reference/voice.md` |
 
 ## Integration
 
 **Called by:**
-- `kickoff` during the REQUIREMENTS stage (between DISCOVER and BRAINSTORM)
+- `kickoff` at the PRD stage (features, large improvements) and at PRD CHECK
+- Direct invocation (`/prd`), including by a PM outside any repo
 
-**Terminal state:**
-- Return to `kickoff`, which proceeds to BRAINSTORM
+**Hands off to:**
+- `spec`: takes the PRD path or page link and specs the MVP phase
+- `review` with `mode: prd`: the four PRD specialists
 
-**Related skills:**
-- `brainstorm` -- consumes the PRD as input to design exploration
-- `plan` -- references the PRD in the plan header for spec reviewers
-- `kickoff` -- orchestrates the full pipeline including this skill
-
----
+**Kept current by:** `spec`, `plan`, `build`, `team-dev`, `sdd`, `finish` and
+`postmortem`, per `framework/LIVE_PRD.md`.
 
 ## Quick Reference
 
 | Element | Rule |
 |---------|------|
-| Full tier | 12 sections, features and large improvements |
-| Light tier | 5 sections, bugs and small improvements |
-| Save location | `{plans-directory}/{filename-format}` (default: `docs/plans/YYYY-MM-DD-<topic>-prd.md`) |
-| Remote sync | Optional via `prd-sync` in `jig.config.md` (pack-driven) |
-| Acceptance items | Atomic, testable, layer-tagged, concrete |
-| Layer tags | `[API]`, `[DATA]`, `[LOGIC]`, `[UI]` |
-| API-first | Platform contract before UI in section order |
-| Ticket sync | Read `ticket-system` from `jig.config.md` |
+| Thesis | One sentence: when, the work, the outcome, who it saves |
+| Outcome IDs | `MVP.n`, `NEXT.n`, `LATER.n`, each with "you'll know it works when" |
+| Milestones | `m1…`, each something a person could watch happen, with a date |
+| Decisions | `d1…`, two options, one recommended, owner, due date; three open at most |
+| Approvers | Short slugs (`finance`, `eng`); sign-off counts per rev |
+| Files | `*-prd.md` + the page (`reference/template.html` → `assemble.sh` → Artifact) |
+| Publish | `capabilities: {db: {}, user: {scopes: ["profile"]}}`, same link on every rev |
+| Voice | `reference/voice.md`. No code, no Claude-speak |
+| Live state | `framework/LIVE_PRD.md` |

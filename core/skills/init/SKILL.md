@@ -26,6 +26,8 @@ at a time, and generate the configuration and team extension directory.
 - `/init` invoked directly
 - After installing the Jig plugin
 
+- Upgrading a Jig 1.x project to 2.0 (`jig.config.md` has no `spec-swarm-tiers`): follow [Upgrade](./reference/upgrade.md)
+
 **Do NOT use when:**
 - `jig.config.md` already exists and is correct (edit it directly)
 - You only need to change one config value (edit `jig.config.md`)
@@ -38,6 +40,7 @@ at a time, and generate the configuration and team extension directory.
 |-------|-----------|
 | [Detection](./reference/detection.md) | Phase 1: running auto-detection |
 | [Config Template](./reference/config-template.md) | Phase 3: generating jig.config.md |
+| [Upgrade](./reference/upgrade.md) | An existing 1.x `jig.config.md` (no `spec-swarm-tiers`) |
 | [Existing Project](./reference/existing-project.md) | Phase 3: handling existing files |
 
 ---
@@ -118,7 +121,7 @@ Free text. Maps to `ticket-prefix` in jig.config.md.
 
 ```
 What engineering concerns matter to your team?
-These surface during PRD authoring (Step 3c: Concerns Walk-Through) to make sure nothing gets missed.
+These surface during spec authoring (Step 3c: Concerns Walk-Through) to make sure nothing gets missed.
 You can always add more later in jig.config.md.
 
   [ ] i18n / translations

@@ -1,5 +1,8 @@
 <p>
-  <img src="assets/jig.png" alt="Jig" width="100">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/jig-mark-dark.svg">
+    <img src="assets/jig-mark.svg" alt="Jig" width="88">
+  </picture>
 </p>
 
 **The AI engineering workflow framework for teams.**
@@ -16,8 +19,14 @@ Jig fixes this the way Rails fixed web development: with strong opinions, sensib
 
 **Full Pipeline** — Every stage of development has a skill:
 ```
-DISCOVER → BRAINSTORM → PLAN → EXECUTE → REVIEW → SHIP → LEARN
+DISCOVER → PRD → SPEC → PLAN → BUILD → REVIEW → PRD CHECK → SHIP → LEARN
 ```
+
+**A PRD anyone can read** — `/jig:prd` turns a Word doc, a bullet list or a brainstorm into a plain-language product document: who it is for, the moments people see, phases with an MVP cut line, milestones, open decisions and who signs off. It runs in Claude Code, Claude.ai or the desktop app, so a PM can write one without a repo.
+
+**A PRD that stays current** — The PRD publishes as a live Jig page. People tick milestones, record decisions and sign off on it. Jig writes to the same page from Claude Code as the spec, plan and build move along, so the PRD is also the status page.
+
+**A spec the build is checked against** — `/jig:spec` turns the PRD into the technical contract: API, data, rules, UI states and a layer-tagged acceptance checklist traced to the PRD's outcomes. Every task in the build is checked against it, and before shipping, the PRD check asks whether a person can now do what the PRD promised.
 
 **Parallel Execution** — `/jig:team-dev` spawns parallel agent teammates with staggered quality gates. Your implementation plan runs in parallel, with spec compliance and code review at every step.
 
@@ -93,9 +102,10 @@ Jig ships as a plugin with core skills, agents, and review specialists. Your tea
 |---------|-------|-------------|
 | `kickoff` | Pipeline orchestrator | Classifies work (bug/feature/improvement/task) and routes through the appropriate pipeline stages. The entry point for all development work. |
 | `init` | First-run setup | Auto-detects your project environment, conducts a back-and-forth interview, and generates `jig.config.md`, team directory structure, and CLAUDE.md declaration. |
-| `brainstorm` | Design exploration | One question at a time, 2-3 approaches with trade-offs, design approval gate. Surfaces your team's concerns checklist from `jig.config.md`. |
-| `prd` | Requirements capture | Structured PRD with enforceable acceptance checklists. Two tiers: Full (12 sections) for features, Light (5 sections) for bugs. Layer-tagged items (`[API]`, `[DATA]`, `[LOGIC]`, `[UI]`) feed directly into spec reviewers. |
-| `plan` | Implementation planning | Turns approved designs into bite-sized TDD tasks with exact file paths, code snippets, and verification steps. |
+| `brainstorm` | Design exploration | One question at a time, 2-3 approaches with trade-offs, design approval gate. |
+| `prd` | Product document | Plain-language PRD with a one-sentence thesis, moments, rules with "you'll know it works when", phases with an MVP cut line, milestones, decisions and sign-off. Publishes a live Jig page; checks the build against it before shipping. |
+| `spec` | Technical contract | Structured spec with enforceable acceptance checklists. Two tiers: Full (12 sections) for features, Light (5 sections) for bugs. Layer-tagged items (`[API]`, `[DATA]`, `[LOGIC]`, `[UI]`), traced to PRD outcomes, feed directly into spec reviewers. |
+| `plan` | Implementation planning | Turns the spec into bite-sized TDD tasks with exact file paths, code snippets, verification steps, and a map of which tasks complete which PRD milestones. |
 | `build` | Plan execution | **The builder.** Analyzes the plan's task graph and auto-selects parallel or serial execution. You hand it a plan — it builds the thing. |
 | `team-dev` | Parallel execution | Spawns agent teammates in split panes. Each implementer works independently; the lead orchestrates staggered spec compliance + code quality reviews as they finish. Called by `build` when conditions are right. |
 | `sdd` | Serial execution | Fresh subagent per task with two-stage review (spec compliance then code quality). Called by `build` for coupled tasks or when agent teams aren't available. |
@@ -106,6 +116,8 @@ Jig ships as a plugin with core skills, agents, and review specialists. Your tea
 | `debug` | Systematic debugging | Iron law: no fixes without root cause investigation. Four phases — investigate, analyze patterns, test hypothesis, implement. Escalates to "question the architecture" after 3 failed fixes. |
 | `verify` | Verification gate | Evidence before assertions. Run the command, read the output, THEN claim it works. Prevents "should pass now" claims without proof. |
 | `tdd` | Test-driven development | Red-green-refactor. No production code without a failing test first. Wrote code before the test? Delete it. Start over. |
+| `ticket` | Ticket creation | Interviews you, writes the ticket, files it in your configured tracker (Linear, Jira, GitHub Issues), and sets up the branch. |
+| `worktree` | Parallel workspaces | Creates or removes provisioned git worktrees, syncing env files and dependencies, for isolated parallel development. |
 | `finish` | Branch completion | Verifies tests pass, then presents 4 options: merge locally, create PR, keep branch as-is, or discard. Handles worktree cleanup. |
 | `extend` | Framework extension | The meta-skill. Interviews you about what you need, determines the right artifact (skill, specialist, agent, pack, or config change), scaffolds it with valid frontmatter, and wires it into discovery. |
 
@@ -147,7 +159,7 @@ Ships with Jig. Three skills + one specialist for universal engineering practice
 Your domain expertise lives in `.claude/skills/` in your project. These follow Jig's schema and wire into the framework:
 
 - **Glob-triggered**: edit a database entity file → `be-database` skill auto-loads
-- **Concerns checklist**: listed in `jig.config.md` → surfaces during `/jig:brainstorm`
+- **Concerns checklist**: listed in `jig.config.md` → surfaces during `/jig:spec`
 - **Review swarm**: team specialists in `.claude/specialists/` → dispatched by `/jig:review`
 - **Created with**: `/jig:extend` scaffolds new skills with valid frontmatter
 
@@ -169,7 +181,7 @@ ticket-prefix: ENG
 - test-strategy: manual
 ```
 
-The concerns checklist surfaces during brainstorming — mapping your team's engineering concerns to specific skills. See [framework/CONCERNS_CHECKLIST.md](framework/CONCERNS_CHECKLIST.md).
+The concerns checklist surfaces during spec authoring — mapping your team's engineering concerns to specific skills. See [framework/CONCERNS_CHECKLIST.md](framework/CONCERNS_CHECKLIST.md).
 
 ### Tier System
 
@@ -189,6 +201,10 @@ Jig is distributed as a Claude Code plugin. To get the latest version:
 /plugin install jig@duronext-jig --scope project
 ```
 
+### Upgrading from 1.x
+
+Jig 2.0 renames the technical requirements document from **PRD** to **spec** and adds a new, plain-language **PRD**. Run `/jig:init` in a 1.x project and choose **Upgrade to 2.0**: it moves your config keys, renames old technical `*-prd.md` files to `*-spec.md`, and updates plan headers. `/jig:spec` is what `/jig:prd` used to be.
+
 ## Platform Support
 
 Jig skills are platform-agnostic markdown. Adapters handle loading for:
@@ -202,13 +218,15 @@ Teams using GitLab or Bitbucket are supported via the [git host adapter](framewo
 
 | Document | What It Covers |
 |----------|---------------|
-| [PIPELINE.md](framework/PIPELINE.md) | The 7-stage development pipeline |
+| [PIPELINE.md](framework/PIPELINE.md) | The development pipeline |
+| [LIVE_PRD.md](framework/LIVE_PRD.md) | How the live PRD page and the pipeline share state |
 | [DISCOVERY.md](framework/DISCOVERY.md) | How Jig finds and loads skills |
 | [SKILL_SCHEMA.md](framework/SKILL_SCHEMA.md) | Frontmatter spec for all skills |
 | [TIER_SYSTEM.md](framework/TIER_SYSTEM.md) | How tiers control activation |
-| [CONCERNS_CHECKLIST.md](framework/CONCERNS_CHECKLIST.md) | Configurable brainstorming checklist |
+| [CONCERNS_CHECKLIST.md](framework/CONCERNS_CHECKLIST.md) | Configurable concerns checklist for specs |
 | [GIT_HOST.md](framework/GIT_HOST.md) | GitHub/GitLab/Bitbucket command mapping |
 | [Init Experience](docs/init-experience.md) | Interactive setup flow |
+| [Jig 2.0](docs/releases/2.0.md) | What changed in 2.0, upgrading, and the concessions made |
 
 ## Origin
 

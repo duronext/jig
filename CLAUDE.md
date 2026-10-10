@@ -28,15 +28,17 @@ If a team skill has the same name as a core skill, the team version wins. This i
 Every development task flows through stages. `kickoff` orchestrates the full pipeline:
 
 ```
-DISCOVER → BRAINSTORM → PLAN → EXECUTE → REVIEW → SHIP → LEARN
+DISCOVER → PRD → SPEC → PLAN → BUILD → REVIEW → PRD CHECK → SHIP → LEARN
 ```
+
+Three documents, three readers. The **PRD** is the product document anyone can read (phases, MVP cut, milestones, sign-off), published as a live Jig page that people and Jig update as work moves (`framework/LIVE_PRD.md`). The **spec** is the technical contract the spec reviewer checks every task against. The **plan** is the task list.
 
 Work type (bug/feature/improvement/task) determines which stages run and at what depth. Configured in `jig.config.md`.
 
 ### How Skills Compose
 
-- **Direct invocation** — workflow skills invoke each other by name (`kickoff` → `prd` → `plan`)
-- **Concerns checklist** — `jig.config.md` maps engineering concerns to skills. `prd` reads the config and loads relevant skills during PRD authoring.
+- **Direct invocation** — workflow skills invoke each other by name (`kickoff` → `prd` → `spec` → `plan`)
+- **Concerns checklist** — `jig.config.md` maps engineering concerns to skills. `spec` reads the config and loads relevant skills during spec authoring.
 - **Specialist dispatch** — `review` discovers specialist `.md` files from all three directories, filters by glob match, and dispatches as parallel subagents.
 
 ## Inventory
@@ -51,7 +53,8 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `init` | First-run setup — auto-detects environment, interviews, generates config |
 | `ticket` | Ticket creation — routes to the configured ticket-system pack (Linear/Jira/GitHub) |
 | `brainstorm` | Discovery-time ideation tool — explore approaches, compare options, refine unclear problems |
-| `prd` | PRD creation with enforceable acceptance checklists (feeds into spec reviewer) |
+| `prd` | Plain-language product document with phases, milestones and sign-off; publishes the live Jig page; checks the build before shipping |
+| `spec` | Technical spec with an enforceable acceptance checklist traced to PRD outcomes (feeds into spec reviewer) |
 | `plan` | Spec → implementation plan with bite-sized TDD tasks |
 | `build` | Plan execution — analyzes task graph, auto-selects parallel or serial |
 | `team-dev` | Parallel agent execution with staggered quality gates (called by `build`) |
@@ -77,10 +80,11 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 
 ### Core Specialists
 
-Core specialists live in `core/specialists/`. They fall into four groups:
+Core specialists live in `core/specialists/`. They fall into five groups:
 
 - **Code review** — universal code-quality reviewers dispatched by `review` in code mode (e.g., `security`, `dead-code`, `error-handling`).
-- **PRD review** — dispatched by `review` in prd mode against design docs (e.g., `data-dependency`, `ui-conflict`).
+- **PRD review** — dispatched by `review` in prd mode, reading the PRD as a non-engineer would (e.g., `plain-language`, `mvp-cut`).
+- **Spec review** — dispatched by `review` in spec mode against the technical spec (e.g., `data-dependency`, `ui-conflict`).
 - **Plan review** — dispatched by `review` in plan mode against plan docs (e.g., `task-dependency`, `migration-safety`).
 - **Cross-stage** — apply across modes (e.g., `blast-radius`, `state-completeness`).
 
@@ -141,6 +145,7 @@ jig/
 | Verify plugin | `cat .claude/settings.json` |
 | Check for stale refs | `grep -rn 'superpowers:' core/` (should return nothing) |
 | Count lines | `find . -not -path './.git/*' -name '*.md' \| xargs wc -l \| tail -1` |
+| Test the PRD page scripts | `bash core/skills/prd/reference/test/run.sh` (needs Chrome) |
 
 ## Code Style
 
@@ -171,7 +176,7 @@ Commit conventions (format, types, scopes, co-author rules) are defined in `jig.
 3. Create `core/skills/{name}/SKILL.md`
 4. Add to the `skills` array in `.claude-plugin/plugin.json`
 5. Add a command file in `commands/{name}.md` for `/jig:` namespace browsing
-6. If the skill should surface during PRD authoring, add it to the concerns checklist in `jig.config.md`
+6. If the skill should surface during spec authoring, add it to the concerns checklist in `jig.config.md`
 
 ### How consumers install Jig
 Teams add this to their project's `.claude/settings.json`:
@@ -194,7 +199,8 @@ This gives every teammate on the project the full Jig framework on clone — no 
 
 ### Key documents to read first
 - `framework/GIT_HOST.md` — git host adapter (GitHub/GitLab/Bitbucket command mapping)
-- `framework/PIPELINE.md` — the 7-stage development pipeline
+- `framework/PIPELINE.md` — the development pipeline
+- `framework/LIVE_PRD.md` — how the live PRD page and the pipeline share state
 - `framework/DISCOVERY.md` — how Jig finds and loads skills
 - `framework/SKILL_SCHEMA.md` — frontmatter spec for all skills
 - `docs/specs/2026-03-28-jig-framework-design.md` — the original design spec
