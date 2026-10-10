@@ -140,6 +140,11 @@ a non-engineer can read. Name commits and PRs; never paste diffs or code.
   `question`). Jig uses `ArtifactData` `update` pinned with `if_version`; the
   page uses the database's server-side `update()`, falling back to `set()`
   only for a document that does not exist yet.
+- **Never overwrite a change you have not seen.** Jig pins every write with
+  the `version` it read (`if_version`) and re-reads on a conflict. The page
+  takes a short lease on the record (`acquire`, 5 s) and checks the record's
+  `at` still matches what it last showed; if someone else is changing it or
+  just changed it, the page says so and writes nothing.
 - **Batch writes.** When Jig ticks a milestone and logs it, send both in one
   `ArtifactData` `batch`. The page cannot batch (its database has no
   multi-document writes), so it writes the change first and the log entry

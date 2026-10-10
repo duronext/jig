@@ -211,6 +211,8 @@
       say(where, "This view can read the page but not save to it."); return; }
     if (e && e.code === "quota_exceeded") { say(where, "The page's storage is full, so new changes can't be saved."); return; }
     if (e && e.code === "invalid_argument") { say(where, "That change was too large or malformed to save."); return; }
+    if (e && e.code === "busy") { say(where, "Someone else is changing this right now. Try again in a moment."); return; }
+    if (e && e.code === "stale") { say(where, "Someone else just changed this. The page now shows their change."); return; }
     say(where, "That didn't save. Try again in a moment.");
   }
   /* One entry per action: the id is minted once, so a retry overwrites the
@@ -236,8 +238,22 @@
      (Jig's note on a milestone, a decision's question) survives a person's
      click even if it lands at the same moment. update() needs the document
      to exist; the first write to a new document uses set(). */
-  async function merge(path, patch) {
+  /* Before writing, take a short lease on the record so two people cannot
+     change the same item at once, and check the record still has the "at"
+     the page last showed. If either fails, say so instead of overwriting.
+     Jig's own writes are pinned with if_version, so they never overwrite
+     a person's change either. */
+  function conflict(code) { var e = new Error(code); e.code = code; return e; }
+  async function merge(path, patch, seenAt) {
     var ref = db.doc(path);
+    if (typeof ref.acquire === "function") {
+      var lease = null;
+      try { lease = await ref.acquire({ holder: meId || "page", ttlMs: 5000 }); } catch (e) { lease = null; }
+      if (lease && !lease.acquired) throw conflict("busy");
+    }
+    var cur = await ref.get(), curAt = cur.exists ? ((cur.data() || {}).at || null) : null;
+    if ((seenAt || null) !== curAt) throw conflict("stale");
+    if (!cur.exists) { await ref.set(patch); return; }
     try { await ref.update(patch); return; }
     catch (e) {
       if (!e || e.code !== "invalid_argument") throw e;
@@ -253,19 +269,19 @@
   }
   function toggleMilestone(id, done) {
     return guarded("ms" + id, "ms", async function () {
-      await merge("milestones/" + id, { done: done, at: now(), by: meId, actor: "person" });
+      await merge("milestones/" + id, { done: done, at: now(), by: meId, actor: "person" }, (state.ms[id] || {}).at);
       await logAfter("ms", "milestone", (done ? "Ticked off: " : "Reopened: ") + msTitle(id), id);
     });
   }
   function decide(d, choice) {
     return guarded("d" + d.id, "dec", async function () {
-      await merge("decisions/" + d.id, { choice: choice, at: now(), by: meId, actor: "person" });
+      await merge("decisions/" + d.id, { choice: choice, at: now(), by: meId, actor: "person" }, (state.dec[d.id] || {}).at);
       await logAfter("dec", "decision", choice ? d.question + " Chose " + choice + ": " + d.options[choice].label + "." : d.question + " Reopened.", d.id);
     });
   }
   function approve(id, yes) {
     return guarded("a" + id, "appr", async function () {
-      await merge("approvals/" + id, { state: yes ? "approved" : "withdrawn", rev: REV, at: now(), by: meId });
+      await merge("approvals/" + id, { state: yes ? "approved" : "withdrawn", rev: REV, at: now(), by: meId }, (state.appr[id] || {}).at);
       await logAfter("appr", "approval", (yes ? "Sign-off recorded for " : "Sign-off withdrawn for ") + apprName(id) + ", rev " + REV + ".", id);
     });
   }

@@ -69,6 +69,15 @@
     var m6Logs = logTexts().filter(function (t) { return /On for everyone/.test(t); }).length;
     check("a retried log write is not duplicated", m6Logs === 1 && logTexts().length === before + 1, m6Logs + " entries");
 
+    T.leases["decisions/d1"] = { holder: "u_other", until: Date.now() + 60000 };
+    click(btnIn($("#dec-d1"), "Choose B")); await wait(200);
+    check("a record someone else is changing is not written", T.store["decisions/d1"].choice === null && /Someone else is changing this/.test(($('[data-msg="dec"]') || {}).textContent || ""), ($('[data-msg="dec"]') || {}).textContent);
+    delete T.leases["decisions/d1"];
+
+    T.store["approvals/eng"] = { state: "withdrawn", rev: "B", at: "2026-12-01T00:00:00Z", by: "u_other" };   // changed without the page seeing it yet
+    click(btnIn($("#approvers"), "Record sign-off")); await wait(200);
+    check("a change made since the page last showed it is not overwritten", T.store["approvals/eng"].by === "u_other" && T.store["approvals/eng"].state === "withdrawn" && /Someone else just changed this/.test(($('[data-msg="appr"]') || {}).textContent || ""), JSON.stringify(T.store["approvals/eng"]));
+
     T.failNext["set:milestones"] = "unavailable";
     click($("#ms-m4")); await wait(200);
     check("a failed change is reported", /didn't save/.test(($('[data-msg="ms"]') || {}).textContent || ""));

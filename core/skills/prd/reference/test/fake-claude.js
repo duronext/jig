@@ -4,7 +4,7 @@
    window.__jigTest exposes the store and failure switches to the driver. */
 (function () {
   "use strict";
-  var store = {}, listeners = [], seq = 0, failNext = {};
+  var store = {}, listeners = [], seq = 0, failNext = {}, leases = {};
   function clone(v) { return v == null ? v : JSON.parse(JSON.stringify(v)); }
   function children(path) {
     return Object.keys(store).filter(function (k) { return k.indexOf(path + "/") === 0 && k.slice(path.length + 1).indexOf("/") < 0; }).sort();
@@ -28,7 +28,12 @@
         if (store[path] === undefined) { var e = new Error("missing"); e.code = "invalid_argument"; throw e; }
         var c = clone(store[path]); Object.keys(d).forEach(function (k) { c[k] = d[k]; }); store[path] = c; notify(); }); },
       delete: async function () { delete store[path]; notify(); },
-      onSnapshot: function (next) { var l = function () { next(snapDoc(path)); }; listeners.push(l); setTimeout(l, 0); return function () {}; } };
+      onSnapshot: function (next) { var l = function () { next(snapDoc(path)); }; listeners.push(l); setTimeout(l, 0); return function () {}; },
+      acquire: function (o) { return later(function () {
+        var l = leases[path], t = Date.now();
+        if (l && l.holder !== o.holder && l.until > t) return { acquired: false, expiresAt: new Date(l.until).toISOString() };
+        leases[path] = { holder: o.holder, until: t + (o.ttlMs || 30000) };
+        return { acquired: true, version: 1, expiresAt: new Date(leases[path].until).toISOString(), holder: o.holder }; }); } };
   }
   function query(path, order, lim) {
     function run() {
@@ -56,5 +61,5 @@
       o[id] = { id: id, name: id === "u_tester" ? "Test Person" : "", avatarUrl: "", color: "#888", email: null, isMe: id === "u_tester", guest: false }; }); return o; }
   };
   window.claude = { use: async function (name) { return name === "db" ? db : name === "user" ? user : null; } };
-  window.__jigTest = { store: store, failNext: failNext, seed: function (path, d) { store[path] = clone(d); notify(); } };
+  window.__jigTest = { store: store, failNext: failNext, leases: leases, seed: function (path, d) { store[path] = clone(d); notify(); } };
 })();
