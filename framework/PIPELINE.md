@@ -56,7 +56,7 @@ Transpose the spec (or ticket, or conversation context) into an implementation p
 
 ### 5. Build
 
-Build the thing. Either in parallel or serial.
+Stage key in `jig.config.md`: `execute` (kept from 1.x). Build the thing. Either in parallel or serial.
 
 - **Skills:** `team-dev` (parallel, 3+ independent tasks) or `sdd` (serial, coupled tasks)
 - **Output:** Implemented, tested, committed code

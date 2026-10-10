@@ -87,10 +87,10 @@ Before anything else, determine the work type. This controls pipeline depth.
 ```mermaid
 graph TD
   start{"What kind of work?"}
-  start -->|broken / incorrect| bug["BUG<br/>Discovery tool: debug<br/>Spec: light (optional)<br/>Plan: 1-3 tasks<br/>Execute: sequential<br/>Learn: optional"]
-  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tool: brainstorm (optional)<br/>PRD: one-pager if large<br/>Spec: light or full<br/>Plan: standard<br/>Execute: SDD or team-dev<br/>Learn: optional"]
-  start -->|new capability| feature["FEATURE<br/>Discovery tool: brainstorm (recommended)<br/>PRD: recommended<br/>Spec: full<br/>Plan: detailed<br/>Execute: team-dev<br/>Learn: yes"]
-  start -->|config / chore / refactor| task["TASK / CHORE<br/>Skip discovery tools<br/>Plan: minimal<br/>Execute: direct<br/>Learn: no"]
+  start -->|broken / incorrect| bug["BUG<br/>Discovery tool: debug<br/>Spec: light (optional)<br/>Plan: 1-3 tasks<br/>Build: sequential<br/>Learn: optional"]
+  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tool: brainstorm (optional)<br/>PRD: one-pager if large<br/>Spec: light or full<br/>Plan: standard<br/>Build: SDD or team-dev<br/>Learn: optional"]
+  start -->|new capability| feature["FEATURE<br/>Discovery tool: brainstorm (recommended)<br/>PRD: recommended<br/>Spec: full<br/>Plan: detailed<br/>Build: team-dev<br/>Learn: yes"]
+  start -->|config / chore / refactor| task["TASK / CHORE<br/>Skip discovery tools<br/>Plan: minimal<br/>Build: direct<br/>Learn: no"]
 ```
 
 Check `jig.config.md` for stage overrides per work type. The config may skip or lighten stages beyond these defaults.
@@ -208,7 +208,9 @@ Before proceeding, confirm:
 
 ---
 
-## Step 5: EXECUTE
+## Step 5: BUILD
+
+Stage key in `jig.config.md`: `execute` (kept from 1.x so existing configs work).
 
 **Gate**: All tasks implemented, tested, and committed.
 
@@ -312,7 +314,7 @@ The pipeline isn't strictly linear. You may loop back when:
 - **Scope changed during execution** → Return to Spec (or Brainstorm), update the contract
 - **Build hits a product question** → Open a decision on the PRD; pause only the tasks it blocks
 - **Review finds design issues** → Return to Plan or Brainstorm depending on severity
-- **PR feedback requires significant changes** → Return to Execute
+- **PR feedback requires significant changes** → Return to Build
 
 When looping back, update the plan document to reflect changes.
 
@@ -345,7 +347,7 @@ When looping back, update the plan document to reflect changes.
 | Brainstorm (tool) | `Skill: jig:brainstorm` | Understanding, no artifact |
 | Debug (tool) | `Skill: jig:debug` | Root cause, no artifact |
 | Plan | `Skill: jig:plan` | `{plans-directory}/*-plan.md` |
-| Execute | `Skill: jig:build` | Implemented + tested code |
+| Build | `Skill: jig:build` | Implemented + tested code |
 | Review | `Skill: jig:review` | Audited code |
 | PRD check | `Skill: jig:prd` (check mode) | Outcomes verified, trace filled |
 | Ship | `Skill: jig:pr-create` | Merged PR |

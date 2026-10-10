@@ -207,9 +207,10 @@
 
   /* ── writes ─────────────────────────────────────────────── */
   function fail(where, e) {
-    if (e && (e.code === "invalid_argument" || e.code === "not_granted")) { mode = "readonly"; setLive(); render();
+    if (e && (e.code === "not_granted" || e.code === "revoked")) { mode = "readonly"; setLive(); render();
       say(where, "This view can read the page but not save to it."); return; }
-    if (e && e.code === "quota_exceeded") { say(where, "The page's storage is full. Ask the owner to clear old log entries."); return; }
+    if (e && e.code === "quota_exceeded") { say(where, "The page's storage is full, so new changes can't be saved."); return; }
+    if (e && e.code === "invalid_argument") { say(where, "That change was too large or malformed to save."); return; }
     say(where, "That didn't save. Try again in a moment.");
   }
   async function addLog(kind, text, ref) {
@@ -220,7 +221,10 @@
      entry fails, say so instead of claiming the change failed. */
   async function logAfter(where, kind, text, ref) {
     try { await addLog(kind, text, ref); }
-    catch (e) { say(where, "Saved. The log entry for it did not save" + (e && e.code === "quota_exceeded" ? ": the page's storage is full." : ".")); }
+    catch (e) {
+      if (e && e.code === "unavailable") { try { await addLog(kind, text, ref); return; } catch (e2) { e = e2; } }
+      say(where, "Saved. The log entry for it did not save" + (e && e.code === "quota_exceeded" ? ": the page's storage is full." : "."));
+    }
   }
   /* Read, change, write the whole document, so fields another writer added
      (Jig's note on a milestone, a decision's question) survive a person's click. */

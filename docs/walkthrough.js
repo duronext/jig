@@ -365,7 +365,7 @@
         { t: 800, type: 'line', html: '<span class="wt-label">  \u25B8 Work type:</span> <span class="wt-value">feature</span>' },
         { t: 1100, type: 'line', html: '<span class="wt-label">  \u25B8 Summary:</span>  <span class="wt-value">Add commenting system to articles</span>' },
         { t: 1400, type: 'line', html: '<span class="wt-label">  \u25B8 Stack:</span>    <span class="wt-muted">GraphQL API \u00B7 Postgres \u00B7 React \u00B7 Design System</span>' },
-        { t: 1800, type: 'line', html: '<span class="wt-label">  \u25B8 Pipeline:</span> <span class="wt-muted">discover \u2192 prd \u2192 spec \u2192 plan \u2192 build \u2192 review \u2192 ship \u2192 learn</span>' },
+        { t: 1800, type: 'line', html: '<span class="wt-label">  \u25B8 Pipeline:</span> <span class="wt-muted">discover \u2192 prd \u2192 spec \u2192 plan \u2192 build \u2192 review \u2192 prd check \u2192 ship \u2192 learn</span>' },
         { t: 2400, type: 'line', html: '<span class="wt-label">  \u25B8 Branch:</span>   <span class="wt-value">eng/comments-42-article-commenting</span>' },
         { t: 2800, type: 'line', html: '<span class="wt-label">  \u25B8 Ticket:</span>   <span class="wt-success">COMMENTS-42 created \u2713</span>' },
         { t: 3200, type: 'cursor' },

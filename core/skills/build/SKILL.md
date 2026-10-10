@@ -168,7 +168,7 @@ If a write is refused, or the PRD cannot be found, carry on and say once, in the
 ## Integration
 
 **Called by:**
-- `kickoff` during the EXECUTE stage
+- `kickoff` during the BUILD stage
 - Users directly via `/jig:build`
 
 **Invokes:**
@@ -181,7 +181,7 @@ If a write is refused, or the PRD cannot be found, carry on and say once, in the
 - `plan` — creates the plan that this skill executes
 - `spec` — produces acceptance checklists that spec reviewers verify during execution
 - `prd` — the live product document that build keeps current (milestones, decisions, log)
-- `kickoff` — the full pipeline orchestrator that routes here at the EXECUTE stage
+- `kickoff` — the full pipeline orchestrator that routes here at the BUILD stage
 
 ---
 
