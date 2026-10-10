@@ -1,6 +1,6 @@
 # Design: jig init — First-Run Setup Experience
 
-**PRD:** docs/plans/2026-04-01-init-prd.md
+**Spec:** docs/plans/2026-04-01-init-spec.md
 **Date:** 2026-04-01
 **Status:** Approved
 

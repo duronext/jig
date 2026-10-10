@@ -113,7 +113,7 @@ flowchart TD
 Brainstorm produces no required artifact. When the user has clarity, end the session by:
 
 1. **Summarizing the decisions** — 3-5 bullets in conversation capturing the chosen approach and key trade-offs
-2. **Asking what's next** — "Want to capture this as a PRD, jump to a plan, or sit with it?"
+2. **Asking what's next** — "Want to turn this into a PRD, go straight to a spec, or sit with it?"
 
 If the user wants a design doc for archival reasons, save to `{plans-directory}/YYYY-MM-DD-<topic>-brainstorm.md` (read `plans-directory` from `jig.config.md`, default `docs/plans`). This is opt-in, not default.
 
@@ -161,7 +161,8 @@ A question about a UI topic is not automatically a visual question. "What does p
 - Return control to the user or invoking skill. No forced next step.
 
 **Related skills:**
-- `prd` — when ideas crystallize into requirements
+- `prd` — when ideas crystallize into a product document people can read and sign off
+- `spec` — when the product is already settled and engineering needs the contract
 - `plan` — when approach is clear and ready to decompose
 - `debug` — sister discovery tool for understanding bugs
 

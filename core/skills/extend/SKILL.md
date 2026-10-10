@@ -78,7 +78,7 @@ Based on the interview, route to the correct artifact type:
 
 "I just need to change pipeline behavior"
   +-- Stage overrides, thresholds, models --> jig.config.md change (no new artifact)
-  +-- New concern in PRD authoring --> Add to Concerns Checklist in jig.config.md
+  +-- New concern in spec authoring --> Add to Concerns Checklist in jig.config.md
 ```
 
 ### Decision Matrix
@@ -299,7 +299,7 @@ Edit `jig.config.md` directly. Common changes:
 
 ## Step 5: Wire into Concerns Checklist (if appropriate)
 
-If the new artifact represents a concern that should be surfaced during PRD authoring:
+If the new artifact represents a concern that should be surfaced during spec authoring:
 
 1. Open `jig.config.md`
 2. Add an entry to `## Concerns Checklist`:
@@ -310,7 +310,7 @@ If the new artifact represents a concern that should be surfaced during PRD auth
    ```
    - {concern-name}: team/specialists/{specialist-name}
    ```
-3. Confirm with the user: "Added {concern} to the Concerns Checklist. It will be surfaced during PRD authoring for features and improvements."
+3. Confirm with the user: "Added {concern} to the Concerns Checklist. It will be surfaced during spec authoring for features and improvements."
 
 Not every artifact belongs in the checklist. Only add it if it represents a cross-cutting concern that should be explicitly considered during design.
 
@@ -359,7 +359,7 @@ These framework documents define the schemas and systems this skill works with:
 | `framework/SKILL_SCHEMA.md` | Frontmatter fields, file structure, writing guidelines |
 | `framework/TIER_SYSTEM.md` | Tier definitions, choosing the right tier |
 | `framework/DISCOVERY.md` | How skills/specialists/agents are found and loaded |
-| `framework/CONCERNS_CHECKLIST.md` | How concerns are wired into PRD authoring |
+| `framework/CONCERNS_CHECKLIST.md` | How concerns are wired into spec authoring |
 | `framework/PIPELINE.md` | Pipeline stages and gate checks |
 | `scaffold/SKILL_TEMPLATE.md` | Quick-start template with checklist |
 
@@ -392,7 +392,7 @@ These framework documents define the schemas and systems this skill works with:
 
 **Related skills:**
 - `review` -- specialists created here are discovered by the review swarm
-- `prd` -- concerns added to the checklist are surfaced during PRD authoring
+- `spec` -- concerns added to the checklist are surfaced during spec authoring
 - `postmortem` -- identifies gaps that lead to new artifacts
 
 ---
@@ -409,7 +409,7 @@ These framework documents define the schemas and systems this skill works with:
 | Add a review check (reasoning) | Logic reviewer pattern | Add to existing logic-reviewer.md |
 | Automate a task | Agent | Triggered by command or phrase |
 | Change pipeline behavior | jig.config.md | No new artifact needed |
-| Add PRD concern | Concerns checklist | Points to a skill or specialist |
+| Add spec concern | Concerns checklist | Points to a skill or specialist |
 
 ---
 

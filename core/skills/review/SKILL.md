@@ -10,9 +10,9 @@ alwaysApply: false
 
 # Review Swarm Engine
 
-**PURPOSE**: Dispatch parallel specialist review agents, each focused on one concern. Operates in three modes: **code** (diff review), **prd** (requirements review), and **plan** (implementation plan review). The orchestrator coordinates discovery, dispatch, scoring, and reporting across all modes.
+**PURPOSE**: Dispatch parallel specialist review agents, each focused on one concern. Operates in four modes: **code** (diff review), **prd** (product requirements review, read as a non-engineer would), **spec** (technical spec review), and **plan** (implementation plan review). The orchestrator coordinates discovery, dispatch, scoring, and reporting across all modes.
 
-**CONFIGURATION**: Reads `jig.config.md` for `swarm-tiers` (code), `prd-swarm-tiers` (prd), `plan-swarm-tiers` (plan), `deep-review-model`, `plan-deep-review-model`, `design-review-model`, and `specialist-model-default`.
+**CONFIGURATION**: Reads `jig.config.md` for `swarm-tiers` (code), `prd-swarm-tiers` (prd), `spec-swarm-tiers` (spec), `plan-swarm-tiers` (plan), `deep-review-model`, `plan-deep-review-model`, `design-review-model`, and `specialist-model-default`.
 
 ---
 
@@ -25,7 +25,12 @@ alwaysApply: false
 
 ### Mode: prd
 - `prd` skill invokes this with `mode: prd` after drafting a PRD
-- Direct invocation via `/review` with a PRD document path
+- Direct invocation via `/review` with a PRD document path or PRD artifact link
+- Reviews the product document from the reader's side: plain language, MVP cut, testable outcomes, missing moments. Specialists may read the codebase when it is available but never ask for implementation detail.
+
+### Mode: spec
+- `spec` skill invokes this with `mode: spec` after drafting a spec
+- Direct invocation via `/review` with a spec document path
 - Automatic for medium-to-large features and improvements
 
 ### Mode: plan
@@ -33,7 +38,7 @@ alwaysApply: false
 - Direct invocation via `/review` with a plan document path
 - Automatic for medium-to-large features and improvements
 
-**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` mode.
+**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` or `spec` mode.
 
 ---
 
@@ -49,8 +54,7 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 4. Deduplicate by `name` (team > pack > core)
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
-   - `mode: prd` → include specialists where `stage: prd` or `stage: both`
-   - `mode: plan` → include specialists where `stage: plan` or `stage: both`
+   - Otherwise include specialists whose `stage` names the mode. `stage` is a single value (`prd`, `spec`, `plan`) or a list (`[spec, plan]`). The legacy value `both` means `[spec, plan]`.
 6. Filter by the requested tier:
    - `tier: all` → include all specialists matching the mode
    - `tier: fast-pass` → include only `tier: fast-pass` specialists matching the mode
@@ -58,6 +62,7 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 Check `jig.config.md` for the appropriate tier config:
 - `mode: code` → `swarm-tiers`
 - `mode: prd` → `prd-swarm-tiers`
+- `mode: spec` → `spec-swarm-tiers`
 - `mode: plan` → `plan-swarm-tiers`
 
 ### Stage 2: PREPARE the Input
@@ -86,24 +91,35 @@ For each matching specialist, extract only the diff hunks for its matched files.
 
 #### Mode: prd
 
-1. Read the PRD document at the provided path
-2. For each matching specialist, compute section hints based on the specialist's description:
+1. Read the PRD. For a `*-prd.md` file, read it directly. For a PRD artifact link, read the artifact and use the Markdown inside its `<script type="text/markdown" id="prd-source">` block.
+2. For each matching specialist, compute section hints:
+   - `plain-language` → "Focus on: every section, as a reader who has never written code"
+   - `mvp-cut` → "Focus on: Phases, What it does, Scope"
+   - `testable-outcomes` → "Focus on: What it does (each 'you'll know it works when' line), Measures"
+   - `missing-moments` → "Focus on: Moments, People, What it does"
+3. Build the specialist input: full PRD + section hints
+
+#### Mode: spec
+
+1. Read the spec document at the provided path
+2. Read the PRD (from the spec header's `> **PRD:**` line) if it exists
+3. For each matching specialist, compute section hints based on the specialist's description:
    - `data-dependency` → "Focus on: Data Model, API Contract, Business Logic"
    - `ui-conflict` → "Focus on: UI States, Component Behavior, Entry Points"
    - `blast-radius` → "Focus on: All sections (cross-cutting)"
    - `state-completeness` → "Focus on: Business Logic, API Contract"
-3. Build the specialist input: full document + section hints
+4. Build the specialist input: full spec + PRD (if exists) + section hints
 
 #### Mode: plan
 
 1. Read the implementation plan at the provided path
-2. Read the PRD (from the plan header's `> **PRD:**` line) if it exists
+2. Read the spec (from the plan header's `> **Spec:**` line) and the PRD (`> **PRD:**`) if they exist
 3. For each matching specialist, compute section hints:
    - `task-dependency` → "Focus on: Task list, Dependencies"
    - `migration-safety` → "Focus on: Tasks involving DB/schema changes"
    - `blast-radius` → "Focus on: All tasks (cross-cutting)"
    - `state-completeness` → "Focus on: Tasks involving state/status changes"
-4. Build the specialist input: full plan + PRD (if exists) + section hints
+4. Build the specialist input: full plan + spec (if exists) + section hints
 
 ### Stage 3: DISPATCH (Parallel)
 
@@ -125,7 +141,7 @@ Agent tool:
     {filtered diff}             <- only the files matching this specialist's globs
 ```
 
-#### Mode: prd
+#### Mode: prd or spec
 
 For each specialist with a matching stage, spawn a parallel subagent:
 
@@ -141,11 +157,15 @@ Agent tool:
 
     ## Document to Review
 
-    {full PRD content}
+    {full PRD or spec content}
 
     ## Section Hints
 
     {computed section hints for this specialist}
+
+    ## PRD Reference          <- spec mode only
+
+    {PRD content if available, or "No PRD available"}
 ```
 
 #### Mode: plan
@@ -170,12 +190,12 @@ Agent tool:
 
     {computed section hints for this specialist}
 
-    ## PRD Reference
+    ## Spec Reference
 
-    {PRD content if available, or "No PRD available"}
+    {spec content if available, or "No spec available"}
 ```
 
-All specialists in prd/plan modes receive codebase access tools: Read, Grep, Glob.
+All specialists in prd/spec/plan modes receive codebase access tools: Read, Grep, Glob. In prd mode the codebase may be absent (a PM running in Claude.ai); specialists then review the document alone.
 
 **All matching specialists are dispatched in a single message** (parallel Agent calls). Do not dispatch sequentially.
 
@@ -204,9 +224,9 @@ After collecting swarm findings, dispatch the code logic reviewer:
 4. Wait for the logic reviewer to complete
 5. Parse findings in the same format as swarm specialists
 
-#### Mode: prd
+#### Mode: prd or spec
 
-**Skip.** No deep reviewer for PRD mode.
+**Skip.** No deep reviewer for PRD or spec mode.
 
 #### Mode: plan
 
@@ -216,7 +236,7 @@ After collecting swarm findings, dispatch the code logic reviewer:
 2. Build the prompt:
    - The plan logic reviewer's body (everything below frontmatter)
    - The full implementation plan
-   - The PRD (if exists)
+   - The spec (if exists)
    - The swarm findings from Stage 4 (so it knows what's already caught)
 3. Dispatch a single Agent with:
    - `model: opus` (or `plan-deep-review-model` from `jig.config.md`)
@@ -244,10 +264,10 @@ Deduplication (mode-aware):
 - If the logic reviewer flags the same `file:line` as a specialist → drop the logic reviewer's finding (specialist caught it first)
 - If the logic reviewer flags a different `file:line` but same root cause as a specialist → keep both, note the connection
 
-**Mode: prd or plan:**
+**Mode: prd, spec or plan:**
 - If multiple specialists flag the same document section → merge into one finding, use the higher severity, note all specialists
 - If the plan logic reviewer flags the same task/section as a specialist → drop the logic reviewer's finding (specialist caught it first)
-- If a specialist flags something already in the document's Open Questions section → skip (author already knows)
+- If a specialist flags something already in the document's Open Questions or Open Decisions section → skip (author already knows)
 
 ### Stage 7: REPORT
 
@@ -255,6 +275,7 @@ Produce the unified report. Adapt the header by mode:
 
 - `mode: code` → `## Code Review Summary`
 - `mode: prd` → `## PRD Review Summary`
+- `mode: spec` → `## Spec Review Summary`
 - `mode: plan` → `## Plan Review Summary`
 
 The rest of the report format is identical across modes:
@@ -315,7 +336,7 @@ See `tiers.md` for tier definitions, severity levels, and the default specialist
 
 1. Create a new `.md` file in `team/specialists/` (for team-specific) or `core/specialists/` (for framework)
 2. Add frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`
-3. **For PRD/PLAN specialists**: add `stage: prd`, `stage: plan`, or `stage: both`
+3. **For PRD/spec/plan specialists**: add `stage: prd`, `stage: spec`, `stage: plan`, or a list such as `stage: [spec, plan]`
 4. **For code review specialists**: omit `stage` (backward compatible default)
 5. Write the review prompt body with: What to check, What to ignore, Report format
 6. The orchestrator discovers it automatically on next run — no config updates needed
@@ -340,10 +361,13 @@ The agent fetches `git diff origin/{main-branch}...HEAD`, then follows this skil
 The lead dispatches this skill as a subagent after spec compliance passes. Diff is scoped to the task's commits (BASE_SHA..HEAD_SHA). Uses `tier: fast-pass`.
 
 ### With `prd` skill
-The `prd` skill invokes this with `mode: prd` after drafting a PRD. Specialists with `stage: prd` or `stage: both` are dispatched. No deep reviewer. Automatic for medium-to-large work.
+The `prd` skill invokes this with `mode: prd` after drafting a PRD. Specialists whose `stage` includes `prd` are dispatched. No deep reviewer. When the PRD is a live artifact, the `prd` skill records the review in the artifact's log and the title block's "Checked" field.
+
+### With `spec` skill
+The `spec` skill invokes this with `mode: spec` after drafting a spec. Specialists whose `stage` includes `spec` are dispatched. No deep reviewer. Automatic for medium-to-large work.
 
 ### With `plan` skill
-The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialists with `stage: plan` or `stage: both` are dispatched, followed by the plan logic reviewer (Opus). Automatic for medium-to-large work.
+The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialists whose `stage` includes `plan` are dispatched, followed by the plan logic reviewer (Opus). Automatic for medium-to-large work.
 
 ### With `postmortem`
 When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it.

@@ -1,6 +1,6 @@
 # Implementation Plan: Core Worktree Skill
 
-**PRD:** [worktree-prd.md](./worktree-prd.md)
+**Spec:** [worktree-spec.md](./worktree-spec.md)
 **Date:** 2026-03-31
 **Tasks:** 5 (serial — each builds on the previous)
 

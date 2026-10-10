@@ -1,29 +1,33 @@
 ---
-name: prd
+name: spec
 description: >
-  Use when capturing product requirements for features, improvements, or bugs
-  before brainstorming or implementation. Triggered by "create a PRD", "capture
-  requirements", "document requirements", "write a PRD", or /prd.
+  Use when turning requirements into an enforceable technical spec before
+  planning: API contract, data model, rules, UI states and a layer-tagged
+  acceptance checklist. Reads a PRD (file or artifact link) when one exists.
+  Triggered by "write a spec", "spec this out", "technical spec", or /spec.
 tier: workflow
 alwaysApply: false
 ---
 
-# PRD Author
+# Spec Author
 
-**PURPOSE**: Collaboratively author structured Product Requirements Documents that serve as enforceable specs for both human reviewers and downstream AI agents (spec reviewers, team-dev quality gates).
+**PURPOSE**: Collaboratively author the technical spec: the enforceable contract that human reviewers and downstream AI agents (spec reviewers, team-dev quality gates) verify the build against. The PRD says *what* and *why* in plain language; the spec says *what exactly* in the system's terms.
+
+**INPUT**: A PRD when one exists (from `prd`: a `*-prd.md` file, or a PRD artifact link whose page carries its Markdown source). Without a PRD, the spec starts from a ticket, a brainstorm summary, or the conversation.
 
 **PRINCIPLE**: API-first. The platform contract (data model, API surface, business rules) comes before UI. Sections are ordered by platform priority, not visual priority.
 
-**CONFIGURATION**: Reads `jig.config.md` for `ticket-system` (sync target), `plans-directory` (local save location), `prd-sync` (optional remote document sync), and the `## Concerns Checklist` (concerns to walk through).
+**CONFIGURATION**: Reads `jig.config.md` for `ticket-system` (sync target), `plans-directory` (local save location), `spec-sync` (optional remote document sync), and the `## Concerns Checklist` (concerns to walk through).
 
 ---
 
 ## When to Use
 
-- Starting a new feature or large improvement -- capture requirements before brainstorming approaches
+- A PRD has been approved and engineering needs the contract before planning
+- Starting a new feature or large improvement without a PRD -- capture the contract before planning
 - Documenting a bug fix that touches multiple layers
 - Any time you want a structured spec that downstream agents can verify against
-- Invoked manually via `/prd` or prompted by `kickoff` for features
+- Invoked manually via `/spec` (optionally with a PRD path or artifact link) or by `kickoff` after the PRD stage
 
 **Do NOT use when:** The work is a trivial config change, chore, or single-line fix with obvious scope.
 
@@ -36,9 +40,9 @@ Two tiers, selected by work type:
 ```
 What type of work?
   |
-  +-- feature / large improvement --> Full PRD (12 sections)
+  +-- feature / large improvement --> Full spec (12 sections)
   |
-  +-- bug / small improvement / task --> Light PRD (5 sections)
+  +-- bug / small improvement / task --> Light spec (5 sections)
 ```
 
 - **Full**: Features and large improvements. 12 sections covering API, data, logic, UI, scope, and acceptance.
@@ -54,9 +58,12 @@ Auto-suggest the tier from context. Ask the user to confirm.
 
 Before asking the user anything, do your homework:
 
-1. **Read the ticket** (if one exists) -- extract the problem statement, any existing requirements. Check `jig.config.md` for `ticket-system` to determine where to look.
-2. **Explore the codebase** -- look at relevant entities, services, components, APIs. What exists already?
-3. **Check recent plans/PRDs** -- scan `docs/plans/` for related prior work
+1. **Read the PRD** (if one exists) -- a `*-prd.md` in `{plans-directory}`, or a PRD artifact link. For a link, read the artifact and take the Markdown inside its `<script type="text/markdown" id="prd-source">` block; that is the PRD's source of truth. Note its outcome IDs (`MVP.1`, `NEXT.2`, ...), phases, open decisions, and current rev. **Spec only the phase the user is building now** (usually MVP); later phases get their own spec when their turn comes.
+2. **Read the ticket** (if one exists) -- extract the problem statement, any existing requirements. Check `jig.config.md` for `ticket-system` to determine where to look.
+3. **Explore the codebase** -- look at relevant entities, services, components, APIs. What exists already?
+4. **Check recent plans/specs** -- scan `docs/plans/` for related prior work
+
+**Product implications go back to the PRD, not into the spec.** If exploring the code turns up something a product person must decide (a report that would double-count, a screen the PRD did not mention, a permission the PRD assumed), record it as an open decision on the PRD. Write it to the PRD's `decisions` and `log` as `framework/LIVE_PRD.md` describes (the artifact on a page, the file's Open decisions and Log otherwise) and tell the user.
 
 Then ask **2-3 targeted questions** (not a form):
 - What tier does this feel like? (suggest one based on context)
@@ -68,30 +75,31 @@ Then ask **2-3 targeted questions** (not a form):
 Based on the user's answers and your context gathering:
 - Select Full or Light tier
 - Identify which sections are relevant vs N/A for this specific work
-- Use the section references below (Full PRD Sections or Light PRD Sections)
+- Use the section references below (Full Spec Sections or Light Spec Sections)
 
 ### Step 3: Draft
 
-Produce a **complete PRD draft** in one pass:
+Produce a **complete spec draft** in one pass:
 
 - **Known sections**: fill from context, codebase exploration, and conversation
 - **Unknown sections**: flag with `TBD -- [what needs to be decided]`
+- **Traceability**: when a PRD exists, end every acceptance item with the PRD outcome it serves, e.g. `(MVP.2)`. Every in-scope PRD outcome must be served by at least one item.
 - **N/A sections**: mark explicitly with a one-line reason -- never silently omit
 - **Acceptance checklist**: always present, with `[ ]` items tagged by layer
 
 **Draft quality bar**: The draft should be good enough that the user is refining and correcting, not writing from scratch. Leverage what you learned in Step 1.
 
-### Step 3b: PRD Review Swarm
+### Step 3b: Spec Review Swarm
 
 After producing the draft, invoke the review swarm to scrutinize the requirements before the user refines them.
 
 **Automatic dispatch**: Run the swarm for all medium-to-large features and improvements. Skip only for clearly trivial work (config change, single-line fix, chore with obvious scope).
 
-**INVOKE `jig:review` using the Skill tool with mode: prd.** Pass the PRD document path. The review skill discovers PRD specialists (stage: prd or both), dispatches them in parallel with the full document + section hints + codebase access, scores findings, and returns a unified report.
+**INVOKE `jig:review` using the Skill tool with mode: spec.** Pass the spec document path (and the PRD path, if one exists). The review skill discovers spec specialists (`stage: spec` or `both`), dispatches them in parallel with the full document + section hints + codebase access, scores findings, and returns a unified report.
 
 Present the swarm findings to the user **alongside the draft**:
 
-> "Here's the PRD draft. Before we refine, the review swarm found these concerns:"
+> "Here's the spec draft. Before we refine, the review swarm found these concerns:"
 >
 > {swarm report}
 >
@@ -105,11 +113,11 @@ After the swarm findings are presented but before refinement, walk through the `
 
 For each concern listed:
 - If marked **Yes** and mapped to a skill -> load that skill for guidance, then capture its implications as new acceptance items
-- If marked **Yes** and mapped to a specialist -> note the specialist's domain; the specialist will validate during `review:prd`
+- If marked **Yes** and mapped to a specialist -> note the specialist's domain; the specialist will validate during `review:spec`
 - If marked **Yes** and mapped to `manual` -> add an acceptance item flagging human review
 - If marked **No** or **N/A** -> record the decision with brief rationale in an "Open Questions" or "Out of Scope" section
 
-Each `Yes` concern adds scope to the PRD acceptance checklist. The user must explicitly approve added scope.
+Each `Yes` concern adds scope to the spec acceptance checklist. The user must explicitly approve added scope.
 
 **Work type behavior:**
 - Features and large improvements: full walk-through
@@ -128,28 +136,29 @@ Walk through the draft with the user:
 - Remove sections the user confirms are N/A
 - Iterate until the user approves
 
-**Do NOT rush this step.** The PRD is only as good as the refinement. If the user spots gaps, dig into them.
+**Do NOT rush this step.** The spec is only as good as the refinement. If the user spots gaps, dig into them.
 
 ### Step 5: Save
 
-1. **Determine the local save path** — read `plans-directory` and `filename-format` from `jig.config.md` (defaults: `docs/plans/` and `{date}-{topic}-{kind}.md`). Resolve to e.g. `docs/plans/2026-05-27-export-feature-prd.md`.
-2. **Write the PRD** to the resolved path.
-3. **Check `prd-sync` in `jig.config.md`** — if set (e.g., `prd-sync: linear`), invoke the configured pack's doc-sync instructions. See the pack's README for the sync method (e.g., `packs/linear/README.md` → "PRD document sync").
-4. **Always offer ticket sync** — "Want to also sync these requirements to the ticket description?" If yes, push the PRD content to the ticket system configured in `jig.config.md` (separate from doc sync — ticket is the issue, doc is the standalone artifact).
-5. **Confirm all save locations** to the user.
+1. **Determine the local save path** — read `plans-directory` and `filename-format` from `jig.config.md` (defaults: `docs/plans/` and `{date}-{topic}-{kind}.md`). Resolve to e.g. `docs/plans/2026-05-27-export-feature-spec.md`.
+2. **Write the spec** to the resolved path. When a PRD exists, put its pointer in the header: `> **PRD:** docs/plans/YYYY-MM-DD-<topic>-prd.md` (or the artifact link) and `> **PRD rev:** C`.
+3. **Check `spec-sync` in `jig.config.md`** — if set (e.g., `spec-sync: linear`), invoke the configured pack's doc-sync instructions. See the pack's README for the sync method (e.g., `packs/linear/README.md` → "Document sync").
+4. **Always offer ticket sync** — "Want to also sync the acceptance checklist to the ticket description?" If yes, push it to the ticket system configured in `jig.config.md` (separate from doc sync — ticket is the issue, doc is the standalone artifact).
+5. **Update the PRD** (if one exists) — append a `spec` entry to its log naming the spec path, the item count, and any decisions opened. On a page this goes to the artifact; on a plain `*-prd.md` it goes into the file. See `framework/LIVE_PRD.md`.
+6. **Confirm all save locations** to the user.
 
 ---
 
-## Full PRD Sections (12 sections)
+## Full Spec Sections (12 sections)
 
-Use for **features** and **large improvements**. Not every section applies to every PRD -- mark irrelevant sections as N/A with a brief reason. Sections are ordered by platform priority: API-first, UI last.
+Use for **features** and **large improvements**. Not every section applies to every spec -- mark irrelevant sections as N/A with a brief reason. Sections are ordered by platform priority: API-first, UI last.
 
 ### 1. Overview
 
 Orient any reader in 30 seconds.
 
 - 1-3 sentences: what is being built and why
-- Links to context: ticket, walkthrough, designs (when available)
+- Links to context: PRD, ticket, walkthrough, designs (when available)
 - Audience test: someone outside engineering should understand this paragraph
 
 **Good:** "A component export feature that lets users build custom export packages, select revisions, configure output settings, and receive the export via email or direct download."
@@ -164,7 +173,7 @@ Establish why this work matters.
 - What is the business or user impact of solving it?
 - Any prior art, customer requests, or competitive pressure?
 
-Skip if self-evident from the Overview. Keep to 2-4 sentences.
+When a PRD exists, link to it and skip this section -- the PRD owns the why. Otherwise keep to 2-4 sentences.
 
 ### 3. API Contract
 
@@ -298,9 +307,9 @@ The enforceable contract. Downstream agents verify every item. See the Acceptanc
 
 ---
 
-## Light PRD Sections (5 sections)
+## Light Spec Sections (5 sections)
 
-Use for **bugs**, **small improvements**, or **tasks**. Keep it concise -- a light PRD should take minutes, not an hour.
+Use for **bugs**, **small improvements**, or **tasks**. Keep it concise -- a light spec should take minutes, not an hour.
 
 ### 1. Problem Statement
 
@@ -340,7 +349,7 @@ Prevent scope creep on what should be a focused change.
 
 ### 5. Acceptance Checklist
 
-The enforceable contract -- same rules as the full PRD. See the Acceptance Checklist Format section below.
+The enforceable contract -- same rules as the full spec. See the Acceptance Checklist Format section below.
 
 ---
 
@@ -354,51 +363,54 @@ The acceptance checklist is the **enforceable contract**. Every item must be:
 | **Testable** | An agent can determine pass/fail by reading code or running a test |
 | **Layer-tagged** | Prefixed with `[API]`, `[DATA]`, `[LOGIC]`, or `[UI]` |
 | **Concrete** | "Export button disabled when list empty" not "UI works correctly" |
+| **Numbered** | Starts with a sequential id, `S-1`, `S-2`, … unique across the spec, so the PRD's trace can name it |
+| **Traced** | When a PRD exists, ends with the outcome it serves: `(MVP.2)` |
 
 **Example:**
 
 > ### API
-> - [ ] [API] `createOrder` mutation accepts `items` and `settings` input
-> - [ ] [API] Returns `Order` with `id`, `status`, `total`
-> - [ ] [API] Throws `ORDER_EMPTY_ITEMS` error when `items` is empty
+> - [ ] S-1 [API] `createOrder` mutation accepts `items` and `settings` input (MVP.1)
+> - [ ] S-2 [API] Returns `Order` with `id`, `status`, `total`
+> - [ ] S-3 [API] Throws `ORDER_EMPTY_ITEMS` error when `items` is empty
 >
 > ### Data
-> - [ ] [DATA] `Order` entity created with status, userId, settings columns
-> - [ ] [DATA] Migration runs cleanly on empty and populated databases
+> - [ ] S-4 [DATA] `Order` entity created with status, userId, settings columns
+> - [ ] S-5 [DATA] Migration runs cleanly on empty and populated databases
 >
 > ### Logic
-> - [ ] [LOGIC] Background job initiated on submission
-> - [ ] [LOGIC] Only active items included when `activeOnly: true`
+> - [ ] S-6 [LOGIC] Background job initiated on submission
+> - [ ] S-7 [LOGIC] Only active items included when `activeOnly: true`
 >
 > ### UI
-> - [ ] [UI] Submit button disabled when item list is empty
-> - [ ] [UI] Toast shown after submission
+> - [ ] S-8 [UI] Submit button disabled when item list is empty
+> - [ ] S-9 [UI] Toast shown after submission (MVP.1)
 
 ---
 
 ## Downstream Agent Consumption
 
-When a PRD exists, implementation plans should reference it:
+Implementation plans reference the spec (and, through it, the PRD):
 
+> **Spec:** docs/plans/YYYY-MM-DD-<topic>-spec.md
 > **PRD:** docs/plans/YYYY-MM-DD-<topic>-prd.md
 
-This pointer tells downstream agents (spec reviewers, team-dev quality gates) where to find the acceptance checklist. They load the PRD, extract the `[ ]` items, and verify each one against the implementation with file:line references.
+The `Spec` pointer tells downstream agents (spec reviewers, team-dev quality gates) where to find the acceptance checklist. They load the spec, extract the `[ ]` items, and verify each one against the implementation with file:line references. The `PRD` pointer is used by the pre-ship PRD check and by the live-PRD updates (`framework/LIVE_PRD.md`).
 
 ---
 
 ## Integration with kickoff
 
-This skill sits inside the **DISCOVER** stage in the kickoff pipeline as an optional requirements-capture tool:
+This skill is the **SPEC** stage in the kickoff pipeline:
 
 ```
-CLASSIFY -> DISCOVER -> (PRD optional) -> PLAN -> EXECUTE -> REVIEW -> SHIP -> LEARN
+CLASSIFY -> DISCOVER -> (PRD) -> SPEC -> PLAN -> BUILD -> REVIEW -> SHIP -> LEARN
 ```
 
-- **Features**: kickoff prompts "Capture requirements with `/prd`?"
+- **Features**: kickoff runs `/spec` after the PRD is approved (or directly, if the user skipped the PRD)
 - **Large improvements**: prompted
-- **Bugs/tasks**: skipped (invoke manually if needed)
+- **Bugs/tasks**: light spec, or skipped (invoke manually if needed)
 
-The PRD becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the PRD's acceptance checklist and distills it into a build sequence. The PRD defines *what* the requirements are; `plan` decides *how* to satisfy them.
+The spec becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the spec's acceptance checklist and distills it into a build sequence. The PRD says *what* and *why*; the spec says *what exactly*; `plan` decides *how*.
 
 ---
 
@@ -409,9 +421,11 @@ The PRD becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the PRD's
 | Starting with UI sections | Lead with API contract and data model -- platform first |
 | Vague acceptance items | Every `[ ]` must be testable. "Works correctly" is never acceptable |
 | Skipping N/A sections silently | Mark them explicitly -- the absence of a section is a decision worth documenting |
-| Writing implementation details | The PRD captures *what*, not *how*. Save the *how* for brainstorming and planning |
+| Writing implementation details | The spec captures the contract, not the task sequence. Save the *how* for planning |
 | Forgetting open questions | Flag unknowns with TBD -- unresolved questions are better visible than hidden |
-| Overly long PRDs for small work | Use the Light tier. Five focused sections beat twelve half-empty ones |
+| Overly long specs for small work | Use the Light tier. Five focused sections beat twelve half-empty ones |
+| Deciding product questions in the spec | Send them back to the PRD as open decisions with an owner |
+| Speccing every PRD phase at once | Spec the phase being built now; later phases get their own spec |
 | Not exploring the codebase first | The draft quality depends on context. Read the code before writing the spec |
 | Hardcoding ticket system references | Read `ticket-system` from `jig.config.md` -- do not assume any particular tool |
 | Acceptance items without layer tags | Every `[ ]` must be prefixed with `[API]`, `[DATA]`, `[LOGIC]`, or `[UI]` |
@@ -422,14 +436,14 @@ The PRD becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the PRD's
 ## Integration
 
 **Called by:**
-- `kickoff` during the REQUIREMENTS stage (between DISCOVER and BRAINSTORM)
+- `kickoff` during the SPEC stage (after PRD, before PLAN)
 
 **Terminal state:**
-- Return to `kickoff`, which proceeds to BRAINSTORM
+- Return to `kickoff`, which proceeds to PLAN
 
 **Related skills:**
-- `brainstorm` -- consumes the PRD as input to design exploration
-- `plan` -- references the PRD in the plan header for spec reviewers
+- `prd` -- the product document this spec serves
+- `plan` -- references the spec (and PRD) in the plan header for spec reviewers
 - `kickoff` -- orchestrates the full pipeline including this skill
 
 ---
@@ -440,8 +454,9 @@ The PRD becomes the **input** to `plan`'s TRANSPOSE step. `plan` reads the PRD's
 |---------|------|
 | Full tier | 12 sections, features and large improvements |
 | Light tier | 5 sections, bugs and small improvements |
-| Save location | `{plans-directory}/{filename-format}` (default: `docs/plans/YYYY-MM-DD-<topic>-prd.md`) |
-| Remote sync | Optional via `prd-sync` in `jig.config.md` (pack-driven) |
+| Save location | `{plans-directory}/{filename-format}` (default: `docs/plans/YYYY-MM-DD-<topic>-spec.md`) |
+| Remote sync | Optional via `spec-sync` in `jig.config.md` (pack-driven) |
+| PRD trace | Each acceptance item ends with the PRD outcome it serves, e.g. `(MVP.2)` |
 | Acceptance items | Atomic, testable, layer-tagged, concrete |
 | Layer tags | `[API]`, `[DATA]`, `[LOGIC]`, `[UI]` |
 | API-first | Platform contract before UI in section order |

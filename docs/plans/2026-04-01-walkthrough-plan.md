@@ -1,6 +1,6 @@
 # Interactive Pipeline Walkthrough — Implementation Plan
 
-> **PRD:** docs/plans/2026-04-01-walkthrough-prd.md
+> **Spec:** docs/plans/2026-04-01-walkthrough-spec.md
 > **For agents:** Use sdd (sequential) to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build an animated, interactive modal walkthrough that demonstrates the full Jig pipeline through 8 sections (~2 min total), triggered from the homepage terminal's play button.

@@ -9,7 +9,7 @@ dependencies, UI conflicts, blast radius miscalculations, and
 incomplete state machines slip through to implementation where they
 cost 10x more to fix.
 
-**PRD:** `docs/plans/2026-04-01-prd-plan-specialists-prd.md`
+**Spec:** `docs/plans/2026-04-01-prd-plan-specialists-spec.md`
 
 ## Approved Approach
 
