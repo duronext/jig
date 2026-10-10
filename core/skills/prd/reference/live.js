@@ -215,6 +215,21 @@
   async function addLog(kind, text, ref) {
     await db.collection("log").add({ at: now(), by: meId, actor: "person", kind: kind, text: text, ref: ref || null });
   }
+  /* The page's database has no multi-document batch, so a change and its log
+     entry are two writes. The change is the one that matters: if only the log
+     entry fails, say so instead of claiming the change failed. */
+  async function logAfter(where, kind, text, ref) {
+    try { await addLog(kind, text, ref); }
+    catch (e) { say(where, "Saved. The log entry for it did not save" + (e && e.code === "quota_exceeded" ? ": the page's storage is full." : ".")); }
+  }
+  /* Read, change, write the whole document, so fields another writer added
+     (Jig's note on a milestone, a decision's question) survive a person's click. */
+  async function merge(path, patch) {
+    var ref = db.doc(path), cur = await ref.get();
+    var body = cur.exists ? JSON.parse(JSON.stringify(cur.data())) : {};
+    Object.keys(patch).forEach(function (k) { body[k] = patch[k]; });
+    await ref.set(body);
+  }
   async function guarded(key, where, fn) {
     if (busy[key] || mode !== "live") { render(); return; }
     busy[key] = true; say(where, "");
@@ -223,22 +238,20 @@
   }
   function toggleMilestone(id, done) {
     return guarded("ms" + id, "ms", async function () {
-      await db.doc("milestones/" + id).set({ done: done, at: now(), by: meId, actor: "person" });
-      await addLog("milestone", (done ? "Ticked off: " : "Reopened: ") + msTitle(id), id);
+      await merge("milestones/" + id, { done: done, at: now(), by: meId, actor: "person" });
+      await logAfter("ms", "milestone", (done ? "Ticked off: " : "Reopened: ") + msTitle(id), id);
     });
   }
   function decide(d, choice) {
     return guarded("d" + d.id, "dec", async function () {
-      var ref = db.doc("decisions/" + d.id), cur = await ref.get(), body = cur.exists ? JSON.parse(JSON.stringify(cur.data())) : {};
-      body.choice = choice; body.at = now(); body.by = meId; body.actor = "person";
-      await ref.set(body);
-      await addLog("decision", choice ? d.question + " Chose " + choice + ": " + d.options[choice].label + "." : d.question + " Reopened.", d.id);
+      await merge("decisions/" + d.id, { choice: choice, at: now(), by: meId, actor: "person" });
+      await logAfter("dec", "decision", choice ? d.question + " Chose " + choice + ": " + d.options[choice].label + "." : d.question + " Reopened.", d.id);
     });
   }
   function approve(id, yes) {
     return guarded("a" + id, "appr", async function () {
-      await db.doc("approvals/" + id).set({ state: yes ? "approved" : "withdrawn", rev: REV, at: now(), by: meId });
-      await addLog("approval", (yes ? "Sign-off recorded for " : "Sign-off withdrawn for ") + apprName(id) + ", rev " + REV + ".", id);
+      await merge("approvals/" + id, { state: yes ? "approved" : "withdrawn", rev: REV, at: now(), by: meId });
+      await logAfter("appr", "approval", (yes ? "Sign-off recorded for " : "Sign-off withdrawn for ") + apprName(id) + ", rev " + REV + ".", id);
     });
   }
   var form = $("#log-form");

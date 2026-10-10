@@ -135,8 +135,13 @@ a non-engineer can read. Name commits and PRs; never paste diffs or code.
   person's state is wrong, write a `log` entry saying so and leave the state.
 - **One fact per entry.** A log line is something a reader would want to know
   happened. Batch a run of task completions into one `build` entry.
-- **Batch writes.** When ticking a milestone and logging it, send both in one
-  `ArtifactData` `batch`.
+- **Merge, never replace.** Read the document and write it back with your
+  fields changed, so fields another writer added survive (Jig's `note` on a
+  milestone, a decision's `question`). The page does the same.
+- **Batch writes.** When Jig ticks a milestone and logs it, send both in one
+  `ArtifactData` `batch`. The page cannot batch (its database has no
+  multi-document writes), so it writes the change first and the log entry
+  second, and tells the person if only the log entry failed.
 - **Plain words.** Log text follows the PRD voice rules in
   `core/skills/prd/reference/voice.md`.
 
