@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jig, OpenSpec and Spec Kit — Jig</title>
+  <meta name="description" content="A side-by-side comparison of Jig, OpenSpec and GitHub Spec Kit for teams choosing a spec-driven AI development workflow.">
+  <meta name="theme-color" content="#08080d">
+  <meta property="og:title" content="Jig, OpenSpec and Spec Kit">
+  <meta property="og:description" content="Which spec-driven tool fits your team? Jig, OpenSpec and Spec Kit side by side.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://duronext.github.io/jig/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://duronext.github.io/jig/og-image.png">
+  <meta name="author" content="Dustin Diaz">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2308080d%22/%3E %3Cg transform=%22translate(6.4 6.4) scale(.8)%22%3E %3Cpath d=%22M9 27V14a5 5 0 0 1 5-5h13%22 fill=%22none%22 stroke=%22%23ececf4%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E %3Cpath d=%22M55 37v13a5 5 0 0 1-5 5H37%22 fill=%22none%22 stroke=%22%23ececf4%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E %3Crect x=%2220%22 y=%2220%22 width=%2224%22 height=%2224%22 rx=%223.5%22 fill=%22%23818cf8%22/%3E %3C/g%3E %3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { scroll-behavior: smooth; overflow-x: hidden; }
+
+    /* ── Custom Properties ─────────────────────────────────── */
+    :root {
+      --bg: #08080d;
+      --text-primary: #e4e4ed;
+      --text-secondary: #8888a0;
+      --text-tertiary: #555570;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-rgb: 99, 102, 241;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace;
+      --max-width: 680px;
+    }
+
+    /* ── Base ──────────────────────────────────────────────── */
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(circle at 1px 1px, hsla(0,0%,100%,.015) 1px, transparent 0);
+      background-size: 32px 32px;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+
+    ::selection {
+      background: rgba(99,102,241, .3);
+      color: #fff;
+    }
+
+    /* ── Layout ────────────────────────────────────────────── */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .site-header {
+      padding: 2rem 0;
+    }
+    .back-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      border-bottom: none;
+      letter-spacing: 0.04em;
+      transition: color 0.3s ease;
+    }
+    .back-link:hover {
+      color: var(--accent);
+      border-bottom: none;
+    }
+
+    /* ── Article Header ────────────────────────────────────── */
+    .article-header {
+      padding: 4rem 0 3rem;
+    }
+    .article-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: rgba(99,102,241, .5);
+      margin-bottom: 2rem;
+    }
+    .article-title {
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      text-shadow:
+        0 0 60px rgba(99,102,241, .15),
+        0 0 120px rgba(99,102,241, .05);
+    }
+    .article-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .article-meta {
+      margin-top: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(99,102,241, .15);
+      object-fit: cover;
+      filter: grayscale(30%);
+      opacity: .85;
+    }
+    .meta-text {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+    .meta-text strong {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ── Article Body ──────────────────────────────────────── */
+    .article-body {
+      padding-bottom: 4rem;
+    }
+    .article-body p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.85;
+      margin-bottom: 1.5rem;
+    }
+    .article-body p em {
+      color: var(--text-primary);
+      font-style: italic;
+    }
+    .article-body p strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .article-body p code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      opacity: .8;
+    }
+
+    /* ── Links ─────────────────────────────────────────────── */
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(99,102,241, .15);
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    a:hover {
+      color: var(--accent-hover);
+      border-bottom-color: rgba(99,102,241, .4);
+    }
+
+    /* ── Section Headers ───────────────────────────────────── */
+    .section-break {
+      height: 1px;
+      border: none;
+      background: linear-gradient(90deg, rgba(99,102,241, .25), transparent 70%);
+      margin: 3.5rem 0;
+    }
+    .article-body h2,
+    .sources-label {
+      position: relative;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      line-height: 1.35;
+    }
+    a.heading-anchor {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: none;
+    }
+    a.heading-anchor:hover {
+      color: inherit;
+      border-bottom: none;
+    }
+    a.heading-anchor::before {
+      content: '#';
+      position: absolute;
+      right: 100%;
+      padding-right: 0.5rem;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      font-weight: 400;
+    }
+    .article-body h2:hover a.heading-anchor::before,
+    .sources-label:hover a.heading-anchor::before {
+      opacity: 0.4;
+    }
+
+    /* ── Pull Quotes ───────────────────────────────────────── */
+    .pull-quote {
+      border-left: 2px solid rgba(99,102,241, .4);
+      padding: 1.25rem 0 1.25rem 1.5rem;
+      margin: 2rem 0 2.5rem;
+      background: rgba(99,102,241, .03);
+      border-radius: 0 6px 6px 0;
+    }
+    .pull-quote p {
+      font-size: 0.95rem !important;
+      color: var(--text-primary) !important;
+      font-weight: 400;
+      line-height: 1.75 !important;
+      margin-bottom: 0 !important;
+    }
+    .pull-quote .pull-source {
+      font-size: 0.75rem !important;
+      color: var(--text-tertiary) !important;
+      margin-top: 0.75rem !important;
+      font-family: var(--font-mono);
+    }
+
+    /* ── Stat Callout ──────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin: 2rem 0 2.5rem;
+    }
+    .stat-card {
+      padding: 1.25rem;
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, .3);
+      text-align: center;
+    }
+    .stat-number {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+
+    /* ── Emphasis Card ─────────────────────────────────────── */
+    .emphasis-card {
+      padding: 1.5rem 1.75rem;
+      margin: 2rem 0 2.5rem;
+      background: rgba(99,102,241, .04);
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      box-shadow: 0 0 32px rgba(99,102,241, .03);
+    }
+    .emphasis-card p {
+      font-size: 1.05rem !important;
+      color: var(--text-primary) !important;
+      font-weight: 400;
+      line-height: 1.8 !important;
+      margin-bottom: 0 !important;
+    }
+
+    /* ── Postscript ────────────────────────────────────────── */
+    .postscript {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      font-style: italic;
+      border-top: 1px solid rgba(99,102,241, .1);
+      padding-top: 2rem;
+      margin-top: 1rem;
+      line-height: 1.75;
+    }
+    .postscript strong {
+      font-style: normal;
+      color: var(--text-secondary);
+    }
+
+    /* ── Sources ───────────────────────────────────────────── */
+    .sources {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(99,102,241, .08);
+    }
+    .sources-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-tertiary);
+      margin-bottom: 1rem;
+    }
+    .sources ol {
+      padding-left: 1.25rem;
+    }
+    .sources li {
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      line-height: 1.7;
+      margin-bottom: 0.25rem;
+    }
+    .sources li a {
+      color: rgba(99,102,241, .55);
+      border-bottom-color: rgba(99,102,241, .15);
+    }
+    .sources li a:hover {
+      color: var(--accent);
+    }
+
+    /* ── CTA ───────────────────────────────────────────────── */
+    .article-cta {
+      text-align: center;
+      padding: 4rem 0 2rem;
+    }
+    .cta-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+    .cta-links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      align-items: center;
+    }
+    .cta-link {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    .footer {
+      padding: 3rem 0 4rem;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      opacity: .6;
+    }
+    .footer-text a {
+      color: var(--text-tertiary);
+      border-bottom-color: rgba(255, 255, 255, .08);
+    }
+    .footer-text a:hover { color: var(--accent); }
+
+    /* ── Skip Link ─────────────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      z-index: 100;
+      padding: 0.75rem 1.25rem;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      border-radius: 4px;
+      border-bottom: none;
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      top: 1rem;
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Focus Styles ──────────────────────────────────────── */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* ── Animations ────────────────────────────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity 0.7s cubic-bezier(.25, .1, .25, 1),
+        transform 0.7s cubic-bezier(.25, .1, .25, 1);
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .article-header .fade-in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── Schematic ─────────────────────────────────────────── */
+    .schematic {
+      position: absolute;
+      top: -6rem;
+      right: -10rem;
+      width: 800px;
+      height: 740px;
+      pointer-events: none;
+      z-index: 0;
+      -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+      mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+    }
+    .schematic svg { width: 100%; height: 100%; }
+    .article-header {
+      position: relative;
+      overflow: hidden;
+    }
+    .article-header .fade-in {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .container { padding: 0 1.5rem; }
+      .article-header { padding: 2.5rem 0 2rem; }
+      .schematic, .schematic-bottom { display: none; }
+      .stat-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-align: left;
+      }
+      .stat-number { margin-bottom: 0; }
+    }
+
+
+    /* ── Lists ─────────────────────────────────────────────── */
+    .article-body ul {
+      margin: 0 0 1.5rem 1.25rem;
+    }
+    .article-body ul li {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 0.4rem;
+    }
+    .article-body ul li code,
+    .article-body td code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      opacity: .8;
+    }
+
+    /* ── Pipeline plate ────────────────────────────────────── */
+    .pipeline-plate {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      background: rgba(0, 0, 0, .35);
+      border: 1px solid rgba(99,102,241, .12);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 0 0 2rem;
+      line-height: 2;
+      overflow-wrap: anywhere;
+    }
+    .pipeline-plate .new { color: var(--accent-hover); font-weight: 600; }
+    .pipeline-plate .sep { color: var(--text-tertiary); padding: 0 .35rem; }
+
+    /* ── Tables ────────────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0 0 2rem;
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, .3);
+    }
+    .table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+    .table-wrap caption {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-tertiary);
+      padding: 0.9rem 1rem 0.25rem;
+    }
+    .table-wrap th,
+    .table-wrap td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.7rem 1rem;
+      border-top: 1px solid rgba(99,102,241, .08);
+    }
+    .table-wrap thead th {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      border-top: none;
+    }
+    .table-wrap tbody th {
+      color: var(--text-primary);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .table-wrap td { color: var(--text-secondary); }
+    .table-wrap .jig { background: rgba(99,102,241, .05); color: var(--text-primary); }
+    .table-wrap thead .jig { color: var(--accent-hover); }
+    .table-wrap .none { color: var(--text-tertiary); }
+
+    .more-link {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .checked-note {
+      font-size: 0.78rem !important;
+      color: var(--text-tertiary) !important;
+    }
+
+    /* ── Wide layout (comparison page) ─────────────────────── */
+    .container.wide { max-width: 960px; }
+
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <div class="container">
+    <header class="site-header">
+      <a href="./" class="back-link"><span aria-hidden="true">&larr;</span> Jig</a>
+    </header>
+  </div>
+
+  <main id="main-content">
+
+  <!-- ── Article Header ─────────────────────────────────── -->
+  <div class="container">
+    <div class="article-header">
+      <div class="fade-in">
+        <div class="article-label">Comparison</div>
+        <h1 class="article-title">Jig, OpenSpec and Spec Kit</h1>
+        <p class="article-subtitle">Three spec-driven tools, three different questions</p>
+        <div class="article-meta">
+          <img src="avatars/dustin.jpg" alt="Dustin Diaz" class="author-avatar">
+          <div class="meta-text">
+            <strong>Dustin Diaz</strong><br>
+            October 2026 &middot; Checked against OpenSpec v1.14.1 and Spec Kit v1.1.3
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <hr class="section-break">
+  </div>
+
+  <div class="container">
+    <article class="article-body">
+      <div class="fade-in">
+        <p>All three tools agree on the big idea: decide what to build, in writing, before an agent writes code. They differ on who that writing is for and how far past the spec they go.</p>
+
+        <p><strong>OpenSpec</strong> is built around one change at a time, and keeps a living spec for each area of the codebase. <strong>Spec Kit</strong> is built around a feature's spec, plan and tasks, and works with almost any coding agent. <strong>Jig</strong> is built around a team: product requirements and sign-off on one end, parallel agents, review and a postmortem on the other.</p>
+
+        <p>This page is written by the Jig team, so read it with that in mind. We've tried to be fair, and we say where the others are ahead. If something here is wrong or out of date, <a href="https://github.com/duronext/jig/issues">open an issue</a>.</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="container wide">
+    <div class="article-body fade-in">
+        <div class="table-wrap" role="region" aria-label="Jig, OpenSpec and Spec Kit compared" tabindex="0">
+          <table>
+            <caption>Side by side</caption>
+            <thead>
+              <tr><th scope="col"></th><th scope="col">OpenSpec</th><th scope="col">Spec Kit</th><th scope="col" class="jig">Jig</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">What it is</th><td>Spec-driven development for AI coding assistants. A light spec layer agreed before code is written.</td><td>A toolkit that gives coding agents structured processes, templates and documented outcomes.</td><td class="jig">An AI engineering workflow framework for teams: the whole lifecycle from ticket to postmortem, with a gate at every stage.</td></tr>
+              <tr><th scope="row">Unit of work</th><td>A change: its own folder with a proposal, spec changes, design and tasks.</td><td>A feature: a spec, a technical plan and tasks, under a project constitution.</td><td class="jig">A piece of work classified by type (bug, feature, improvement, task), which sets the stages it runs and how deep.</td></tr>
+              <tr><th scope="row">Documents</th><td><code>proposal.md</code>, spec changes (added, modified, removed), <code>design.md</code>, <code>tasks.md</code></td><td>Constitution, spec, plan, tasks, checklists</td><td class="jig">PRD (live page and markdown), spec, plan</td></tr>
+              <tr><th scope="row">Written for</th><td>Engineers and their agents</td><td>Engineers and their agents</td><td class="jig">Product, design, engineering and approvers (PRD); engineers (spec); agents (plan)</td></tr>
+              <tr><th scope="row">Product requirements</th><td>The proposal says why and what</td><td>The spec carries user stories and measurable outcomes</td><td class="jig">A separate plain-language PRD: phases, an MVP cut line, rules with &ldquo;you'll know it works when&rdquo;, no code</td></tr>
+              <tr><th scope="row">Decisions and sign-off</th><td class="none">Not built in</td><td>Not built in. An optional idea-assessment extension ends in go, clarify or stop.</td><td class="jig">Open decisions with owners and dates; sign-off per revision on the live page</td></tr>
+              <tr><th scope="row">Status the team can see</th><td>Files in the repo</td><td>Files in the repo</td><td class="jig">A live page: milestones, decisions, log and trace, updated by people and by the pipeline</td></tr>
+              <tr><th scope="row">Requirements after ship</th><td>Archiving a change merges it into living specs per area. This is OpenSpec's strongest idea.</td><td>One spec per feature</td><td class="jig">The PRD keeps its trace and log. Living per-area specs are on the roadmap.</td></tr>
+              <tr><th scope="row">Ticket trackers</th><td class="none">Not built in</td><td>Turns tasks into GitHub Issues</td><td class="jig">Linear, Jira and GitHub Issues packs; Linear can sync documents to a dedicated project</td></tr>
+              <tr><th scope="row">Execution</th><td>Apply tasks with your agent</td><td>Implement, then converge until done</td><td class="jig">Picks parallel agent teams or serial execution from the task graph; test-first on every task</td></tr>
+              <tr><th scope="row">Quality gates</th><td>Verify (in the expanded command set)</td><td>Clarify, analyze, checklists, converge</td><td class="jig">PRD and spec review swarms, a spec and quality gate per task, specialist code review, PRD check</td></tr>
+              <tr><th scope="row">Pull requests</th><td class="none">Not built in</td><td class="none">Not built in</td><td class="jig">Writes the PR and responds to review comments: fix, commit, push, reply, resolve</td></tr>
+              <tr><th scope="row">Learning from mistakes</th><td class="none">Not built in</td><td class="none">Not built in</td><td class="jig">Postmortem after merge turns review misses into new specialists and skills</td></tr>
+              <tr><th scope="row">Team customization</th><td>Config profiles, community schemas</td><td>Constitution, extensions, presets, bundles, organization catalogs</td><td class="jig">Three layers: team overrides pack overrides core; team specialists are discovered automatically</td></tr>
+              <tr><th scope="row">Across repos</th><td>Stores (beta): a planning repo shared across code repos</td><td>Organization catalogs of extensions and presets</td><td class="jig">The PRD lives outside any repo, as a page the whole team opens</td></tr>
+              <tr><th scope="row">Coding agents</th><td>30+ tools</td><td>38 integrations</td><td class="jig">Claude Code (plugin); Gemini CLI and Codex adapters</td></tr>
+              <tr><th scope="row">Setup</th><td>npm or Homebrew, then <code>openspec init</code></td><td><code>specify</code> CLI via uv, then <code>specify init</code></td><td class="jig">Add the plugin to <code>.claude/settings.json</code>, then <code>/jig:init</code></td></tr>
+              <tr><th scope="row">License</th><td>MIT</td><td>MIT</td><td class="jig">MIT</td></tr>
+            </tbody>
+          </table>
+        </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <article class="article-body">
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="choose"><a href="#choose" class="heading-anchor">Which one fits</a></h2>
+
+        <p><strong>Choose OpenSpec</strong> if you mostly change existing code and want something light. Its change folders are easy to review, and archiving each change into a living spec per area means the specs describe the system as it is now, not as it was planned. That's an idea we plan to borrow.</p>
+
+        <p><strong>Choose Spec Kit</strong> if you want a thorough, well-documented process that works with whichever coding agent each developer prefers. Its constitution, checklists and cross-artifact analysis catch a lot before implementation starts, and its extensions cover bug fixing and idea assessment.</p>
+
+        <p><strong>Choose Jig</strong> if you're a team where:</p>
+        <ul>
+          <li>product, design or other stakeholders need to read the requirements and sign off;</li>
+          <li>work is tracked in Linear, Jira or GitHub Issues;</li>
+          <li>several agents build in parallel and you want every task checked against the spec;</li>
+          <li>you want review, pull request responses and a postmortem that improves the next run, in the same pipeline.</li>
+        </ul>
+
+      </div>
+
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="honest"><a href="#honest" class="heading-anchor">Where Jig is behind</a></h2>
+
+        <ul>
+          <li><strong>Agent support.</strong> Jig is built for Claude Code. Gemini CLI and Codex have adapters, but the live PRD page needs Claude. Spec Kit and OpenSpec support far more agents.</li>
+          <li><strong>Living specs.</strong> OpenSpec keeps per-area specs current as changes land. Jig keeps each PRD current while its work moves, but doesn't yet merge shipped specs into a per-area record.</li>
+          <li><strong>Weight.</strong> A full Jig pipeline is more process than a quick fix needs. Work type sets the depth (a bug skips the PRD and gets a lighter review), but OpenSpec is lighter still.</li>
+          <li><strong>Community.</strong> OpenSpec and Spec Kit have tens of thousands of users and many contributors. Jig is newer and smaller.</li>
+        </ul>
+
+        <p class="checked-note">Checked on October 10, 2026 against each project's own repository and documentation: <a href="https://github.com/Fission-AI/OpenSpec">OpenSpec</a> v1.14.1, <a href="https://github.com/github/spec-kit">Spec Kit</a> v1.1.3 and its <a href="https://github.github.com/spec-kit/">docs</a>. Both projects move quickly.</p>
+
+        <p><a href="jig-2-0.html" class="more-link">&larr; Read the Jig 2.0 story</a></p>
+
+      </div>
+
+    </article>
+  </div>
+
+  <!-- ── CTA ────────────────────────────────────────────── -->
+  <div class="container">
+    <div class="article-cta fade-in">
+      <p class="cta-text">Jig is the AI engineering workflow framework for teams.<br>Full lifecycle. Quality gates at every stage. Open source.</p>
+      <div class="cta-links">
+        <a href="https://github.com/duronext/jig" class="cta-link">GitHub</a>
+        <span style="color: var(--text-tertiary); opacity: .3;" aria-hidden="true">/</span>
+        <a href="./" class="cta-link">Homepage</a>
+        <span style="color: var(--text-tertiary); opacity: .3;" aria-hidden="true">/</span>
+        <a href="./#start" class="cta-link">Get Started</a>
+      </div>
+    </div>
+  </div>
+
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────── -->
+  <footer class="container">
+    <div class="footer">
+      <div class="footer-text">
+        <a href="https://github.com/duronext/jig">Jig</a> &middot; MIT License &middot; WCAG 2.1 AA &middot; Built by the <a href="https://www.duro.us">Duro</a> engineering team
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Scroll Animations ──────────────────────────────── -->
+  <script>
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { rootMargin: '-60px' }
+    );
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

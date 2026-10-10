@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Human-Speed Steps — Jig</title>
+  <meta name="description" content="Jig 2.0 brings product requirements, sign-off and delivery into one loop: a live PRD the whole team and the pipeline keep current.">
+  <meta name="theme-color" content="#08080d">
+  <meta property="og:title" content="The Human-Speed Steps">
+  <meta property="og:description" content="Jig 2.0: a live PRD that product, engineering and the pipeline keep current, from sign-off to ship.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://duronext.github.io/jig/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://duronext.github.io/jig/og-image.png">
+  <meta name="author" content="Dustin Diaz">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 width=%2264%22 height=%2264%22%3E %3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2308080d%22/%3E %3Cg transform=%22translate(6.4 6.4) scale(.8)%22%3E %3Cpath d=%22M9 27V14a5 5 0 0 1 5-5h13%22 fill=%22none%22 stroke=%22%23ececf4%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E %3Cpath d=%22M55 37v13a5 5 0 0 1-5 5H37%22 fill=%22none%22 stroke=%22%23ececf4%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E %3Crect x=%2220%22 y=%2220%22 width=%2224%22 height=%2224%22 rx=%223.5%22 fill=%22%23818cf8%22/%3E %3C/g%3E %3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { scroll-behavior: smooth; overflow-x: hidden; }
+
+    /* ── Custom Properties ─────────────────────────────────── */
+    :root {
+      --bg: #08080d;
+      --text-primary: #e4e4ed;
+      --text-secondary: #8888a0;
+      --text-tertiary: #555570;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-rgb: 99, 102, 241;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', Menlo, monospace;
+      --max-width: 680px;
+    }
+
+    /* ── Base ──────────────────────────────────────────────── */
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(circle at 1px 1px, hsla(0,0%,100%,.015) 1px, transparent 0);
+      background-size: 32px 32px;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+
+    ::selection {
+      background: rgba(99,102,241, .3);
+      color: #fff;
+    }
+
+    /* ── Layout ────────────────────────────────────────────── */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .site-header {
+      padding: 2rem 0;
+    }
+    .back-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      border-bottom: none;
+      letter-spacing: 0.04em;
+      transition: color 0.3s ease;
+    }
+    .back-link:hover {
+      color: var(--accent);
+      border-bottom: none;
+    }
+
+    /* ── Article Header ────────────────────────────────────── */
+    .article-header {
+      padding: 4rem 0 3rem;
+    }
+    .article-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: rgba(99,102,241, .5);
+      margin-bottom: 2rem;
+    }
+    .article-title {
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      text-shadow:
+        0 0 60px rgba(99,102,241, .15),
+        0 0 120px rgba(99,102,241, .05);
+    }
+    .article-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .article-meta {
+      margin-top: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(99,102,241, .15);
+      object-fit: cover;
+      filter: grayscale(30%);
+      opacity: .85;
+    }
+    .meta-text {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+    .meta-text strong {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* ── Article Body ──────────────────────────────────────── */
+    .article-body {
+      padding-bottom: 4rem;
+    }
+    .article-body p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.85;
+      margin-bottom: 1.5rem;
+    }
+    .article-body p em {
+      color: var(--text-primary);
+      font-style: italic;
+    }
+    .article-body p strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .article-body p code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      opacity: .8;
+    }
+
+    /* ── Links ─────────────────────────────────────────────── */
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(99,102,241, .15);
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    a:hover {
+      color: var(--accent-hover);
+      border-bottom-color: rgba(99,102,241, .4);
+    }
+
+    /* ── Section Headers ───────────────────────────────────── */
+    .section-break {
+      height: 1px;
+      border: none;
+      background: linear-gradient(90deg, rgba(99,102,241, .25), transparent 70%);
+      margin: 3.5rem 0;
+    }
+    .article-body h2,
+    .sources-label {
+      position: relative;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      line-height: 1.35;
+    }
+    a.heading-anchor {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: none;
+    }
+    a.heading-anchor:hover {
+      color: inherit;
+      border-bottom: none;
+    }
+    a.heading-anchor::before {
+      content: '#';
+      position: absolute;
+      right: 100%;
+      padding-right: 0.5rem;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      font-weight: 400;
+    }
+    .article-body h2:hover a.heading-anchor::before,
+    .sources-label:hover a.heading-anchor::before {
+      opacity: 0.4;
+    }
+
+    /* ── Pull Quotes ───────────────────────────────────────── */
+    .pull-quote {
+      border-left: 2px solid rgba(99,102,241, .4);
+      padding: 1.25rem 0 1.25rem 1.5rem;
+      margin: 2rem 0 2.5rem;
+      background: rgba(99,102,241, .03);
+      border-radius: 0 6px 6px 0;
+    }
+    .pull-quote p {
+      font-size: 0.95rem !important;
+      color: var(--text-primary) !important;
+      font-weight: 400;
+      line-height: 1.75 !important;
+      margin-bottom: 0 !important;
+    }
+    .pull-quote .pull-source {
+      font-size: 0.75rem !important;
+      color: var(--text-tertiary) !important;
+      margin-top: 0.75rem !important;
+      font-family: var(--font-mono);
+    }
+
+    /* ── Stat Callout ──────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin: 2rem 0 2.5rem;
+    }
+    .stat-card {
+      padding: 1.25rem;
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, .3);
+      text-align: center;
+    }
+    .stat-number {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+
+    /* ── Emphasis Card ─────────────────────────────────────── */
+    .emphasis-card {
+      padding: 1.5rem 1.75rem;
+      margin: 2rem 0 2.5rem;
+      background: rgba(99,102,241, .04);
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      box-shadow: 0 0 32px rgba(99,102,241, .03);
+    }
+    .emphasis-card p {
+      font-size: 1.05rem !important;
+      color: var(--text-primary) !important;
+      font-weight: 400;
+      line-height: 1.8 !important;
+      margin-bottom: 0 !important;
+    }
+
+    /* ── Postscript ────────────────────────────────────────── */
+    .postscript {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      font-style: italic;
+      border-top: 1px solid rgba(99,102,241, .1);
+      padding-top: 2rem;
+      margin-top: 1rem;
+      line-height: 1.75;
+    }
+    .postscript strong {
+      font-style: normal;
+      color: var(--text-secondary);
+    }
+
+    /* ── Sources ───────────────────────────────────────────── */
+    .sources {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(99,102,241, .08);
+    }
+    .sources-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-tertiary);
+      margin-bottom: 1rem;
+    }
+    .sources ol {
+      padding-left: 1.25rem;
+    }
+    .sources li {
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      line-height: 1.7;
+      margin-bottom: 0.25rem;
+    }
+    .sources li a {
+      color: rgba(99,102,241, .55);
+      border-bottom-color: rgba(99,102,241, .15);
+    }
+    .sources li a:hover {
+      color: var(--accent);
+    }
+
+    /* ── CTA ───────────────────────────────────────────────── */
+    .article-cta {
+      text-align: center;
+      padding: 4rem 0 2rem;
+    }
+    .cta-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+    .cta-links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      align-items: center;
+    }
+    .cta-link {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    .footer {
+      padding: 3rem 0 4rem;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      opacity: .6;
+    }
+    .footer-text a {
+      color: var(--text-tertiary);
+      border-bottom-color: rgba(255, 255, 255, .08);
+    }
+    .footer-text a:hover { color: var(--accent); }
+
+    /* ── Skip Link ─────────────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      z-index: 100;
+      padding: 0.75rem 1.25rem;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      border-radius: 4px;
+      border-bottom: none;
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      top: 1rem;
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Focus Styles ──────────────────────────────────────── */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* ── Animations ────────────────────────────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity 0.7s cubic-bezier(.25, .1, .25, 1),
+        transform 0.7s cubic-bezier(.25, .1, .25, 1);
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .article-header .fade-in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── Schematic ─────────────────────────────────────────── */
+    .schematic {
+      position: absolute;
+      top: -6rem;
+      right: -10rem;
+      width: 800px;
+      height: 740px;
+      pointer-events: none;
+      z-index: 0;
+      -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+      mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, rgba(0,0,0,1) 0%, transparent 65%);
+    }
+    .schematic svg { width: 100%; height: 100%; }
+    .article-header {
+      position: relative;
+      overflow: hidden;
+    }
+    .article-header .fade-in {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .container { padding: 0 1.5rem; }
+      .article-header { padding: 2.5rem 0 2rem; }
+      .schematic, .schematic-bottom { display: none; }
+      .stat-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-align: left;
+      }
+      .stat-number { margin-bottom: 0; }
+    }
+
+
+    /* ── Lists ─────────────────────────────────────────────── */
+    .article-body ul {
+      margin: 0 0 1.5rem 1.25rem;
+    }
+    .article-body ul li {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 0.4rem;
+    }
+    .article-body ul li code,
+    .article-body td code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      opacity: .8;
+    }
+
+    /* ── Pipeline plate ────────────────────────────────────── */
+    .pipeline-plate {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      background: rgba(0, 0, 0, .35);
+      border: 1px solid rgba(99,102,241, .12);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 0 0 2rem;
+      line-height: 2;
+      overflow-wrap: anywhere;
+    }
+    .pipeline-plate .new { color: var(--accent-hover); font-weight: 600; }
+    .pipeline-plate .sep { color: var(--text-tertiary); padding: 0 .35rem; }
+
+    /* ── Tables ────────────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0 0 2rem;
+      border: 1px solid rgba(99,102,241, .1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, .3);
+    }
+    .table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+    .table-wrap caption {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-tertiary);
+      padding: 0.9rem 1rem 0.25rem;
+    }
+    .table-wrap th,
+    .table-wrap td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.7rem 1rem;
+      border-top: 1px solid rgba(99,102,241, .08);
+    }
+    .table-wrap thead th {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      border-top: none;
+    }
+    .table-wrap tbody th {
+      color: var(--text-primary);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .table-wrap td { color: var(--text-secondary); }
+    .table-wrap .jig { background: rgba(99,102,241, .05); color: var(--text-primary); }
+    .table-wrap thead .jig { color: var(--accent-hover); }
+    .table-wrap .none { color: var(--text-tertiary); }
+
+    .more-link {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+    .checked-note {
+      font-size: 0.78rem !important;
+      color: var(--text-tertiary) !important;
+    }
+
+    /* ── Wide layout (comparison page) ─────────────────────── */
+    .container.wide { max-width: 960px; }
+
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <div class="container">
+    <header class="site-header">
+      <a href="./" class="back-link"><span aria-hidden="true">&larr;</span> Jig</a>
+    </header>
+  </div>
+
+  <main id="main-content">
+
+  <!-- ── Article Header ─────────────────────────────────── -->
+  <div class="container">
+    <div class="article-header">
+      <div class="schematic" aria-hidden="true">
+        <svg viewBox="0 0 520 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+              <path d="M0,0 L6,2 L0,4" fill="none" stroke="rgba(99,102,241,0.55)" stroke-width=".75"/>
+            </marker>
+            <marker id="arr-r" markerWidth="6" markerHeight="4" refX="1" refY="2" orient="auto-start-reverse">
+              <path d="M6,0 L0,2 L6,4" fill="none" stroke="rgba(99,102,241,0.55)" stroke-width=".75"/>
+            </marker>
+          </defs>
+          <rect x="80" y="70" width="340" height="300" rx="6" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <line x1="40" y1="220" x2="460" y2="220" stroke="rgba(99,102,241,0.25)" stroke-width=".5" stroke-dasharray="16 4 4 4"/>
+          <line x1="250" y1="30" x2="250" y2="410" stroke="rgba(99,102,241,0.25)" stroke-width=".5" stroke-dasharray="16 4 4 4"/>
+          <rect x="130" y="110" width="220" height="220" rx="2" stroke="rgba(99,102,241,0.29)" stroke-width=".75" stroke-dasharray="8 4"/>
+          <circle cx="140" cy="120" r="7" stroke="rgba(99,102,241,0.49)" stroke-width=".75"/>
+          <circle cx="140" cy="120" r="2.5" stroke="rgba(99,102,241,0.39)" stroke-width=".5"/>
+          <line x1="128" y1="120" x2="152" y2="120" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="140" y1="108" x2="140" y2="132" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <circle cx="340" cy="120" r="7" stroke="rgba(99,102,241,0.49)" stroke-width=".75"/>
+          <circle cx="340" cy="120" r="2.5" stroke="rgba(99,102,241,0.39)" stroke-width=".5"/>
+          <line x1="328" y1="120" x2="352" y2="120" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="340" y1="108" x2="340" y2="132" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <circle cx="140" cy="320" r="7" stroke="rgba(99,102,241,0.49)" stroke-width=".75"/>
+          <circle cx="140" cy="320" r="2.5" stroke="rgba(99,102,241,0.39)" stroke-width=".5"/>
+          <line x1="128" y1="320" x2="152" y2="320" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="140" y1="308" x2="140" y2="332" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <path d="M320,300 L350,300 L350,340 L320,340 Z" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <path d="M335,300 L335,285 M330,285 L340,285" stroke="rgba(99,102,241,0.35)" stroke-width=".75"/>
+          <circle cx="335" cy="320" r="4" stroke="rgba(99,102,241,0.35)" stroke-width=".5"/>
+          <circle cx="210" cy="190" r="10" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <circle cx="210" cy="190" r="4" stroke="rgba(99,102,241,0.29)" stroke-width=".5"/>
+          <line x1="195" y1="190" x2="225" y2="190" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <line x1="210" y1="175" x2="210" y2="205" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <circle cx="290" cy="250" r="10" stroke="rgba(99,102,241,0.39)" stroke-width=".75"/>
+          <circle cx="290" cy="250" r="4" stroke="rgba(99,102,241,0.29)" stroke-width=".5"/>
+          <line x1="275" y1="250" x2="305" y2="250" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <line x1="290" y1="235" x2="290" y2="265" stroke="rgba(99,102,241,0.20)" stroke-width=".4" stroke-dasharray="16 4 4 4"/>
+          <line x1="80" y1="48" x2="420" y2="48" stroke="rgba(99,102,241,0.35)" stroke-width=".5" marker-start="url(#arr-r)" marker-end="url(#arr)"/>
+          <line x1="80" y1="56" x2="80" y2="68" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="420" y1="56" x2="420" y2="68" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <text x="250" y="44" text-anchor="middle" font-family="var(--font-mono)" font-size="7" fill="rgba(99,102,241,0.49)">340.00</text>
+          <line x1="445" y1="70" x2="445" y2="370" stroke="rgba(99,102,241,0.35)" stroke-width=".5" marker-start="url(#arr-r)" marker-end="url(#arr)"/>
+          <line x1="422" y1="70" x2="438" y2="70" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <line x1="422" y1="370" x2="438" y2="370" stroke="rgba(99,102,241,0.25)" stroke-width=".4"/>
+          <text x="455" y="224" font-family="var(--font-mono)" font-size="7" fill="rgba(99,102,241,0.49)" transform="rotate(90 455 224)">300.00</text>
+          <circle cx="210" cy="190" r="22" stroke="rgba(99,102,241,0.29)" stroke-width=".5" stroke-dasharray="3 2"/>
+          <line x1="226" y1="174" x2="265" y2="148" stroke="rgba(99,102,241,0.29)" stroke-width=".5"/>
+          <circle cx="275" cy="140" r="11" stroke="rgba(99,102,241,0.35)" stroke-width=".5"/>
+          <text x="275" y="143" text-anchor="middle" font-family="var(--font-mono)" font-size="8" fill="rgba(99,102,241,0.49)">A</text>
+          <polyline points="80,78 88,78 88,70" stroke="rgba(99,102,241,0.29)" stroke-width=".5" fill="none"/>
+          <polyline points="412,370 412,362 420,362" stroke="rgba(99,102,241,0.29)" stroke-width=".5" fill="none"/>
+          <g stroke="rgba(99,102,241,0.20)" stroke-width=".3">
+            <line x1="322" y1="302" x2="328" y2="308"/><line x1="326" y1="302" x2="332" y2="308"/>
+            <line x1="330" y1="302" x2="336" y2="308"/><line x1="334" y1="302" x2="340" y2="308"/>
+            <line x1="338" y1="302" x2="344" y2="308"/><line x1="342" y1="302" x2="348" y2="308"/>
+          </g>
+          <rect x="370" y="395" width="110" height="50" rx="1" stroke="rgba(99,102,241,0.25)" stroke-width=".5"/>
+          <line x1="370" y1="412" x2="480" y2="412" stroke="rgba(99,102,241,0.20)" stroke-width=".4"/>
+          <line x1="370" y1="428" x2="480" y2="428" stroke="rgba(99,102,241,0.20)" stroke-width=".4"/>
+          <text x="425" y="408" text-anchor="middle" font-family="var(--font-mono)" font-size="5.5" fill="rgba(99,102,241,0.35)">JIG-002 REV A</text>
+          <text x="425" y="423" text-anchor="middle" font-family="var(--font-mono)" font-size="4.5" fill="rgba(99,102,241,0.25)">LIVE PRD ASSY</text>
+          <text x="425" y="440" text-anchor="middle" font-family="var(--font-mono)" font-size="4" fill="rgba(99,102,241,0.20)">SCALE 1:1</text>
+        </svg>
+      </div>
+      <div class="fade-in">
+        <div class="article-label">Jig 2.0</div>
+        <h1 class="article-title">The Human-Speed Steps</h1>
+        <p class="article-subtitle">Jig 2.0 brings product requirements, sign-off and delivery into one loop</p>
+        <div class="article-meta">
+          <img src="avatars/dustin.jpg" alt="Dustin Diaz" class="author-avatar">
+          <div class="meta-text">
+            <strong>Dustin Diaz</strong><br>
+            October 2026 &middot; 10 min read
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <hr class="section-break">
+  </div>
+
+  <!-- ── Article Body ───────────────────────────────────── -->
+  <div class="container">
+    <article class="article-body">
+
+      <div class="fade-in">
+        <p>In March I wrote that <a href="ship-fast-break-nothing.html">the spec is the product</a>. Precise input, precise output, across as many agents as you care to run. I still believe that. But it left people out.</p>
+
+        <p>Jig 1.x had a skill called <code>prd</code>. It wrote API contracts, data models, UI states and an acceptance checklist tagged by layer. Our spec reviewer checked every task against it, and it worked. Then the feedback came in, and it was fair: that &ldquo;PRD&rdquo; was a technical spec with a product name on it. Nobody in product, design or support could read it, and nothing in Jig was written for them.</p>
+
+        <p>The agents had a contract. The people deciding what to build had nothing.</p>
+
+        <p>Jig 2.0 fixes that. This is the story of why, what we built, and how Jig compares to the other spec-driven tools you might be weighing.</p>
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="handoff"><a href="#handoff" class="heading-anchor">Where the handoff breaks</a></h2>
+
+        <p>Here's how a feature used to move through our team.</p>
+
+        <p>An idea starts in a Slack thread. Someone writes it up in a Google Doc, and comments pile up in the margins. Engineering copies the parts they need into a markdown file in the repo, because that's where the agents can read it. A cleaner version lands in Confluence for the people who weren't in the thread. Sign-off happens back in Slack, as a thumbs-up on a message nobody can find three weeks later.</p>
+
+        <p>Now there are four copies of the requirements, and none of them is the source of truth. The Google Doc has the latest decision. The markdown file has what the agents built against. Confluence has what leadership thinks we're building. Slack has the reasoning, buried.</p>
+
+        <p>That's the handoff: the moment product intent turns into an engineering contract. It's where things went sideways for us. The code was rarely the problem. A decision that changed in one place and not the others usually was.</p>
+
+        <p>Agents make this worse in a specific way. A person reading a stale doc will often notice something is off and ask. An agent reads whatever file it's given and builds it, confidently, five times in parallel.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="why-claude"><a href="#why-claude" class="heading-anchor">Why we leaned into Claude</a></h2>
+
+        <p>We'd already gone all in on Claude Code for engineering. Skills, subagents, plugins and worktrees gave us the parts to build a real pipeline instead of a pile of prompts, and Jig runs on them.</p>
+
+        <p>The missing piece was the rest of the team. Product managers, designers and stakeholders don't live in a terminal, but more and more of them were already working in Claude: drafting docs, thinking through problems, sharing what they made. Claude artifacts gave us what we didn't have: a real web page the whole team can open, that Claude can write to, and that keeps its own shared data.</p>
+
+        <p>That last part is what mattered. An artifact can hold records that people change from the page and that Claude Code changes from a session. So the PRD doesn't have to be one more copy. It can be <em>the</em> place.</p>
+
+        <p>It also means a product manager can write a PRD without touching the repo. <code>/jig:prd</code> works in Claude.ai and the desktop app as well as Claude Code. Looking at the code is optional, but recommended: it's how the PRD learns what a change really touches.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="bottleneck"><a href="#bottleneck" class="heading-anchor">Build stopped being the slow part</a></h2>
+
+        <p>A few weeks before we shipped, Anthropic published <a href="https://claude.com/resources/articles/the-ai-native-sdlc-playbook">The AI-Native SDLC Playbook</a>. One line in it could be the thesis for Jig 2.0:</p>
+
+        <div class="pull-quote">
+          <p>&ldquo;Build is no longer the constraint — the human-speed steps around it are.&rdquo;</p>
+          <p class="pull-source">— Louis Claxton, The AI-Native SDLC Playbook, Anthropic</p>
+        </div>
+
+        <p>That matches what we saw. Agents took features from weeks to hours. What stayed slow was human: agreeing on what to build, getting the right people to say yes, and knowing where things actually stand. A faster model doesn't help with any of that. A better loop does.</p>
+
+        <p>The playbook's answer is a loop where each stage ends by writing a file the next stage reads, with people approving at defined gates. Jig already had the engineering half of that loop. 2.0 adds the half that starts before the first line of code.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="three-documents"><a href="#three-documents" class="heading-anchor">Three documents, three readers</a></h2>
+
+        <div class="pipeline-plate" role="img" aria-label="The Jig 2.0 pipeline: discover, PRD, spec, plan, build, review, PRD check, ship, learn">
+          DISCOVER<span class="sep">&rarr;</span><span class="new">PRD</span><span class="sep">&rarr;</span>SPEC<span class="sep">&rarr;</span>PLAN<span class="sep">&rarr;</span>BUILD<span class="sep">&rarr;</span>REVIEW<span class="sep">&rarr;</span><span class="new">PRD CHECK</span><span class="sep">&rarr;</span>SHIP<span class="sep">&rarr;</span>LEARN
+        </div>
+
+        <p><strong>The PRD is for everyone.</strong> Plain language, no code. One sentence that says what this is for. The people who feel the problem and the moments they'll see. Rules written as behaviours, each with &ldquo;you'll know it works when.&rdquo; Phases with an MVP cut line. Milestones, open decisions with owners and dates, and who signs off. When a rule needs steps, it gets plain-language pseudo steps, never real code.</p>
+
+        <p><strong>The spec is for engineers.</strong> This is the old <code>prd</code>, renamed and kept in substance: the API, the data, the rules and the UI, with an acceptance checklist tagged by layer. Engineering writes it straight from the PRD link, and every checklist item points back to the PRD outcome it serves.</p>
+
+        <p><strong>The plan is for agents.</strong> Small, test-first tasks with exact file paths and a dependency graph, so <code>build</code> knows what can run in parallel.</p>
+
+        <p>Each one traces to the one before it. A PRD outcome like <code>MVP.2</code> becomes spec items, spec items become tasks, and every task is checked against the spec. When someone asks why a task exists, the answer is a link.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="live-prd"><a href="#live-prd" class="heading-anchor">A PRD that stays current</a></h2>
+
+        <p>This is the part I'm most excited about.</p>
+
+        <p>A Jig PRD publishes as a live page. It looks like an engineering drawing: a drafting-paper grid, indigo for the work, a pink &ldquo;markup pen&rdquo; for what changed and what's still open, dashed lines for things outside our control, and a title block for sign-off at the bottom. (A jig is a manufacturing tool. We leaned in.)</p>
+
+        <p>People work on the page directly:</p>
+        <ul>
+          <li>Tick milestones as they land.</li>
+          <li>Choose an option on an open decision, with the reasoning saved next to it.</li>
+          <li>Sign off on the current revision. A new revision asks again.</li>
+          <li>Leave a note in the log.</li>
+        </ul>
+
+        <p>And Jig writes to the same page from Claude Code as the work moves:</p>
+        <ul>
+          <li><code>spec</code> opens decisions it finds in the code that the PRD didn't settle.</li>
+          <li><code>build</code> ticks milestones as their tasks pass review.</li>
+          <li>The PRD check fills in the trace: each promised outcome, and how someone watched it work.</li>
+          <li><code>finish</code> logs the pull request.</li>
+        </ul>
+
+        <p>So when someone asks &ldquo;where are we on this?&rdquo; the answer is a link. Product sees the build move. Engineering gets decisions made without a meeting. Nobody reconciles four copies, because there's one.</p>
+
+        <div class="emphasis-card">
+          <p><strong>See one.</strong> <a href="https://claude.ai/artifact/52j9jNSqtNX92ZKK9axr7E">Here's a live example</a> built with the Jig kit, for a made-up feature called self-healing invoices. It's read-only for you; on your team's own page, the same buttons save for everyone. Sign in to Claude to see its live state.</p>
+        </div>
+
+        <p>Two details I care about. When two people change the same thing at once, the page refuses the second write and asks that person to look again, instead of quietly overwriting. And sign-off is honest about its limits: it records the account that pressed the button, so a wrong sign-off is visible, but today it can't prevent one. That's written down in the <a href="https://github.com/duronext/jig/blob/main/docs/releases/2.0.md">release notes</a>, along with everything else we traded off to ship.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="prd-check"><a href="#prd-check" class="heading-anchor">A new gate before shipping</a></h2>
+
+        <p>The spec reviewer asks: did we build what the spec says? That's necessary, and it isn't enough. You can pass every acceptance criterion and still ship something a person can't use.</p>
+
+        <p>So 2.0 adds a <strong>PRD check</strong> after review. It walks each in-scope outcome from the user's side and asks a different question: can a person now do what the PRD promised? &ldquo;Verified&rdquo; means someone, agent or human, watched it work and wrote down how. The proof goes on the page for anyone to judge.</p>
+
+        <p>Review also gained four specialists for the PRD itself, reading it the way a non-engineer would: <code>plain-language</code>, <code>mvp-cut</code>, <code>testable-outcomes</code> and <code>missing-moments</code>. Same lesson as March: narrow reviewers beat one reviewer that knows everything.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="playbook"><a href="#playbook" class="heading-anchor">How Jig maps to the playbook</a></h2>
+
+        <p>The playbook lays out six stages. Here's where each one lives in Jig.</p>
+
+        <div class="table-wrap" role="region" aria-label="Playbook stages mapped to Jig" tabindex="0">
+          <table>
+            <thead>
+              <tr><th scope="col">Playbook stage</th><th scope="col">What it produces</th><th scope="col" class="jig">In Jig</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Plan</th><td><code>intent.md</code>, reviewed by the product owner</td><td class="jig">Discover, then <code>/jig:prd</code>: a live PRD with sign-off</td></tr>
+              <tr><th scope="row">Design</th><td><code>spec.md</code>, drafted from the intent</td><td class="jig"><code>/jig:spec</code>, reviewed by a spec specialist swarm</td></tr>
+              <tr><th scope="row">Build</th><td><code>plan.md</code> approved before code; parallel sessions</td><td class="jig"><code>/jig:plan</code> and <code>/jig:build</code>: parallel agents in worktrees</td></tr>
+              <tr><th scope="row">Test</th><td>The agent checks its own work; failing test first</td><td class="jig">TDD and verify, plus a quality gate on every task</td></tr>
+              <tr><th scope="row">Deploy</th><td>Review against a policy; humans approve</td><td class="jig">Specialist review, PR responses, PRD check; people merge</td></tr>
+              <tr><th scope="row">Maintain</th><td>Production findings become new intent</td><td class="jig">Postmortem turns review misses into new specialists and skills</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>We agree on most of it. A few places we differ, and one gap worth naming.</p>
+
+        <p><strong>Sign-off stays.</strong> The playbook moves work through committed files &ldquo;rather than tickets and sign-offs.&rdquo; For a small team, that's right. A growing one has stakeholders who will never review a pull request but still need to say yes. Jig keeps sign-off and makes it live and traceable, instead of a thumbs-up in Slack.</p>
+
+        <p><strong>Trackers stay too.</strong> The playbook's advice for Jira is to name one source of truth for each artifact, or link the two. Jig's packs for Linear, Jira and GitHub Issues follow that: the ticket tracks the work, the PRD holds what it's for and names its ticket, and the Linear pack can sync documents into a dedicated project.</p>
+
+        <p><strong>Learning is built in.</strong> The playbook says to treat a repeated mistake as a signal to update <code>CLAUDE.md</code> or add a skill. That's Jig's postmortem, run after every merge.</p>
+
+        <p><strong>The gap is production.</strong> The playbook's Maintain stage watches production and turns incidents into new work. Jig's loop closes at the postmortem, after the merge; it doesn't watch production yet. Keep your monitoring. And most of Jig's gates are skills, and the playbook is right that &ldquo;the skill makes violations rare and the hook makes them close to impossible.&rdquo; If a rule must always hold, back it with a hook.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="dogfood"><a href="#dogfood" class="heading-anchor">Jig built Jig 2.0</a></h2>
+
+        <p>Jig develops itself with itself, and 2.0 was no exception. It shipped as one pull request of 18 commits: the rename, the page kit, the new pipeline stages, the new specialists and the upgrade path for 1.x teams.</p>
+
+        <p>Claude's code reviewer went over it several times. Each round found something real, like a page write that could wipe a note Jig had logged, or a lock that one person's two open tabs would share. We fixed every one. We pushed back once, when it suggested batching page writes, because the page's database can't write several records at once. The page is covered by 29 browser checks that drive it the way a person would, and the 1.x upgrade was run on a real 1.x checkout before we called it done.</p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="compare"><a href="#compare" class="heading-anchor">Jig, OpenSpec and Spec Kit</a></h2>
+
+        <p>If you're looking at spec-driven development, you've probably seen <a href="https://github.com/Fission-AI/OpenSpec">OpenSpec</a> and GitHub's <a href="https://github.com/github/spec-kit">Spec Kit</a>. Both are good, both are open source, and both are far more popular than Jig. They're worth understanding on their own terms, because they answer different questions.</p>
+
+        <div class="table-wrap" role="region" aria-label="Jig, OpenSpec and Spec Kit at a glance" tabindex="0">
+          <table>
+            <thead>
+              <tr><th scope="col"></th><th scope="col">OpenSpec</th><th scope="col">Spec Kit</th><th scope="col" class="jig">Jig</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Built around</th><td>One change at a time</td><td>A feature's spec, plan and tasks</td><td class="jig">A team's whole lifecycle</td></tr>
+              <tr><th scope="row">Written for</th><td>Engineers and their agents</td><td>Engineers and their agents</td><td class="jig">Product, design, engineering and approvers</td></tr>
+              <tr><th scope="row">Sign-off</th><td class="none">Not built in</td><td class="none">Not built in</td><td class="jig">Live PRD with decisions and sign-off</td></tr>
+              <tr><th scope="row">Trackers</th><td class="none">Not built in</td><td>GitHub Issues from tasks</td><td class="jig">Linear, Jira, GitHub Issues</td></tr>
+              <tr><th scope="row">After the code</th><td>Verify, archive</td><td>Analyze, checklists, converge</td><td class="jig">Specialist review, PRD check, PR responses, postmortem</td></tr>
+              <tr><th scope="row">Coding agents</th><td>30+</td><td>38 integrations</td><td class="jig">Claude Code; Gemini and Codex adapters</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>The short version: if you're one developer, or a small team working mostly in one repo, OpenSpec and Spec Kit are both excellent. OpenSpec is light and great for changes to existing code. Spec Kit is thorough and works with almost any coding agent. If you're a team where product signs off, work lives in a tracker, and several agents ship in parallel, that's what Jig is for.</p>
+
+        <p><a href="compare.html" class="more-link">The full comparison &rarr;</a></p>
+
+      </div>
+
+      <hr class="section-break">
+
+      <div class="fade-in">
+
+        <h2 id="trust"><a href="#trust" class="heading-anchor">You scale trust</a></h2>
+
+        <p>In March I wrote that you don't scale speed, you scale trust. Back then, trust meant quality gates between agents. In 2.0 it reaches further, to the people who never open a terminal but still decide what gets built and whether it's ready.</p>
+
+        <p>One place for the requirements. One place to say yes. A pipeline that writes back to it as the work moves. That's the loop.</p>
+
+        <p>Run <code>/jig:init</code> to start. On 1.x already? Run it and choose <strong>Upgrade to 2.0</strong>.</p>
+
+      </div>
+
+      <div class="postscript">
+        <p><strong>p.s.</strong> The playbook closes with &ldquo;The loop keeps running. Human judgement stays above it.&rdquo; That's the best one-line description of Jig 2.0 I've read, and we didn't write it.</p>
+      </div>
+
+      <!-- ── Sources ─────────────────────────────────────── -->
+      <div class="sources fade-in">
+        <h2 class="sources-label" id="sources"><a href="#sources" class="heading-anchor">Sources</a></h2>
+        <ol>
+          <li><a href="https://claude.com/resources/articles/the-ai-native-sdlc-playbook">The AI-Native SDLC Playbook</a> — Louis Claxton, Anthropic</li>
+          <li><a href="ship-fast-break-nothing.html">Ship Fast, Break Nothing</a> — Jig</li>
+          <li><a href="https://github.com/duronext/jig/blob/main/docs/releases/2.0.md">Jig 2.0 release notes</a> — Jig</li>
+          <li><a href="https://github.com/Fission-AI/OpenSpec">OpenSpec</a> — Fission AI</li>
+          <li><a href="https://github.com/github/spec-kit">Spec Kit</a> and its <a href="https://github.github.com/spec-kit/">documentation</a> — GitHub</li>
+        </ol>
+      </div>
+
+    </article>
+  </div>
+
+  <!-- ── CTA ────────────────────────────────────────────── -->
+  <div class="container">
+    <div class="article-cta fade-in">
+      <p class="cta-text">Jig is the AI engineering workflow framework for teams.<br>Full lifecycle. Quality gates at every stage. Open source.</p>
+      <div class="cta-links">
+        <a href="https://github.com/duronext/jig" class="cta-link">GitHub</a>
+        <span style="color: var(--text-tertiary); opacity: .3;" aria-hidden="true">/</span>
+        <a href="./" class="cta-link">Homepage</a>
+        <span style="color: var(--text-tertiary); opacity: .3;" aria-hidden="true">/</span>
+        <a href="./#start" class="cta-link">Get Started</a>
+      </div>
+    </div>
+  </div>
+
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────── -->
+  <footer class="container">
+    <div class="footer">
+      <div class="footer-text">
+        <a href="https://github.com/duronext/jig">Jig</a> &middot; MIT License &middot; WCAG 2.1 AA &middot; Built by the <a href="https://www.duro.us">Duro</a> engineering team
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Scroll Animations ──────────────────────────────── -->
+  <script>
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { rootMargin: '-60px' }
+    );
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
