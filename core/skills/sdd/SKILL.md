@@ -327,7 +327,7 @@ Final reviewer: All requirements met, cross-task integration clean.
 
 **Called by:**
 - `plan` (execution handoff) -- when user chooses sequential execution
-- `kickoff` during the BUILD stage
+- `kickoff` during the BUILD stage (config key `execute`)
 
 **Terminal state:**
 - **REQUIRED**: Invoke `finish` after all tasks pass final review

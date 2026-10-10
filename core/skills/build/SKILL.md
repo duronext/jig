@@ -168,7 +168,7 @@ If a write is refused, or the PRD cannot be found, carry on and say once, in the
 ## Integration
 
 **Called by:**
-- `kickoff` during the BUILD stage
+- `kickoff` during the BUILD stage (config key `execute`)
 - Users directly via `/jig:build`
 
 **Invokes:**

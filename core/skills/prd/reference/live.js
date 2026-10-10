@@ -222,7 +222,10 @@
   async function logAfter(where, kind, text, ref) {
     try { await addLog(kind, text, ref); }
     catch (e) {
-      if (e && e.code === "unavailable") { try { await addLog(kind, text, ref); return; } catch (e2) { e = e2; } }
+      if (e && e.code === "unavailable") {
+        await new Promise(function (r) { setTimeout(r, 200 + Math.random() * 300); });
+        try { await addLog(kind, text, ref); return; } catch (e2) { e = e2; }
+      }
       say(where, "Saved. The log entry for it did not save" + (e && e.code === "quota_exceeded" ? ": the page's storage is full." : "."));
     }
   }
