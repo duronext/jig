@@ -21,6 +21,12 @@
 
     click($("#ms-m3")); await wait(200);
     var m3 = T.store["milestones/m3"];
+    T.seed("milestones/m5", { done: false, at: "2026-11-30T00:00:00Z", by: null, actor: "jig", note: "Beta report drafted" });
+    await wait(150);
+    click($("#ms-m5"));
+    setTimeout(function () { T.store["milestones/m5"].owner = "set-by-jig-mid-click"; }, 5);
+    await wait(200);
+    check("a write landing mid-click is kept", T.store["milestones/m5"].done === true && T.store["milestones/m5"].owner === "set-by-jig-mid-click" && T.store["milestones/m5"].note === "Beta report drafted", JSON.stringify(T.store["milestones/m5"]));
     check("reopening keeps Jig's note", m3 && m3.done === false && m3.note === "Tasks 4-9 passed review", JSON.stringify(m3));
 
     click(btnIn($("#dec-d1"), "Choose A")); await wait(200);

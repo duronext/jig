@@ -9,15 +9,21 @@
   function children(path) {
     return Object.keys(store).filter(function (k) { return k.indexOf(path + "/") === 0 && k.slice(path.length + 1).indexOf("/") < 0; }).sort();
   }
-  function snapDoc(path) { var d = store[path]; return { id: path.split("/").pop(), exists: d !== undefined,
+  function snapDoc(path) { var d = clone(store[path]); return { id: path.split("/").pop(), exists: d !== undefined,
     data: function () { return clone(d); }, metadata: { fromCache: false, hasPendingWrites: false } }; }
+  /* Every call takes LAG ms, like a network round trip. Reads capture their
+     snapshot when called; writes apply when they arrive. */
+  var LAG = 10;
+  function later(fn) { return new Promise(function (res, rej) { setTimeout(function () { try { res(fn()); } catch (e) { rej(e); } }, LAG); }); }
   function notify() { listeners.forEach(function (l) { setTimeout(l, 0); }); }
   function maybeFail(op) { if (failNext[op]) { var c = failNext[op]; delete failNext[op]; var e = new Error(c); e.code = c; throw e; } }
   function docRef(path) {
     return { id: path.split("/").pop(), path: path,
-      get: async function () { return snapDoc(path); },
-      set: async function (d) { maybeFail("set:" + path.split("/")[0]); store[path] = clone(d); notify(); },
-      update: async function (d) { var c = store[path] || {}; Object.keys(d).forEach(function (k) { c[k] = d[k]; }); store[path] = clone(c); notify(); },
+      get: function () { var snap = snapDoc(path); return later(function () { return snap; }); },
+      set: function (d) { d = clone(d); return later(function () { maybeFail("set:" + path.split("/")[0]); store[path] = d; notify(); }); },
+      update: function (d) { d = clone(d); return later(function () { maybeFail("update:" + path.split("/")[0]);
+        if (store[path] === undefined) { var e = new Error("missing"); e.code = "invalid_argument"; throw e; }
+        var c = clone(store[path]); Object.keys(d).forEach(function (k) { c[k] = d[k]; }); store[path] = c; notify(); }); },
       delete: async function () { delete store[path]; notify(); },
       onSnapshot: function (next) { var l = function () { next(snapDoc(path)); }; listeners.push(l); setTimeout(l, 0); return function () {}; } };
   }
@@ -36,7 +42,7 @@
       get: async function () { return run(); },
       onSnapshot: function (next) { var l = function () { next(run()); }; listeners.push(l); setTimeout(l, 0); return function () {}; },
       doc: function (id) { return docRef(path + "/" + (id || "auto" + (++seq))); },
-      add: async function (d) { maybeFail("add:" + path); var r = docRef(path + "/auto" + (++seq)); store[r.path] = clone(d); notify(); return r; } };
+      add: function (d) { d = clone(d); return later(function () { maybeFail("add:" + path); var r = docRef(path + "/auto" + (++seq)); store[r.path] = d; notify(); return r; }); } };
   }
   var db = { doc: docRef, collection: function (p) { return query(p); } };
   var user = {

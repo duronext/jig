@@ -423,6 +423,7 @@
     {
       id: 'spec',
       label: 'Spec',
+      audio: null, // the 1.x recording for this slot narrates the old PRD; re-record
       duration: 16000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
@@ -447,6 +448,7 @@
     },
     {
       id: 'plan',
+      audio: 4,
       label: 'Plan',
       duration: 14000,
       layout: 'single',
@@ -476,6 +478,7 @@
     },
     {
       id: 'execute',
+      audio: 5,
       label: 'Build',
       duration: 26000,
       layout: 'split',
@@ -546,6 +549,7 @@
     },
     {
       id: 'review',
+      audio: 6,
       label: 'Review',
       duration: 13000,
       layout: 'single',
@@ -574,6 +578,7 @@
     },
     {
       id: 'ship',
+      audio: 7,
       label: 'Ship',
       duration: 14500,
       layout: 'single',
@@ -603,6 +608,7 @@
     },
     {
       id: 'learn',
+      audio: 8,
       label: 'Learn',
       duration: 10500,
       layout: 'single',

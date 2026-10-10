@@ -135,9 +135,11 @@ a non-engineer can read. Name commits and PRs; never paste diffs or code.
   person's state is wrong, write a `log` entry saying so and leave the state.
 - **One fact per entry.** A log line is something a reader would want to know
   happened. Batch a run of task completions into one `build` entry.
-- **Merge, never replace.** Read the document and write it back with your
-  fields changed, so fields another writer added survive (Jig's `note` on a
-  milestone, a decision's `question`). The page does the same.
+- **Merge, never replace.** Change only your own fields so fields another
+  writer added survive (Jig's `note` on a milestone, a decision's
+  `question`). Jig uses `ArtifactData` `update` pinned with `if_version`; the
+  page uses the database's server-side `update()`, falling back to `set()`
+  only for a document that does not exist yet.
 - **Batch writes.** When Jig ticks a milestone and logs it, send both in one
   `ArtifactData` `batch`. The page cannot batch (its database has no
   multi-document writes), so it writes the change first and the log entry

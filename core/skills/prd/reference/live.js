@@ -226,13 +226,14 @@
       say(where, "Saved. The log entry for it did not save" + (e && e.code === "quota_exceeded" ? ": the page's storage is full." : "."));
     }
   }
-  /* Read, change, write the whole document, so fields another writer added
-     (Jig's note on a milestone, a decision's question) survive a person's click. */
+  /* Merge fields on the server with update(), so a field another writer set
+     (Jig's note on a milestone, a decision's question) survives a person's
+     click even if it lands at the same moment. update() needs the document
+     to exist; the first write to a new document uses set(). */
   async function merge(path, patch) {
-    var ref = db.doc(path), cur = await ref.get();
-    var body = cur.exists ? JSON.parse(JSON.stringify(cur.data())) : {};
-    Object.keys(patch).forEach(function (k) { body[k] = patch[k]; });
-    await ref.set(body);
+    var ref = db.doc(path);
+    try { await ref.update(patch); }
+    catch (e) { if (e && e.code === "invalid_argument" && !(await ref.get()).exists) await ref.set(patch); else throw e; }
   }
   async function guarded(key, where, fn) {
     if (busy[key] || mode !== "live") { render(); return; }
