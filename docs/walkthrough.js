@@ -399,9 +399,9 @@
     {
       id: 'prd',
       label: 'PRD',
-      duration: 9000,
+      duration: 11500,
       layout: 'single',
-      audio: 'prd', // docs/audio/voiceover-prd.mp3, script in docs/audio/SCRIPTS.md; silent until recorded
+      audio: 'prd.m4a', // macOS voice for now; see docs/audio/SCRIPTS.md to re-record in the ElevenLabs voice
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
       frames: [
         { t: 0, type: 'line', html: '<span class="wt-prompt">$</span> <span class="wt-cmd">/jig:prd</span>', typing: true },
@@ -423,7 +423,7 @@
     {
       id: 'spec',
       label: 'Spec',
-      audio: 'spec', // docs/audio/voiceover-spec.mp3, script in docs/audio/SCRIPTS.md; silent until recorded
+      audio: 'spec.m4a', // macOS voice for now; see docs/audio/SCRIPTS.md to re-record in the ElevenLabs voice
       duration: 16000,
       layout: 'single',
       tabs: ['\u2217 Claude Code: Jig \u2318\u0031'],
@@ -648,7 +648,8 @@
     voiceovers = SECTIONS.map((s, i) => {
       if (s.audio === null) return null;
       n += 1;
-      const audio = new Audio('audio/voiceover-' + (s.audio || n) + '.mp3');
+      const name = String(s.audio || n);
+      const audio = new Audio('audio/voiceover-' + name + (name.indexOf('.') < 0 ? '.mp3' : ''));
       audio.preload = 'auto';
       audio.addEventListener('error', () => { if (voiceovers[i] === audio) voiceovers[i] = null; });
       return audio;
