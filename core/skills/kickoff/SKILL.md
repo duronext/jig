@@ -241,6 +241,8 @@ Before proceeding, confirm:
 
 ## Step 6b: PRD CHECK (when a PRD exists)
 
+Stage key in `jig.config.md`: `prd-check`. Skip this step if the config's `stages` list leaves it out.
+
 **Gate**: Every in-scope PRD outcome is verified from the user's side, or explicitly deferred.
 
 **INVOKE `jig:prd` using the Skill tool in check mode** ("Check the PRD at `...` against the build"). The spec reviewer already asked "did we build what the spec says"; this asks "can a person now do what the PRD promised". The `prd` skill walks each in-scope outcome's "you'll know it works when" line, records proof or a gap, and fills in the PRD's trace. On a live PRD, it writes the results to the trace and the log.

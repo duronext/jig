@@ -145,6 +145,7 @@ jig/
 | Verify plugin | `cat .claude/settings.json` |
 | Check for stale refs | `grep -rn 'superpowers:' core/` (should return nothing) |
 | Count lines | `find . -not -path './.git/*' -name '*.md' \| xargs wc -l \| tail -1` |
+| Test the PRD page scripts | `bash core/skills/prd/reference/test/run.sh` (needs Chrome) |
 
 ## Code Style
 

@@ -82,7 +82,7 @@ Same skill, four modes. Specialists are tagged with `stage: prd | spec | plan` (
 
 ### 7. PRD Check
 
-Before shipping, walk every in-scope PRD outcome from the user's side. The spec reviewer asked "did we build what the spec says"; the PRD check asks "can a person now do what the PRD promised".
+Stage key in `jig.config.md`: `prd-check`. Before shipping, walk every in-scope PRD outcome from the user's side. The spec reviewer asked "did we build what the spec says"; the PRD check asks "can a person now do what the PRD promised".
 
 - **Skill:** `prd` (check mode)
 - **Output:** Each outcome `verified` with proof, or deferred with a reason; the PRD's trace filled in

@@ -104,3 +104,11 @@ container where each one goes; `live.js` fills it.
 `.sheet section[id]` with its `.sheetno` and eyebrow, and every `[data-sub][id]`
 inside a section as a sub-part. Give sub-parts an `id` and a short `data-sub`
 label. Sections with a `[data-live]` chip get a green dot.
+
+## Testing
+
+`test/run.sh` assembles `template.html`, swaps in a fake `window.claude`
+(`test/fake-claude.js`, an in-memory database), and drives the page in
+headless Chrome with `test/driver.js`. Run it after any change to `live.js`,
+`toc.js` or the template's live containers. Add a check to `driver.js` for
+every new behaviour.

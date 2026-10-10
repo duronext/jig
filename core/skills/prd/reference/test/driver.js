@@ -1,0 +1,80 @@
+/* Drives the assembled page like a person would, then writes PASS/FAIL lines
+   into a results block (id test-results) for run.sh to read. */
+(function () {
+  "use strict";
+  var T = window.__jigTest, results = [], $ = function (s) { return document.querySelector(s); };
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function check(name, ok, detail) { results.push((ok ? "PASS " : "FAIL ") + name + (ok || !detail ? "" : " :: " + detail)); }
+  function logTexts() { return Object.keys(T.store).filter(function (k) { return k.indexOf("log/") === 0; }).map(function (k) { return T.store[k].text; }); }
+  function click(el) { if (!el) return false; el.click(); return true; }
+  function btnIn(root, label) { return Array.prototype.slice.call((root || document).querySelectorAll("button")).filter(function (b) { return b.textContent.trim() === label; })[0]; }
+
+  async function run() {
+    T.seed("milestones/m3", { done: true, at: "2026-11-14T18:02:00Z", by: null, actor: "jig", note: "Tasks 4-9 passed review" });
+    await wait(400);
+    check("goes live with a database", /Live/.test(($("[data-live]") || {}).textContent || ""), ($("[data-live]") || {}).textContent);
+    check("renders Jig's milestone note", /Tasks 4-9 passed review/.test($("#milestones").textContent));
+
+    click($("#ms-m1")); await wait(200);
+    check("ticking saves the milestone", T.store["milestones/m1"] && T.store["milestones/m1"].done === true && T.store["milestones/m1"].by === "u_tester");
+    check("ticking writes a log entry", logTexts().some(function (t) { return /Ticked off: PRD approved/.test(t); }), JSON.stringify(logTexts()));
+
+    click($("#ms-m3")); await wait(200);
+    var m3 = T.store["milestones/m3"];
+    check("reopening keeps Jig's note", m3 && m3.done === false && m3.note === "Tasks 4-9 passed review", JSON.stringify(m3));
+
+    click(btnIn($("#dec-d1"), "Choose A")); await wait(200);
+    check("choosing records the decision", T.store["decisions/d1"] && T.store["decisions/d1"].choice === "A");
+    check("decided card shows who and when", $("#dec-d1").classList.contains("is-decided") && /recorded by/.test($("#dec-d1").textContent));
+
+    click(btnIn($("#dec-d1"), "Reopen")); await wait(200);
+    check("reopening clears the choice", T.store["decisions/d1"].choice === null);
+
+    T.seed("decisions/d9", { question: "Should beta customers get a heads-up email?", options: { A: "Yes, a week before", B: "No" },
+      recommended: "A", owner: "Maya", due: "2026-11-10", source: "spec", choice: null, actor: "jig", by: null, at: "2026-10-12T10:00:00Z" });
+    await wait(200);
+    check("a decision Jig opens appears as a card", !!$("#dec-d9") && /heads-up email/.test($("#dec-d9").textContent));
+    click(btnIn($("#dec-d9"), "Choose B")); await wait(200);
+    check("choosing keeps Jig's question", T.store["decisions/d9"].choice === "B" && /heads-up/.test(T.store["decisions/d9"].question));
+
+    click(btnIn($("#approvers"), "Record sign-off")); await wait(200);
+    check("first sign-off saves for the current rev", T.store["approvals/finance"] && T.store["approvals/finance"].state === "approved" && T.store["approvals/finance"].rev === "C");
+    check("title block counts sign-offs", /1 of 3/.test($("#tb-approved").textContent), $("#tb-approved").textContent);
+    click(btnIn($("#approvers"), "Record sign-off")); await wait(200);
+    click(btnIn($("#approvers"), "Record sign-off")); await wait(200);
+    check("all sign-offs stamp the page approved", /Approved for spec/.test($("#tb-approved").textContent), $("#tb-approved").textContent);
+
+    T.seed("approvals/eng", { state: "approved", rev: "B", at: "2026-10-01T00:00:00Z", by: "u_other" }); await wait(200);
+    check("an old rev's sign-off asks again", /asks again/.test($("#approvers").textContent) && /2 of 3/.test($("#tb-approved").textContent), $("#tb-approved").textContent);
+
+    $("#log-form input").value = "Finance agreed to 1, 3, 7 on the call";
+    $("#log-form").dispatchEvent(new Event("submit", { cancelable: true })); await wait(200);
+    check("a note lands in the log", logTexts().indexOf("Finance agreed to 1, 3, 7 on the call") >= 0);
+    check("the log renders newest first", /Finance agreed/.test(($("#log-items .entry") || {}).textContent || ""));
+
+    T.failNext["add:log"] = "quota_exceeded";
+    click($("#ms-m2")); await wait(200);
+    check("a log-only failure keeps the change", T.store["milestones/m2"] && T.store["milestones/m2"].done === true);
+    check("a log-only failure says the change saved", /^Saved\./.test(($('[data-msg="ms"]') || {}).textContent || ""), ($('[data-msg="ms"]') || {}).textContent);
+
+    T.failNext["set:milestones"] = "unavailable";
+    click($("#ms-m4")); await wait(200);
+    check("a failed change is reported", /didn't save/.test(($('[data-msg="ms"]') || {}).textContent || ""));
+    check("a failed change leaves the box unticked", !$("#ms-m4").checked && !T.store["milestones/m4"]);
+
+    T.seed("trace/MVP.1", { status: "verified", proof: "Paid 22 s after saving a card", actor: "jig", by: null, at: "2026-11-20T00:00:00Z" });
+    await wait(200);
+    check("trace shows verified with proof", /verified/.test($("#trace-rows").textContent) && /22 s/.test($("#trace-rows").textContent));
+    check("unchecked outcomes show no proof", /\u2014/.test($("#trace-rows").textContent));
+
+    T.seed("log/xss", { at: "2026-12-31T00:00:00Z", by: null, actor: "person", kind: "note", text: "<img src=x onerror=window.__pwned=1>" });
+    await wait(200);
+    check("log text is not parsed as HTML", !window.__pwned && !document.querySelector("#log-items img[src='x']"));
+
+    check("contents sidebar lists the live sections", document.querySelectorAll("#toc .livedot").length >= 4);
+
+    var pre = document.createElement("pre"); pre.id = "test-results"; pre.textContent = results.join("\n");
+    document.body.appendChild(pre);
+  }
+  run().catch(function (e) { var pre = document.createElement("pre"); pre.id = "test-results"; pre.textContent = results.concat("FAIL driver crashed :: " + e).join("\n"); document.body.appendChild(pre); });
+})();
