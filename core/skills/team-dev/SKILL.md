@@ -1,7 +1,7 @@
 ---
 name: team-dev
 description: >
-  Execute implementation plans in parallel using agent teams with quality gates.
+  Use when executing an implementation plan in parallel with agent teams and quality gates.
   Spawns implementer teammates in split panes, orchestrated by a team lead who
   enforces spec compliance and code quality reviews.
 tier: workflow
