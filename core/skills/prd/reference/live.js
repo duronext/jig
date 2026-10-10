@@ -244,11 +244,14 @@
      Jig's own writes are pinned with if_version, so they never overwrite
      a person's change either. */
   function conflict(code) { var e = new Error(code); e.code = code; return e; }
+  /* Each open copy of the page holds leases under its own id, so two people,
+     or one person in two tabs, never share a holder. */
+  var SESSION = "s-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
   async function merge(path, patch, seenAt) {
     var ref = db.doc(path);
     if (typeof ref.acquire === "function") {
       var lease = null;
-      try { lease = await ref.acquire({ holder: meId || "page", ttlMs: 5000 }); } catch (e) { lease = null; }
+      try { lease = await ref.acquire({ holder: SESSION, ttlMs: 5000 }); } catch (e) { lease = null; }
       if (lease && !lease.acquired) throw conflict("busy");
     }
     var cur = await ref.get(), curAt = cur.exists ? ((cur.data() || {}).at || null) : null;

@@ -142,7 +142,8 @@ a non-engineer can read. Name commits and PRs; never paste diffs or code.
   only for a document that does not exist yet.
 - **Never overwrite a change you have not seen.** Jig pins every write with
   the `version` it read (`if_version`) and re-reads on a conflict. The page
-  takes a short lease on the record (`acquire`, 5 s) and checks the record's
+  takes a short lease on the record (`acquire`, 5 s, held per open copy of
+  the page) and checks the record's
   `at` still matches what it last showed; if someone else is changing it or
   just changed it, the page says so and writes nothing.
 - **Batch writes.** When Jig ticks a milestone and logs it, send both in one
