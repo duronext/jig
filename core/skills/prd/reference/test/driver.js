@@ -158,6 +158,39 @@
     check("saving a demo logs it", logTexts().indexOf("Moved the demo Retry works on staging from due Nov 14 to due Nov 21.") >= 0, JSON.stringify(logTexts().slice(-2)));
     check("the milestone list shows the moved due date", /2026-11-21/.test($("#milestones").textContent) && !/2026-11-14/.test($("#milestones").textContent));
 
+    /* review fixes: saving is a snapshot, partial saves are named, odd records, one pointer */
+    var barN = $('[data-bar="next-summary"] .bar'); barN.focus();
+    barN.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })); await wait(50);
+    click(btnIn($("#gantt-pending"), "Save change"));
+    var dropDuring = btnIn($("#gantt-pending"), "Discard");
+    check("Discard is off while a save runs", !!dropDuring && dropDuring.disabled);
+    click(dropDuring); await wait(400);
+    check("the save finishes with the move it started with", T.store["schedule/next-summary"] && T.store["schedule/next-summary"].startWeek === 6 && $("#gantt-pending").hidden, JSON.stringify(T.store["schedule/next-summary"]));
+
+    var barB2 = $('[data-bar="build-mvp"] .bar'), barD2 = $('[data-bar="prd-spec"] .bar');
+    barB2.focus(); barB2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true }));
+    barD2.focus(); barD2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true })); await wait(50);
+    T.leases["schedule/prd-spec"] = { holder: "u_other", until: Date.now() + 60000 };
+    click(btnIn($("#gantt-pending"), "Save changes")); await wait(500);
+    delete T.leases["schedule/prd-spec"];
+    check("a partly failed save names what saved and what didn't", /Saved Build the MVP\. Not saved: PRD and spec \(someone else is changing it\)/.test(($('[data-msg="sched"]') || {}).textContent || "") && T.store["schedule/build-mvp"].endWeek === 7 && !T.store["schedule/prd-spec"], ($('[data-msg="sched"]') || {}).textContent);
+    check("the bar that didn't save stays a draft", !$("#gantt-pending").hidden && /PRD and spec/.test($("#gantt-pending").textContent));
+    click(btnIn($("#gantt-pending"), "Discard")); await wait(50);
+
+    T.seed("schedule/beta", { startWeek: 20, endWeek: 22, at: "2026-12-04T00:00:00Z", by: "u_other", actor: "person" }); await wait(200);
+    var barBeta = $('[data-bar="beta"] .bar');
+    check("a saved move that doesn't fit the chart is ignored", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "7/9" && !barBeta.classList.contains("moved") && !barBeta.title, barBeta.title);
+
+    var rA = barBeta.getBoundingClientRect(), rZ = $('[data-bar="everyone"] .bar').getBoundingClientRect(), yA = rA.top + rA.height / 2;
+    barBeta.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 1, button: 0, clientX: rA.left + rA.width / 2, clientY: yA }));
+    $('[data-bar="everyone"] .bar').dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 2, button: 0, clientX: rZ.left + 4, clientY: rZ.top + 4 }));
+    barBeta.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerId: 2, button: 0, clientX: rA.left + rA.width / 2 + colW * 2, clientY: yA }));
+    barBeta.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerId: 1, button: 0, clientX: rA.left + rA.width / 2 + colW, clientY: yA }));
+    barBeta.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 2, button: 0, clientX: 0, clientY: yA }));
+    barBeta.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 1, button: 0, clientX: 0, clientY: yA })); await wait(50);
+    check("a second finger doesn't take over a drag", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "8/10" && /^9\/11$/.test($('[data-bar="everyone"]').style.gridColumn.replace(/ /g, "")), $('[data-bar="beta"]').style.gridColumn + " | " + $('[data-bar="everyone"]').style.gridColumn);
+    click(btnIn($("#gantt-pending"), "Discard")); await wait(50);
+
     check("contents sidebar lists the live sections", document.querySelectorAll("#toc .livedot").length >= 4);
 
     var pre = document.createElement("pre"); pre.id = "test-results"; pre.textContent = results.join("\n");

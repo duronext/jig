@@ -191,6 +191,7 @@
      record overrides it. Weeks are counted from 0 at the first week column. */
   var GANTT = $(".gantt"), BARS = {}, pending = {}, drag = null, lastPs = {};
   var START = GANTT ? GANTT.getAttribute("data-start") : null;   // first day of the first week column, YYYY-MM-DD
+  if (START && (!/^\d{4}-\d{2}-\d{2}$/.test(START) || isNaN(new Date(START + "T00:00:00").getTime()))) START = null;   // a typo means no dates, never bad ones
   var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   function weeks() { return GANTT ? $$(".wk", GANTT).length : 0; }
   if (GANTT && weeks()) GANTT.style.setProperty("--weeks", weeks());
@@ -223,25 +224,26 @@
   function weekDate(i, plusDays) { var d = new Date(START + "T00:00:00"); d.setDate(d.getDate() + i * 7 + (plusDays || 0)); return d; }
   function isoDay(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
   function spanText(s, e) {
-    if (START && !isNaN(weekDate(0).getTime())) { var a = weekDate(s), b = weekDate(e - 1, 6);
+    if (START) { var a = weekDate(s), b = weekDate(e - 1, 6);
       return MON[a.getMonth()] + " " + a.getDate() + " – " + MON[b.getMonth()] + " " + b.getDate(); }
     var w = $$(".wk", GANTT); return "weeks of " + w[s].textContent.trim() + " – " + w[e - 1].textContent.trim();
   }
-  function saved(id) {
+  /* A saved move counts only if it fits this chart's weeks; otherwise the
+     bar stays where the markup puts it and is not marked as moved. */
+  function moveRec(id) {
     var r = state.sched[id], W = weeks();
-    if (r && typeof r.startWeek === "number" && typeof r.endWeek === "number" && r.startWeek >= 0 && r.endWeek <= W && r.startWeek < r.endWeek)
-      return { start: r.startWeek, end: r.endWeek };
-    return { start: BARS[id].start, end: BARS[id].end };
+    return r && typeof r.startWeek === "number" && typeof r.endWeek === "number" && r.startWeek >= 0 && r.endWeek <= W && r.startWeek < r.endWeek ? r : null;
   }
+  function saved(id) { var r = moveRec(id); return r ? { start: r.startWeek, end: r.endWeek } : { start: BARS[id].start, end: BARS[id].end }; }
   function place(id) { return pending[id] || saved(id); }
   function paintSchedule(ps) {
     if (!GANTT || !Object.keys(BARS).length) return;
     lastPs = ps || lastPs;
     var can = mode === "live";
-    if (!can) pending = {};
+    if (!can && !busy.sched) pending = {};
     GANTT.classList.toggle("editable", can);
     Object.keys(BARS).forEach(function (id) {
-      var b = BARS[id], w = place(id), r = state.sched[id];
+      var b = BARS[id], w = place(id), r = moveRec(id);
       b.cell.style.gridColumn = (w.start + 2) + " / " + (w.end + 2);
       if (!b.bar) return;
       b.bar.classList.toggle("draft", !!pending[id]);
@@ -272,8 +274,10 @@
       li.appendChild(el("span", "to", changeText(id, p))); list.appendChild(li); });
     tray.appendChild(list);
     var acts = el("div", "acts");
-    acts.appendChild(btn("Save " + (ids.length === 1 ? "change" : "changes"), "act solid", saveSchedule));
-    acts.appendChild(btn("Discard", "act quiet", function () { pending = {}; say("sched", ""); paintSchedule(); }));
+    var saveB = btn(busy.sched ? "Saving…" : "Save " + (ids.length === 1 ? "change" : "changes"), "act solid", saveSchedule);
+    var dropB = btn("Discard", "act quiet", function () { if (busy.sched) return; pending = {}; say("sched", ""); paintSchedule(); });
+    if (busy.sched) { saveB.disabled = true; dropB.disabled = true; }
+    acts.appendChild(saveB); acts.appendChild(dropB);
     tray.appendChild(acts);
   }
   function setDraft(id, s, e, base, seenAt) {
@@ -299,24 +303,25 @@
     return w.length > 1 ? w[1].getBoundingClientRect().left - w[0].getBoundingClientRect().left : w[0].getBoundingClientRect().width; }
   if (GANTT) {
     GANTT.addEventListener("pointerdown", function (ev) {
-      if (mode !== "live" || ev.button > 0) return;
+      if (mode !== "live" || ev.button > 0 || drag || busy.sched) return;   // one drag at a time, none while saving
       var hit = barAt(ev.target); if (!hit) return;
       var b = draftBase(hit.id);
-      drag = { id: hit.id, zone: zoneAt(hit.bar, ev.clientX), x0: ev.clientX, from: place(hit.id), cw: colWidth(), base: b.base, seenAt: b.seenAt };
+      drag = { pointer: ev.pointerId, id: hit.id, zone: zoneAt(hit.bar, ev.clientX), x0: ev.clientX, from: place(hit.id), cw: colWidth(), base: b.base, seenAt: b.seenAt };
       try { hit.bar.setPointerCapture(ev.pointerId); } catch (e) {}
       ev.preventDefault();
     });
     GANTT.addEventListener("pointermove", function (ev) {
       if (!drag) { var hit = mode === "live" && barAt(ev.target);
         if (hit) hit.bar.style.cursor = zoneAt(hit.bar, ev.clientX) === "move" ? "grab" : "ew-resize"; return; }
+      if (ev.pointerId !== drag.pointer) return;
       var w = shift(drag.id, drag.zone, drag.from, Math.round((ev.clientX - drag.x0) / drag.cw));
       var cur = place(drag.id); if (w.start !== cur.start || w.end !== cur.end) setDraft(drag.id, w.start, w.end, drag.base, drag.seenAt);
     });
-    var endDrag = function () { if (!drag) return; var id = drag.id; drag = null;
+    var endDrag = function (ev) { if (!drag || (ev && ev.pointerId !== drag.pointer)) return; var id = drag.id; drag = null;
       var bar = BARS[id] && BARS[id].bar; if (bar && pending[id]) bar.focus({ preventScroll: true }); };
     GANTT.addEventListener("pointerup", endDrag); GANTT.addEventListener("pointercancel", endDrag);
     GANTT.addEventListener("keydown", function (ev) {
-      if (mode !== "live") return;
+      if (mode !== "live" || busy.sched) return;
       var hit = barAt(ev.target); if (!hit) return;
       if (ev.key === "Escape" && pending[hit.id]) { delete pending[hit.id]; paintSchedule(); ev.preventDefault(); return; }
       if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
@@ -325,21 +330,34 @@
       var bar = BARS[hit.id].bar; if (bar) bar.focus();
     });
   }
+  /* Saves a snapshot of the drafts, so nothing the person does meanwhile
+     changes what is being written; drags and Discard wait until it ends.
+     Every bar is tried, and the message names any that did not save. */
+  var REASON = { busy: "someone else is changing it", stale: "someone else just changed it", quota_exceeded: "the page's storage is full" };
   function saveSchedule() {
     return guarded("sched", "sched", async function () {
-      var ids = Object.keys(pending);
-      for (var i = 0; i < ids.length; i++) {
-        var id = ids[i], p = pending[id], rec = { startWeek: p.start, endWeek: p.end, at: now(), by: meId, actor: "person" };
+      var batch = {}; Object.keys(pending).forEach(function (id) { batch[id] = pending[id]; });
+      paintSchedule();
+      var ok = [], bad = [], lastErr = null;
+      for (var id in batch) {
+        var p = batch[id], rec = { startWeek: p.start, endWeek: p.end, at: now(), by: meId, actor: "person" };
         if (START) { rec.from = isoDay(weekDate(p.start)); rec.to = isoDay(weekDate(p.end - 1, 6)); }
         if (BARS[id].demo) { rec.milestone = BARS[id].demo; rec.due = demoDue(id, p) || null; }
         try { await merge("schedule/" + id, rec, p.seenAt); }
-        catch (e) { if (e && e.code === "stale") delete pending[id]; throw e; }
-        delete pending[id];
+        catch (e) {
+          if (e && (e.code === "not_granted" || e.code === "revoked")) throw e;
+          if (e && e.code === "stale") delete pending[id];
+          bad.push(BARS[id].label + (REASON[e && e.code] ? " (" + REASON[e.code] + ")" : "")); lastErr = e; continue;
+        }
+        if (pending[id] === p) delete pending[id];
+        ok.push(BARS[id].label);
         await logAfter("sched", "schedule", BARS[id].demo
           ? "Moved the demo " + BARS[id].label + " from " + changeText(id, p.base) + " to " + changeText(id, p) + "."
           : "Moved " + BARS[id].label + " from " + spanText(p.base.start, p.base.end) + " to " + spanText(p.start, p.end) + ".", id);
       }
-      paintSchedule();
+      if (bad.length && !ok.length) { busy.sched = false; fail("sched", lastErr); }
+      else if (bad.length) say("sched", "Saved " + ok.join(", ") + ". Not saved: " + bad.join(", ") + ".");
+      busy.sched = false; paintSchedule();
     });
   }
 
