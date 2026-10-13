@@ -191,6 +191,26 @@
     check("a second finger doesn't take over a drag", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "8/10" && /^9\/11$/.test($('[data-bar="everyone"]').style.gridColumn.replace(/ /g, "")), $('[data-bar="beta"]').style.gridColumn + " | " + $('[data-bar="everyone"]').style.gridColumn);
     click(btnIn($("#gantt-pending"), "Discard")); await wait(50);
 
+    /* second review: all-failed batches name each bar; a drag holds still while saving */
+    barB2.focus(); barB2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true }));
+    barD2.focus(); barD2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true })); await wait(50);
+    T.leases["schedule/prd-spec"] = { holder: "u_other", until: Date.now() + 60000 };
+    T.leases["schedule/build-mvp"] = { holder: "u_other", until: Date.now() + 60000 };
+    click(btnIn($("#gantt-pending"), "Save changes")); await wait(500);
+    delete T.leases["schedule/prd-spec"]; delete T.leases["schedule/build-mvp"];
+    check("a save where every bar fails names each one", /^Not saved: Build the MVP \(someone else is changing it\), PRD and spec \(someone else is changing it\)\.$/.test(($('[data-msg="sched"]') || {}).textContent || ""), ($('[data-msg="sched"]') || {}).textContent);
+    click(btnIn($("#gantt-pending"), "Discard")); await wait(50);
+
+    var barS = $('[data-bar="build-mvp"] .bar'), cellS = $('[data-bar="build-mvp"]'); barS.focus();
+    barS.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })); await wait(50);
+    var colBefore = cellS.style.gridColumn, rS = barS.getBoundingClientRect(), yS = rS.top + rS.height / 2;
+    barS.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 9, button: 0, clientX: rS.left + rS.width / 2, clientY: yS }));
+    click(btnIn($("#gantt-pending"), "Save change"));
+    barS.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerId: 9, button: 0, clientX: rS.left + rS.width / 2 + colW * 2, clientY: yS }));
+    check("a drag holds still while a save runs", cellS.style.gridColumn === colBefore, cellS.style.gridColumn + " vs " + colBefore);
+    barS.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 9, button: 0, clientX: 0, clientY: yS })); await wait(400);
+    check("the save writes the move made before it", T.store["schedule/build-mvp"].startWeek === 1 && $("#gantt-pending").hidden, JSON.stringify(T.store["schedule/build-mvp"]));
+
     check("contents sidebar lists the live sections", document.querySelectorAll("#toc .livedot").length >= 4);
 
     var pre = document.createElement("pre"); pre.id = "test-results"; pre.textContent = results.join("\n");

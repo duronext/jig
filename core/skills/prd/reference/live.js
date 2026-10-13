@@ -313,7 +313,7 @@
     GANTT.addEventListener("pointermove", function (ev) {
       if (!drag) { var hit = mode === "live" && barAt(ev.target);
         if (hit) hit.bar.style.cursor = zoneAt(hit.bar, ev.clientX) === "move" ? "grab" : "ew-resize"; return; }
-      if (ev.pointerId !== drag.pointer) return;
+      if (ev.pointerId !== drag.pointer || busy.sched) return;   // a drag in progress holds still while saving
       var w = shift(drag.id, drag.zone, drag.from, Math.round((ev.clientX - drag.x0) / drag.cw));
       var cur = place(drag.id); if (w.start !== cur.start || w.end !== cur.end) setDraft(drag.id, w.start, w.end, drag.base, drag.seenAt);
     });
@@ -346,7 +346,7 @@
         try { await merge("schedule/" + id, rec, p.seenAt); }
         catch (e) {
           if (e && (e.code === "not_granted" || e.code === "revoked")) throw e;
-          if (e && e.code === "stale") delete pending[id];
+          if (e && e.code === "stale" && pending[id] === p) delete pending[id];
           bad.push(BARS[id].label + (REASON[e && e.code] ? " (" + REASON[e.code] + ")" : "")); lastErr = e; continue;
         }
         if (pending[id] === p) delete pending[id];
@@ -355,8 +355,8 @@
           ? "Moved the demo " + BARS[id].label + " from " + changeText(id, p.base) + " to " + changeText(id, p) + "."
           : "Moved " + BARS[id].label + " from " + spanText(p.base.start, p.base.end) + " to " + spanText(p.start, p.end) + ".", id);
       }
-      if (bad.length && !ok.length) { busy.sched = false; fail("sched", lastErr); }
-      else if (bad.length) say("sched", "Saved " + ok.join(", ") + ". Not saved: " + bad.join(", ") + ".");
+      if (bad.length === 1 && !ok.length) { busy.sched = false; fail("sched", lastErr); }
+      else if (bad.length) say("sched", (ok.length ? "Saved " + ok.join(", ") + ". " : "") + "Not saved: " + bad.join(", ") + ".");
       busy.sched = false; paintSchedule();
     });
   }
