@@ -101,14 +101,13 @@ See each pack's `pack.json` and `README.md` for what it ships.
 
 ## Self-Hosting Model
 
-Jig eats its own dogfood. This repo installs itself as a plugin via `.claude/settings.json` — the same way any consumer project would. Skills, agents, and commands all come from the plugin. No symlinks, no special treatment.
+Jig eats its own dogfood. This repo installs itself as a plugin via `.claude/settings.json` — the same way any consumer project would. Skills and agents all come from the plugin. No symlinks, no special treatment.
 
 When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/plugin marketplace update duronext-jig` and `/reload-plugins` to see changes locally.
 
 **When adding a new core skill:**
 1. Create `core/skills/{name}/SKILL.md`
 2. Add to the `skills` array in `.claude-plugin/plugin.json`
-3. Add a command file in `commands/{name}.md` for `/jig:` namespace browsing
 
 ## Project Structure
 
@@ -122,7 +121,6 @@ jig/
 ├── packs/               Starter and integration packs (see each pack's pack.json)
 ├── adapters/            Platform integration (claude/, gemini/, codex/)
 ├── scaffold/            jig init templates (config, team dir, skill template)
-├── commands/            Slash-command files for the /jig: namespace
 ├── docs/                Specs and documentation
 ├── team/                (optional, not in this repo) Team's extensions — highest-priority discovery layer
 ├── .claude/             Plugin self-install (settings.json)
@@ -175,8 +173,7 @@ Commit conventions (format, types, scopes, co-author rules) are defined in `jig.
 2. Read `framework/TIER_SYSTEM.md` to choose the right tier
 3. Create `core/skills/{name}/SKILL.md`
 4. Add to the `skills` array in `.claude-plugin/plugin.json`
-5. Add a command file in `commands/{name}.md` for `/jig:` namespace browsing
-6. If the skill should surface during spec authoring, add it to the concerns checklist in `jig.config.md`
+5. If the skill should surface during spec authoring, add it to the concerns checklist in `jig.config.md`
 
 ### How consumers install Jig
 Teams add this to their project's `.claude/settings.json`:
