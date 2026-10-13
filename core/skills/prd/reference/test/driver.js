@@ -96,6 +96,121 @@
     await wait(200);
     check("log text is not parsed as HTML", !window.__pwned && !document.querySelector("#log-items img[src='x']"));
 
+    /* schedule: drag, keyboard, confirm, save, log */
+    var cellB = $('[data-bar="build-mvp"]'), barB = cellB && cellB.querySelector(".bar");
+    check("chart bars are editable for someone who can save", $(".gantt").classList.contains("editable") && barB && barB.tabIndex === 0);
+    function wk(i) { return document.querySelectorAll(".gantt .wk")[i].getBoundingClientRect(); }
+    function pdrag(bar, fromX, toX) {
+      var r = bar.getBoundingClientRect(), y = r.top + r.height / 2, o = { bubbles: true, pointerId: 7, button: 0, clientY: y };
+      bar.dispatchEvent(new PointerEvent("pointerdown", Object.assign({ clientX: fromX }, o)));
+      bar.dispatchEvent(new PointerEvent("pointermove", Object.assign({ clientX: toX }, o)));
+      bar.dispatchEvent(new PointerEvent("pointerup", Object.assign({ clientX: toX }, o)));
+    }
+    var colW = wk(1).left - wk(0).left, rB = barB.getBoundingClientRect();
+    pdrag(barB, rB.left + rB.width / 2, rB.left + rB.width / 2 + colW); await wait(100);
+    check("dragging a bar moves it a week as a draft", cellB.style.gridColumn.replace(/ /g, "") === "4/8" && !T.store["schedule/build-mvp"], cellB.style.gridColumn);
+    check("a draft shows the change and a Save button", !$("#gantt-pending").hidden && /Oct 20 – Nov 16 → Oct 27 – Nov 23/.test($("#gantt-pending").textContent) && !!btnIn($("#gantt-pending"), "Save change"), $("#gantt-pending").textContent);
+    click(btnIn($("#gantt-pending"), "Save change")); await wait(300);
+    var sb = T.store["schedule/build-mvp"] || {};
+    check("saving writes the new weeks", sb.startWeek === 2 && sb.endWeek === 6 && sb.from === "2026-10-27" && sb.to === "2026-11-23" && sb.by === "u_tester", JSON.stringify(sb));
+    check("saving logs the move", logTexts().some(function (t) { return t === "Moved Build the MVP from Oct 20 – Nov 16 to Oct 27 – Nov 23."; }), JSON.stringify(logTexts().slice(-2)));
+    check("the tray closes after saving", $("#gantt-pending").hidden);
+
+    var barE = $('[data-bar="beta"] .bar'), rE = barE.getBoundingClientRect();
+    pdrag(barE, rE.right - 3, rE.right - 3 + colW); await wait(100);
+    check("dragging an end stretches the bar", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "7/10", $('[data-bar="beta"]').style.gridColumn);
+    click(btnIn($("#gantt-pending"), "Discard")); await wait(100);
+    check("discarding puts the bar back without saving", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "7/9" && !T.store["schedule/beta"]);
+
+    barE.focus();
+    barE.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true, bubbles: true })); await wait(50);
+    check("Alt+arrow moves the start a week", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "6/9", $('[data-bar="beta"]').style.gridColumn);
+    barE.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); await wait(50);
+    check("Escape undoes a draft", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "7/9" && $("#gantt-pending").hidden);
+
+    var barP = $('[data-bar="prd-spec"] .bar'); barP.focus();
+    barP.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })); await wait(50);
+    check("a bar can't move before the first week", $('[data-bar="prd-spec"]').style.gridColumn.replace(/ /g, "") === "2/4" && $("#gantt-pending").hidden);
+
+    barE.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true })); await wait(50);
+    T.store["schedule/beta"] = { startWeek: 6, endWeek: 9, at: "2026-12-02T00:00:00Z", by: "u_other", actor: "person" };   // saved elsewhere, not yet seen
+    click(btnIn($("#gantt-pending"), "Save change")); await wait(300);
+    check("a move someone else just saved is not overwritten", T.store["schedule/beta"].by === "u_other" && /Someone else just changed this/.test(($('[data-msg="sched"]') || {}).textContent || ""), JSON.stringify(T.store["schedule/beta"]));
+
+    T.seed("schedule/everyone", { startWeek: 7, endWeek: 9, at: "2026-12-03T00:00:00Z", by: null, actor: "jig" }); await wait(200);
+    check("a saved move from elsewhere redraws the bar", $('[data-bar="everyone"]').style.gridColumn.replace(/ /g, "") === "9/11", $('[data-bar="everyone"]').style.gridColumn);
+
+    /* demo diamonds and dated bar text */
+    var barT = $('[data-bar="prd-spec"] .bar'), tm = barT.querySelector("time"); barT.focus();
+    barT.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true })); await wait(50);
+    check("a date in a bar's text follows its end", tm.textContent === "Oct 31" && tm.getAttribute("datetime") === "2026-10-31", tm.textContent);
+    barT.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); await wait(50);
+    check("undoing puts the date back", tm.textContent === "Oct 24", tm.textContent);
+
+    var dia = $('[data-ms="m3"]');
+    check("demo diamonds are draggable", dia.tabIndex === 0 && dia.parentElement.getAttribute("data-bar") === "demo-m3");
+    var rD = dia.getBoundingClientRect();
+    pdrag(dia, rD.left + 6, rD.left + 6 + colW); await wait(100);
+    check("a moved demo shows its new due date as a draft", /Demo: Retry works on staging due Nov 14 → due Nov 21/.test($("#gantt-pending").textContent), $("#gantt-pending").textContent);
+    click(btnIn($("#gantt-pending"), "Save change")); await wait(300);
+    var sd = T.store["schedule/demo-m3"] || {};
+    check("saving a demo writes its week and due date", sd.startWeek === 5 && sd.due === "2026-11-21" && sd.milestone === "m3", JSON.stringify(sd));
+    check("saving a demo logs it", logTexts().indexOf("Moved the demo Retry works on staging from due Nov 14 to due Nov 21.") >= 0, JSON.stringify(logTexts().slice(-2)));
+    check("the milestone list shows the moved due date", /2026-11-21/.test($("#milestones").textContent) && !/2026-11-14/.test($("#milestones").textContent));
+
+    /* review fixes: saving is a snapshot, partial saves are named, odd records, one pointer */
+    var barN = $('[data-bar="next-summary"] .bar'); barN.focus();
+    barN.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })); await wait(50);
+    click(btnIn($("#gantt-pending"), "Save change"));
+    var dropDuring = btnIn($("#gantt-pending"), "Discard");
+    check("Discard is off while a save runs", !!dropDuring && dropDuring.disabled);
+    click(dropDuring); await wait(400);
+    check("the save finishes with the move it started with", T.store["schedule/next-summary"] && T.store["schedule/next-summary"].startWeek === 6 && $("#gantt-pending").hidden, JSON.stringify(T.store["schedule/next-summary"]));
+
+    var barB2 = $('[data-bar="build-mvp"] .bar'), barD2 = $('[data-bar="prd-spec"] .bar');
+    barB2.focus(); barB2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true }));
+    barD2.focus(); barD2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true })); await wait(50);
+    T.leases["schedule/prd-spec"] = { holder: "u_other", until: Date.now() + 60000 };
+    click(btnIn($("#gantt-pending"), "Save changes")); await wait(500);
+    delete T.leases["schedule/prd-spec"];
+    check("a partly failed save names what saved and what didn't", /Saved Build the MVP\. Not saved: PRD and spec \(someone else is changing it\)/.test(($('[data-msg="sched"]') || {}).textContent || "") && T.store["schedule/build-mvp"].endWeek === 7 && !T.store["schedule/prd-spec"], ($('[data-msg="sched"]') || {}).textContent);
+    check("the bar that didn't save stays a draft", !$("#gantt-pending").hidden && /PRD and spec/.test($("#gantt-pending").textContent));
+    click(btnIn($("#gantt-pending"), "Discard")); await wait(50);
+
+    T.seed("schedule/beta", { startWeek: 20, endWeek: 22, at: "2026-12-04T00:00:00Z", by: "u_other", actor: "person" }); await wait(200);
+    var barBeta = $('[data-bar="beta"] .bar');
+    check("a saved move that doesn't fit the chart is ignored", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "7/9" && !barBeta.classList.contains("moved") && !barBeta.title, barBeta.title);
+
+    var rA = barBeta.getBoundingClientRect(), rZ = $('[data-bar="everyone"] .bar').getBoundingClientRect(), yA = rA.top + rA.height / 2;
+    barBeta.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 1, button: 0, clientX: rA.left + rA.width / 2, clientY: yA }));
+    $('[data-bar="everyone"] .bar').dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 2, button: 0, clientX: rZ.left + 4, clientY: rZ.top + 4 }));
+    barBeta.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerId: 2, button: 0, clientX: rA.left + rA.width / 2 + colW * 2, clientY: yA }));
+    barBeta.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerId: 1, button: 0, clientX: rA.left + rA.width / 2 + colW, clientY: yA }));
+    barBeta.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 2, button: 0, clientX: 0, clientY: yA }));
+    barBeta.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 1, button: 0, clientX: 0, clientY: yA })); await wait(50);
+    check("a second finger doesn't take over a drag", $('[data-bar="beta"]').style.gridColumn.replace(/ /g, "") === "8/10" && /^9\/11$/.test($('[data-bar="everyone"]').style.gridColumn.replace(/ /g, "")), $('[data-bar="beta"]').style.gridColumn + " | " + $('[data-bar="everyone"]').style.gridColumn);
+    click(btnIn($("#gantt-pending"), "Discard")); await wait(50);
+
+    /* second review: all-failed batches name each bar; a drag holds still while saving */
+    barB2.focus(); barB2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true }));
+    barD2.focus(); barD2.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", shiftKey: true, bubbles: true })); await wait(50);
+    T.leases["schedule/prd-spec"] = { holder: "u_other", until: Date.now() + 60000 };
+    T.leases["schedule/build-mvp"] = { holder: "u_other", until: Date.now() + 60000 };
+    click(btnIn($("#gantt-pending"), "Save changes")); await wait(500);
+    delete T.leases["schedule/prd-spec"]; delete T.leases["schedule/build-mvp"];
+    check("a save where every bar fails names each one", /^Not saved: Build the MVP \(someone else is changing it\), PRD and spec \(someone else is changing it\)\.$/.test(($('[data-msg="sched"]') || {}).textContent || ""), ($('[data-msg="sched"]') || {}).textContent);
+    click(btnIn($("#gantt-pending"), "Discard")); await wait(50);
+
+    var barS = $('[data-bar="build-mvp"] .bar'), cellS = $('[data-bar="build-mvp"]'); barS.focus();
+    barS.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true })); await wait(50);
+    var colBefore = cellS.style.gridColumn, rS = barS.getBoundingClientRect(), yS = rS.top + rS.height / 2;
+    barS.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerId: 9, button: 0, clientX: rS.left + rS.width / 2, clientY: yS }));
+    click(btnIn($("#gantt-pending"), "Save change"));
+    barS.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, pointerId: 9, button: 0, clientX: rS.left + rS.width / 2 + colW * 2, clientY: yS }));
+    check("a drag holds still while a save runs", cellS.style.gridColumn === colBefore, cellS.style.gridColumn + " vs " + colBefore);
+    barS.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerId: 9, button: 0, clientX: 0, clientY: yS })); await wait(400);
+    check("the save writes the move made before it", T.store["schedule/build-mvp"].startWeek === 1 && $("#gantt-pending").hidden, JSON.stringify(T.store["schedule/build-mvp"]));
+
     check("contents sidebar lists the live sections", document.querySelectorAll("#toc .livedot").length >= 4);
 
     var pre = document.createElement("pre"); pre.id = "test-results"; pre.textContent = results.join("\n");

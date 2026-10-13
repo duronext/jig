@@ -242,28 +242,28 @@
     <div class="sec-head">
       <div class="row"><span class="sheetno">06</span><span class="eyebrow ac">Schedule</span></div>
       <h2 id="h-sched">Nine weeks, six milestones, three demos</h2>
-      <p class="stand">Each diamond is something you can watch work. Tick a milestone when it is done: it saves for everyone, with your name and the time, and lands in the log.</p>
+      <p class="stand">Each diamond is something you can watch work. Tick a milestone when it is done, or drag a bar to change its weeks and press Save: it saves for everyone, with your name and the time, and lands in the log.</p>
       <div><span class="live" data-live>Connecting</span></div>
     </div>
     <div class="tscroll" id="gantt" data-sub="Week by week">
-      <div class="gantt" role="table" aria-label="Schedule by week">
+      <div class="gantt" role="table" aria-label="Schedule by week" data-start="2026-10-13">
         <div class="lab hdr" style="font:500 10.5px/1 var(--mono);letter-spacing:.14em;color:var(--muted)">WEEK OF</div>
         <div class="wk now">OCT 13</div><div class="wk">OCT 20</div><div class="wk">OCT 27</div><div class="wk">NOV 3</div><div class="wk">NOV 10</div><div class="wk">NOV 17</div><div class="wk">NOV 24</div><div class="wk">DEC 1</div><div class="wk">DEC 8</div>
 
         <div class="lab">PRD and spec</div>
-        <div class="cell" style="grid-column:2 / 4"><span class="bar done">done by Oct 24</span></div>
+        <div class="cell" data-bar="prd-spec" style="grid-column:2 / 4"><span class="bar done">done by <time datetime="2026-10-24" data-edge="end">Oct 24</time></span></div>
 
         <div class="lab">Build the MVP</div>
-        <div class="cell" style="grid-column:3 / 7"><span class="bar acc">retry loop · email · fix-it page</span></div>
+        <div class="cell" data-bar="build-mvp" style="grid-column:3 / 7"><span class="bar acc">retry loop · email · fix-it page</span></div>
 
         <div class="lab">Beta, 20 customers</div>
-        <div class="cell" style="grid-column:7 / 9"><span class="bar soft">watch recovery rate</span></div>
+        <div class="cell" data-bar="beta" style="grid-column:7 / 9"><span class="bar soft">watch recovery rate</span></div>
 
         <div class="lab">Everyone</div>
-        <div class="cell" style="grid-column:10 / 11"><span class="bar acc">on</span></div>
+        <div class="cell" data-bar="everyone" style="grid-column:10 / 11"><span class="bar acc">on</span></div>
 
         <div class="lab">Next: finance summary</div>
-        <div class="cell" style="grid-column:9 / 11"><span class="bar ph">after beta</span></div>
+        <div class="cell" data-bar="next-summary" style="grid-column:9 / 11"><span class="bar ph">after beta</span></div>
 
         <div class="lab">Demos</div>
         <div class="cell ms" style="grid-column:3 / 4"><i data-ms="m2"></i></div>
