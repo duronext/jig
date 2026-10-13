@@ -11,7 +11,7 @@
       "description": "Full lifecycle pipeline: discover, PRD, spec, plan, build, review, ship, learn, with a live PRD page that people and Jig keep current",
       "source": "./",
       "strict": true,
-      "version": "2.0.0"
+      "version": "2.0.1"
     }
   ]
 }
