@@ -9,10 +9,10 @@
   var REV = DATA.rev || "A";
   var MS = DATA.milestones || [], DEC = DATA.decisions || [], APPR = DATA.approvers || [], OUT = DATA.outcomes || [];
   var KIND = { milestone: "new", decision: "mk", approval: "ok", note: "ph", rev: "warn", review: "warn",
-               spec: "new", plan: "new", build: "new", check: "ok", ship: "ok", learn: "ph" };
+               spec: "new", plan: "new", build: "new", check: "ok", ship: "ok", learn: "ph", schedule: "mk" };
   var TRACE = { "not-started": ["bad", "not started"], built: ["warn", "built"], verified: ["ok", "verified"], deferred: ["ph", "deferred"] };
 
-  var state = { ms: {}, dec: {}, appr: {}, trace: {}, log: [] };
+  var state = { ms: {}, dec: {}, appr: {}, trace: {}, sched: {}, log: [] };
   var db = null, user = null, meId = null, mode = "connecting", busy = {}, renderToken = 0;
 
   function $(s, r) { return (r || document).querySelector(s); }
@@ -54,11 +54,11 @@
 
   async function render() {
     var token = ++renderToken, ids = [];
-    ["ms", "dec", "appr", "trace"].forEach(function (k) { Object.keys(state[k]).forEach(function (id) { ids.push(state[k][id].by); }); });
+    ["ms", "dec", "appr", "trace", "sched"].forEach(function (k) { Object.keys(state[k]).forEach(function (id) { ids.push(state[k][id].by); }); });
     state.log.forEach(function (e) { ids.push(e.by); });
     var ps = await names(ids);
     if (token !== renderToken) return;
-    paintMilestones(ps); paintDecisions(ps); paintApprovals(ps); paintTrace(ps); paintLog(ps);
+    paintMilestones(ps); paintDecisions(ps); paintApprovals(ps); paintTrace(ps); paintSchedule(ps); paintLog(ps);
     try { document.dispatchEvent(new CustomEvent("jig:rendered")); } catch (e) {}
   }
 
@@ -80,12 +80,12 @@
       var lab = el("label", "ms-t"); lab.htmlFor = cb.id;
       if (m.kind) lab.appendChild(el("span", "ms-kind", m.kind));
       lab.appendChild(el("b", null, m.title)); if (m.sub) lab.appendChild(el("small", null, m.sub));
-      var date = el("span", "ms-date", m.due || "");
+      var due = dueOf(m), date = el("span", "ms-date", due || "");
       var cell = el("span", "ms-state");
       if (isDone) { cell.appendChild(el("span", "chip ok", "done")); cell.appendChild(stamp("", who(ps, rec), rec.at));
         if (rec.note) cell.appendChild(el("span", "stamped", rec.note)); }
-      else if (m.due && m.due < t) cell.appendChild(el("span", "chip bad", "overdue"));
-      else cell.appendChild(el("span", "chip ph", m.due ? "due " + m.due.slice(5) : "open"));
+      else if (due && due < t) cell.appendChild(el("span", "chip bad", "overdue"));
+      else cell.appendChild(el("span", "chip ph", due ? "due " + due.slice(5) : "open"));
       row.appendChild(cb); row.appendChild(lab); row.appendChild(date); row.appendChild(cell); list.appendChild(row);
       var dia = $('[data-ms="' + m.id + '"]'); if (dia) dia.classList.toggle("ok", isDone);
     });
@@ -179,6 +179,167 @@
       var c4 = el("td"); c4.appendChild(el("span", "chip " + st[0], st[1])); tr.appendChild(c4);
       var c5 = el("td", null, r.proof || "—"); if (r.at) { c5.appendChild(el("br")); c5.appendChild(stamp("", who(ps, r), r.at)); }
       tr.appendChild(c5); body.appendChild(tr);
+    });
+  }
+
+  /* ── schedule ───────────────────────────────────────────── */
+  /* Bars in the week-by-week chart that carry data-bar can be changed by
+     anyone who can save: drag the middle to move a bar, drag an end to
+     stretch it, or use the arrow keys. A change is a draft until the person
+     presses Save; then each changed bar saves to schedule/<id> and adds a log
+     entry. The markup's own grid-column is the plan as written; a saved
+     record overrides it. Weeks are counted from 0 at the first week column. */
+  var GANTT = $(".gantt"), BARS = {}, pending = {}, drag = null, lastPs = {};
+  var START = GANTT ? GANTT.getAttribute("data-start") : null;   // first day of the first week column, YYYY-MM-DD
+  var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function weeks() { return GANTT ? $$(".wk", GANTT).length : 0; }
+  if (GANTT && weeks()) GANTT.style.setProperty("--weeks", weeks());
+  if (GANTT) $$("[data-bar]", GANTT).forEach(function (cell) {
+    var m = /(\d+)\s*\/\s*(\d+)/.exec(cell.style.gridColumn || ""); if (!m) return;
+    var lab = cell.previousElementSibling, id = cell.getAttribute("data-bar");
+    if (cell.classList.contains("ms")) return;
+    BARS[id] = { cell: cell, bar: $(".bar", cell), start: +m[1] - 2, end: +m[2] - 2,
+      label: cell.getAttribute("data-label") || (lab && lab.classList.contains("lab") ? lab.textContent.trim() : id),
+      times: $$("time[data-edge]", cell).map(function (t) { return { el: t, edge: t.getAttribute("data-edge"), day: t.getAttribute("datetime") }; }) };
+  });
+  /* Demo diamonds move a whole week at a time. Moving one moves its
+     milestone's due date by the same number of weeks. */
+  var DEMO = {};   // milestone id -> bar id
+  if (GANTT) $$(".cell.ms", GANTT).forEach(function (cell) {
+    var i = $("i[data-ms]", cell), m = /(\d+)\s*\/\s*(\d+)/.exec(cell.style.gridColumn || ""); if (!i || !m) return;
+    var msId = i.getAttribute("data-ms"), id = cell.getAttribute("data-bar") || "demo-" + msId;
+    cell.setAttribute("data-bar", id); DEMO[msId] = id;
+    BARS[id] = { cell: cell, bar: i, start: +m[1] - 2, end: +m[2] - 2, demo: msId, label: msTitle(msId), times: [] };
+  });
+  function addWeeks(day, n) { if (!day || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return day;
+    var d = new Date(day + "T00:00:00"); d.setDate(d.getDate() + n * 7); return isoDay(d); }
+  function shortDay(day) { var d = new Date(day + "T00:00:00"); return isNaN(d.getTime()) ? day : MON[d.getMonth()] + " " + d.getDate(); }
+  function msDue(msId) { for (var i = 0; i < MS.length; i++) if (MS[i].id === msId) return MS[i].due; return null; }
+  function dueOf(m) { var id = DEMO[m.id]; if (!id || !m.due) return m.due; return addWeeks(m.due, saved(id).start - BARS[id].start); }
+  function demoDue(id, w) { return addWeeks(msDue(BARS[id].demo), w.start - BARS[id].start); }
+  function changeText(id, w) { var b = BARS[id];
+    if (b.demo) { var d = demoDue(id, w); return d ? "due " + shortDay(d) : "week of " + spanText(w.start, w.end).split(" – ")[0]; }
+    return spanText(w.start, w.end); }
+  function weekDate(i, plusDays) { var d = new Date(START + "T00:00:00"); d.setDate(d.getDate() + i * 7 + (plusDays || 0)); return d; }
+  function isoDay(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function spanText(s, e) {
+    if (START && !isNaN(weekDate(0).getTime())) { var a = weekDate(s), b = weekDate(e - 1, 6);
+      return MON[a.getMonth()] + " " + a.getDate() + " – " + MON[b.getMonth()] + " " + b.getDate(); }
+    var w = $$(".wk", GANTT); return "weeks of " + w[s].textContent.trim() + " – " + w[e - 1].textContent.trim();
+  }
+  function saved(id) {
+    var r = state.sched[id], W = weeks();
+    if (r && typeof r.startWeek === "number" && typeof r.endWeek === "number" && r.startWeek >= 0 && r.endWeek <= W && r.startWeek < r.endWeek)
+      return { start: r.startWeek, end: r.endWeek };
+    return { start: BARS[id].start, end: BARS[id].end };
+  }
+  function place(id) { return pending[id] || saved(id); }
+  function paintSchedule(ps) {
+    if (!GANTT || !Object.keys(BARS).length) return;
+    lastPs = ps || lastPs;
+    var can = mode === "live";
+    if (!can) pending = {};
+    GANTT.classList.toggle("editable", can);
+    Object.keys(BARS).forEach(function (id) {
+      var b = BARS[id], w = place(id), r = state.sched[id];
+      b.cell.style.gridColumn = (w.start + 2) + " / " + (w.end + 2);
+      if (!b.bar) return;
+      b.bar.classList.toggle("draft", !!pending[id]);
+      b.bar.classList.toggle("moved", !!r && !pending[id]);
+      b.bar.title = r ? "Moved by " + who(lastPs, r) + " · " + fmt(r.at) : "";
+      b.times.forEach(function (t) { var d = addWeeks(t.day, t.edge === "start" ? w.start - b.start : w.end - b.end);
+        if (d && d !== t.el.getAttribute("datetime")) { t.el.setAttribute("datetime", d); t.el.textContent = shortDay(d); } });
+      if (can) { b.bar.tabIndex = 0; b.bar.setAttribute("role", "button");
+        b.bar.setAttribute("aria-label", (b.demo ? "Demo: " : "") + b.label + ", " + changeText(id, w) + (pending[id] ? ", not saved" : ""));
+        b.bar.setAttribute("aria-describedby", "gantt-help"); }
+      else { b.bar.removeAttribute("tabindex"); b.bar.removeAttribute("role"); b.bar.removeAttribute("aria-label"); b.bar.removeAttribute("aria-describedby"); }
+    });
+    var holder = GANTT.closest(".tscroll") || GANTT, tray = $("#gantt-pending");
+    if (!tray) {
+      var help = el("span", "sr-only", "Drag a bar to move it, or drag an end to change when it starts or finishes. With the keyboard: arrow keys move a week, Shift with an arrow changes the end, Alt with an arrow changes the start, Escape undoes. Then press Save.");
+      help.id = "gantt-help"; holder.insertAdjacentElement("afterend", help);
+      tray = el("div", "gantt-pending"); tray.id = "gantt-pending"; tray.setAttribute("aria-live", "polite");
+      help.insertAdjacentElement("afterend", tray);
+      var msg = el("div", "msg-line"); msg.setAttribute("data-msg", "sched"); tray.insertAdjacentElement("afterend", msg);
+    }
+    tray.textContent = "";
+    var ids = Object.keys(pending); tray.hidden = !ids.length;
+    if (!ids.length) return;
+    tray.appendChild(el("span", "eyebrow mk", ids.length === 1 ? "1 unsaved change" : ids.length + " unsaved changes"));
+    var list = el("ul");
+    ids.forEach(function (id) { var p = pending[id], li = el("li");
+      li.appendChild(el("b", null, (BARS[id].demo ? "Demo: " : "") + BARS[id].label)); li.appendChild(document.createTextNode(" " + changeText(id, p.base) + " → "));
+      li.appendChild(el("span", "to", changeText(id, p))); list.appendChild(li); });
+    tray.appendChild(list);
+    var acts = el("div", "acts");
+    acts.appendChild(btn("Save " + (ids.length === 1 ? "change" : "changes"), "act solid", saveSchedule));
+    acts.appendChild(btn("Discard", "act quiet", function () { pending = {}; say("sched", ""); paintSchedule(); }));
+    tray.appendChild(acts);
+  }
+  function setDraft(id, s, e, base, seenAt) {
+    if (s === base.start && e === base.end) delete pending[id];
+    else pending[id] = { start: s, end: e, base: base, seenAt: seenAt };
+    paintSchedule();
+  }
+  function shift(id, zone, from, dw) {
+    var W = weeks(), s = from.start, e = from.end;
+    if (BARS[id].demo) zone = "move";
+    if (zone === "move") { var len = e - s; s = Math.max(0, Math.min(W - len, s + dw)); e = s + len; }
+    else if (zone === "start") s = Math.max(0, Math.min(e - 1, s + dw));
+    else e = Math.max(s + 1, Math.min(W, e + dw));
+    return { start: s, end: e };
+  }
+  function draftBase(id) { return pending[id] ? { base: pending[id].base, seenAt: pending[id].seenAt }
+    : { base: saved(id), seenAt: (state.sched[id] || {}).at || null }; }
+  function barAt(target) { var bar = target && target.closest ? target.closest(".bar, .ms i[data-ms]") : null, cell = bar && bar.parentElement;
+    var id = cell && cell.getAttribute("data-bar"); return id && BARS[id] ? { id: id, bar: bar } : null; }
+  function zoneAt(bar, x) { var r = bar.getBoundingClientRect(), edge = Math.min(10, r.width / 4);
+    return x - r.left <= edge ? "start" : r.right - x <= edge ? "end" : "move"; }
+  function colWidth() { var w = $$(".wk", GANTT); if (!w.length) return 60;
+    return w.length > 1 ? w[1].getBoundingClientRect().left - w[0].getBoundingClientRect().left : w[0].getBoundingClientRect().width; }
+  if (GANTT) {
+    GANTT.addEventListener("pointerdown", function (ev) {
+      if (mode !== "live" || ev.button > 0) return;
+      var hit = barAt(ev.target); if (!hit) return;
+      var b = draftBase(hit.id);
+      drag = { id: hit.id, zone: zoneAt(hit.bar, ev.clientX), x0: ev.clientX, from: place(hit.id), cw: colWidth(), base: b.base, seenAt: b.seenAt };
+      try { hit.bar.setPointerCapture(ev.pointerId); } catch (e) {}
+      ev.preventDefault();
+    });
+    GANTT.addEventListener("pointermove", function (ev) {
+      if (!drag) { var hit = mode === "live" && barAt(ev.target);
+        if (hit) hit.bar.style.cursor = zoneAt(hit.bar, ev.clientX) === "move" ? "grab" : "ew-resize"; return; }
+      var w = shift(drag.id, drag.zone, drag.from, Math.round((ev.clientX - drag.x0) / drag.cw));
+      var cur = place(drag.id); if (w.start !== cur.start || w.end !== cur.end) setDraft(drag.id, w.start, w.end, drag.base, drag.seenAt);
+    });
+    var endDrag = function () { if (!drag) return; var id = drag.id; drag = null;
+      var bar = BARS[id] && BARS[id].bar; if (bar && pending[id]) bar.focus({ preventScroll: true }); };
+    GANTT.addEventListener("pointerup", endDrag); GANTT.addEventListener("pointercancel", endDrag);
+    GANTT.addEventListener("keydown", function (ev) {
+      if (mode !== "live") return;
+      var hit = barAt(ev.target); if (!hit) return;
+      if (ev.key === "Escape" && pending[hit.id]) { delete pending[hit.id]; paintSchedule(); ev.preventDefault(); return; }
+      if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+      var b = draftBase(hit.id), w = shift(hit.id, ev.shiftKey ? "end" : ev.altKey ? "start" : "move", place(hit.id), ev.key === "ArrowLeft" ? -1 : 1);
+      setDraft(hit.id, w.start, w.end, b.base, b.seenAt); ev.preventDefault();
+      var bar = BARS[hit.id].bar; if (bar) bar.focus();
+    });
+  }
+  function saveSchedule() {
+    return guarded("sched", "sched", async function () {
+      var ids = Object.keys(pending);
+      for (var i = 0; i < ids.length; i++) {
+        var id = ids[i], p = pending[id], rec = { startWeek: p.start, endWeek: p.end, at: now(), by: meId, actor: "person" };
+        if (START) { rec.from = isoDay(weekDate(p.start)); rec.to = isoDay(weekDate(p.end - 1, 6)); }
+        if (BARS[id].demo) { rec.milestone = BARS[id].demo; rec.due = demoDue(id, p) || null; }
+        try { await merge("schedule/" + id, rec, p.seenAt); }
+        catch (e) { if (e && e.code === "stale") delete pending[id]; throw e; }
+        delete pending[id];
+        await logAfter("sched", "schedule", BARS[id].demo
+          ? "Moved the demo " + BARS[id].label + " from " + changeText(id, p.base) + " to " + changeText(id, p) + "."
+          : "Moved " + BARS[id].label + " from " + spanText(p.base.start, p.base.end) + " to " + spanText(p.start, p.end) + ".", id);
+      }
+      paintSchedule();
     });
   }
 
@@ -314,6 +475,7 @@
     }
     setLive();
     watch("milestones", "ms", "ms"); watch("decisions", "dec", "dec"); watch("approvals", "appr", "appr"); watch("trace", "trace", "trace");
+    if (Object.keys(BARS).length) watch("schedule", "sched", "sched");
     db.collection("log").orderBy("at", "desc").limit(150).onSnapshot(function (snap) {
       state.log = snap.docs.map(function (d) { return d.data(); }); render();
     }, function (e) { fail("log", e); });

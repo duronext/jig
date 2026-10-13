@@ -102,6 +102,24 @@ task ids (`T<n>`) that serve this outcome. `status` is one of `not-started`, `bu
 the code exists; `verified` means someone watched it work and wrote down how.
 `deferred` needs a `proof` field that says why and who agreed.
 
+### `schedule/<barId>`
+
+```json
+{ "startWeek": 2, "endWeek": 6, "from": "2026-10-27", "to": "2026-11-23",
+  "at": "...", "by": "u_...", "actor": "person" }
+```
+
+`<barId>` matches a `data-bar` on a bar in the week-by-week chart. Weeks
+count from 0 at the first week column; `endWeek` is the week after the bar
+ends. `from` and `to` are the bar's first and last day, present when the
+chart has `data-start`. The page writes these when a person drags a bar and
+presses Save. With no record, the bar sits where the page's markup puts it.
+
+A demo diamond's record uses `demo-<milestoneId>` as its id and adds
+`milestone` and `due`: the milestone's due date moved by the same number of
+weeks. The milestone list shows that `due` in place of the one in
+`prd-data`.
+
 ### `log/<auto-id>`
 
 ```json
@@ -110,8 +128,8 @@ the code exists; `verified` means someone watched it work and wrote down how.
 ```
 
 `kind` is one of: `rev`, `review`, `spec`, `plan`, `build`, `check`, `ship`,
-`learn` (written by Jig), and `milestone`, `decision`, `approval`, `note`
-(written by the page when a person acts). Keep `text` to one or two sentences
+`learn` (written by Jig), and `milestone`, `decision`, `approval`,
+`schedule`, `note` (written by the page when a person acts). Keep `text` to one or two sentences
 a non-engineer can read. Name commits and PRs; never paste diffs or code.
 
 ## Who writes what
@@ -131,7 +149,7 @@ a non-engineer can read. Name commits and PRs; never paste diffs or code.
 - **Read before you write.** Pass the `version` you read as `if_version`. On a
   conflict, re-read and redo the write against the new state; never force it.
 - **People win.** Do not overwrite a decision a person recorded, re-tick a
-  milestone a person reopened, or touch `approvals`. If the evidence says a
+  milestone a person reopened, or touch `approvals` or `schedule`. If the evidence says a
   person's state is wrong, write a `log` entry saying so and leave the state.
 - **One fact per entry.** A log line is something a reader would want to know
   happened. Batch a run of task completions into one `build` entry.

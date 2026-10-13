@@ -67,7 +67,7 @@ themes. Nothing is coloured to look nice.
 | Rules | `.rules > .rule-row(.id + rule + .know)` | What it has to do, with "you'll know it works when" | One behaviour per row. IDs `MVP.n`, `NEXT.n`, `LATER.n` travel to the spec |
 | Pseudo plate | `.plate > .plate-bar + pre` | A rule that needs steps | Plain words, lowercase keywords in `.p-acc`. Never real code |
 | Ladder | `.ladder > .rung + .cut + .rung.later` | Phases | Up to six rungs, one cut line. Every rung above the cut is usable on its own |
-| Schedule | `.tscroll > .gantt` | Weeks across, workstreams down | Diamonds `i[data-ms=id]` turn green when their milestone is ticked |
+| Schedule | `.tscroll > .gantt[data-start]` | Weeks across, workstreams down | Diamonds `i[data-ms=id]` turn green when their milestone is ticked. Give each bar's cell a `data-bar` id so people can drag it (see Live parts). `data-start` is the first week's date, `YYYY-MM-DD`. Any number of `.wk` columns |
 | Scope | `.scope > .in + .wait + .never` | In the MVP, waits, not building | Always this order. "Waits" and "not building" say why in grey |
 | Map | `.map > .region.ours + .region.outside` | What it touches | `.node.new` for new, `.node.ph` for outside or not checked |
 | Impact table | `.tscroll > table` with `tr.grp` | What changes for people, effect chip, checked chip | "Not checked" is a finding |
@@ -94,6 +94,7 @@ container where each one goes; `live.js` fills it.
 | Decisions | `<div class="decisions" id="decision-cards"></div>` | Cards from `prd-data` plus any decision Jig opens later |
 | Sign-off | `<tbody id="approvers"></tbody>` inside the stakeholders table | Rows for `prd-data.approvers`. "Gives input" and "kept posted" rows are plain markup in another `<tbody>` |
 | Approved stamp | `<span class="stamp review" id="tb-approved">` in the title block | Reads "Approved for spec" once every approver signs the current rev |
+| Schedule bars | `<div class="cell" data-bar="id" style="grid-column:a / b">` in `.gantt` | People who can save drag a bar (middle moves it, ends stretch it, or arrow keys; Shift changes the end, Alt the start). Changes stay a pink draft until Save, then save to `schedule/<id>` and log. Demo diamonds move a week at a time and move their milestone's due date. A date in a bar's text wrapped in `<time datetime="YYYY-MM-DD" data-edge="start|end">` follows that end. Bars without `data-bar` stay fixed |
 | Trace | `<tbody id="trace-rows"></tbody>` | One row per `prd-data.outcomes` entry |
 | Log | `form#log-form > input + button` and `<div id="log-items"></div>` | Newest first; a clamp face means Jig wrote it |
 | Messages | `<div class="msg-line" data-msg="ms|dec|appr|trace|log"></div>` | Where save errors show |
