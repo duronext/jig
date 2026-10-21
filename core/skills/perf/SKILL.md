@@ -142,8 +142,8 @@ Summarize in conversation which levers measured as wins in the combination,
 with their numbers and the `*-perf.md` path, then return control to `kickoff`
 or the invoking skill (or the user, if invoked directly).
 
-**Do NOT go on to implement the levers.** They go through PRD, spec and plan
-like any other change, with the results doc as their evidence.
+**Do NOT go on to implement the levers.** They go through the rest of the
+pipeline as `kickoff` routes the work, with the results doc as evidence.
 
 ---
 
