@@ -273,7 +273,7 @@ Apply mechanical scoring based on the highest severity finding. All findings are
 | `minor` only | 8-9 |
 | No findings | 10 |
 
-No exceptions, no bumps for positives.
+No exceptions, no bumps for positives. An error (`Nothing reviewed`, `Specialist not found`, or a specialist answering `Out of scope:`) gets no score: the report shows `Confidence Score: none (error)` and lists the error, so a caller never reads a 10.
 
 Deduplication (mode-aware):
 
@@ -300,7 +300,7 @@ The rest of the report format is identical across modes:
 
 **Confidence Score**: X/10
 **Risk Level**: Low/Medium/High
-**Specialists**: N dispatched, M skipped, K N/A
+**Specialists**: N dispatched, M skipped, K N/A, E errors
 **Logic reviewer**: {ran / skipped (fast-pass) / skipped (specialists)}
 **Tools**: {enforced / not enforced: <specialists> / none declared}
 
@@ -335,13 +335,14 @@ The rest of the report format is identical across modes:
 
 | Specialist | Status | Findings |
 |---|---|---|
-| {name} | {N blocking / N major / N minor / clean / N/A / skipped} | {one-line summary or —} |
+| {name} | {N blocking / N major / N minor / clean / N/A / skipped / error: <reason>} | {one-line summary or —} |
 | logic-reviewer | {N blocking / N major / N minor / clean / skipped} | {one-line summary or —} |
 
 **Skipped vs N/A distinction:**
 - **Skipped** = specialist's globs matched zero changed files (never spawned; never applies to a specialist the caller named)
 - **N/A** = specialist ran but found nothing relevant in the diff
 - **Clean** = specialist ran, found relevant code, but no issues
+- **Error** = the specialist could not review what it was given (not found, or `Out of scope:`); never clean
 
 ---
 
