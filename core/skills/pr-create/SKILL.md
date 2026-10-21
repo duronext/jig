@@ -16,6 +16,8 @@ alwaysApply: false
 
 **GIT HOST**: Commands in this skill use GitHub (`gh`) as the default. If `git-host` in `jig.config.md` is not `github`, read `framework/GIT_HOST.md` for the platform-specific command equivalents.
 
+**STACKED PRS**: If this PR builds on another unmerged branch, read `framework/STACKED_PRS.md` first. Use that branch in place of `{main-branch}` below (`git log <parent-branch>..HEAD`, `gh pr create --base <parent-branch>`), add the chain list to the body, and check CI on every PR in the chain, not just this one.
+
 ---
 
 ## When to Use
@@ -133,7 +135,7 @@ Add **context-specific items** when applicable:
 
 **Title**: Follow the project's commit convention from `jig.config.md` (e.g., `type(scope): description`), under 70 chars.
 
-**Body**: Use this structure:
+**Body**: If `perf` measured this work, link its results doc (`*-perf.md` in `plans-directory`) from the Summary. Use this structure:
 
 ```markdown
 ## Summary
@@ -223,7 +225,7 @@ That tells the reviewer nothing. What actually changed? Which files? Why?
 ## Pre-Submit Checklist
 
 - [ ] `review` run -- score 8+ (or blocking/major issues addressed)
-- [ ] All CI checks pass locally (build, tests)
+- [ ] All CI checks pass locally (build, tests); CI's conditions reproduced if env, install, dependency or build config changed (see `verify`)
 - [ ] PR description matches actual implementation
 - [ ] Appropriate test coverage for the change type
 - [ ] No merge conflicts with base branch
@@ -257,3 +259,4 @@ That tells the reviewer nothing. What actually changed? Which files? Why?
 - `review` -- run before creating the PR
 - `pr-respond` -- for handling reviewer feedback after PR is created
 - `postmortem` -- uses PR data for retrospectives
+- `perf` -- its `*-perf.md` results doc is linked from the PR Summary

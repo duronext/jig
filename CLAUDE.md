@@ -64,6 +64,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `pr-respond` | PR comment response — analyze, fix, commit, push, reply, resolve |
 | `postmortem` | Learning loop entry point — turns lessons from merged PRs and any other input into fit-reviewed skill changes |
 | `debug` | Systematic debugging — root cause before fixes, always |
+| `perf` | Performance investigation — measurement protocol, profile first, ablate before shipping |
 | `verify` | Evidence before assertions — run it before claiming it works |
 | `tdd` | Red-green-refactor discipline |
 | `finish` | Branch completion — merge, PR, keep, or discard |
@@ -111,7 +112,7 @@ When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/
 
 ```
 jig/
-├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters)
+├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, stacked PRs)
 ├── core/
 │   ├── skills/          Pipeline skills (one dir per skill)
 │   ├── agents/          Core agents
@@ -218,6 +219,7 @@ Core and pack changes reach installed copies only after a release.
 
 ### Key documents to read first
 - `framework/GIT_HOST.md` — git host adapter (GitHub/GitLab/Bitbucket command mapping)
+- `framework/STACKED_PRS.md` — building, retargeting and merging chains of dependent PRs (read by `pr-create`, `finish`, `pr-respond`)
 - `framework/PIPELINE.md` — the development pipeline
 - `framework/LEARNING_LOOP.md` — how Jig improves itself, from lesson to release
 - `framework/LIVE_PRD.md` — how the live PRD page and the pipeline share state

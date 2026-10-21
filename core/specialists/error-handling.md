@@ -25,6 +25,7 @@ You are reviewing a code diff for error handling issues. This review is language
 - External API calls, database operations, or file I/O without error consideration
 - Network requests that assume success without handling failure states
 - Resource acquisition (connections, locks, file handles) without cleanup on failure
+- Error and early-exit paths that leave process-wide state changed (terminal modes, working directory, env vars, temp files, locks)
 
 ### Inconsistent Error Patterns
 - Mixing different error handling patterns within the same module or layer
@@ -45,7 +46,7 @@ You are reviewing a code diff for error handling issues. This review is language
 
 ## What to Ignore
 - Test files (error handling in tests is intentionally different)
-- Scripts and tooling (non-production code)
+- One-off scripts (build, test and CI tooling the team runs every day is in scope)
 - Intentional error suppression with clear documentation explaining why
 - Logging concerns (that's a separate review concern)
 

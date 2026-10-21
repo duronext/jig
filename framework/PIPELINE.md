@@ -6,7 +6,7 @@ The guaranteed order of operations for all development work in Jig.
 DISCOVER → PRD → SPEC → PLAN → BUILD → REVIEW → PRD CHECK → SHIP → LEARN
 ```
 
-`BRAINSTORM` and `DEBUG` are discovery-time tools that hang off DISCOVER; they are not pipeline stages. `REVIEW` is a multi-stage gate engine that runs after PRD (mode: prd), after SPEC (mode: spec), after PLAN (mode: plan), and during / after BUILD (mode: code, fast tier per-task and full tier pre-ship).
+`BRAINSTORM`, `DEBUG` and `PERF` are discovery-time tools that hang off DISCOVER; they are not pipeline stages. `PERF`'s ship-time checks (ablating the combination, any "faster" or "cheaper" claim) run through `verify`. `REVIEW` is a multi-stage gate engine that runs after PRD (mode: prd), after SPEC (mode: spec), after PLAN (mode: plan), and during / after BUILD (mode: code, fast tier per-task and full tier pre-ship).
 
 Three documents, three readers:
 
@@ -112,6 +112,7 @@ How Jig improves itself. After a merge, and whenever a lesson turns up anywhere 
 | Discover | Yes | Yes | Yes | Yes |
 | Brainstorm tool | Rare | Recommended | Optional | Skip |
 | Debug tool | If unclear | Skip | Skip | Skip |
+| Perf tool | After `debug`, if speed or cost regressed | If speed/cost goal | If speed/cost goal | Skip |
 | PRD | Skip | Recommended | One-pager if large | Skip |
 | Spec | Light, optional | Full | Light or full | Skip |
 | Plan | 1-3 tasks | Detailed | Standard | Minimal |
