@@ -95,15 +95,15 @@ Skills should never hardcode `gh` commands without checking the git host first.
 | Host | Command |
 |------|---------|
 | github | `gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments` |
-| gitlab | `glab api projects/{id}/merge_requests/{iid}/notes` |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/comments` |
+| gitlab | `glab api --paginate projects/{id}/merge_requests/{iid}/notes` |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/comments`, following each page's `next` link until there is none |
 
 ### Fetch review summaries and top-level PR/MR comments
 
 | Host | Command |
 |------|---------|
 | github | `gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews` (review bodies) and `gh api --paginate repos/{owner}/{repo}/issues/{number}/comments` (top-level comments) |
-| gitlab | Included in the notes endpoint above (`glab api projects/{id}/merge_requests/{iid}/notes`) |
+| gitlab | Included in the notes endpoint above (`glab api --paginate projects/{id}/merge_requests/{iid}/notes`) |
 | bitbucket | Included in the comments endpoint above (top-level comments have no `inline` object) |
 
 ### Code-scanning alerts on a PR/MR
