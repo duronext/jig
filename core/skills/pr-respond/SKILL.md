@@ -155,18 +155,25 @@ case $runs in
   "") echo "code scanning: no check on this PR's head: not checked" >&2 ;;
   *) echo "$runs" | while read -r id status conclusion count check; do
        echo "$check"
-       if [ "$status" != completed ]; then echo "  pending: not checked" >&2
-       elif [ "$count" -gt 0 ]; then
-         gh api --paginate repos/{owner}/{repo}/check-runs/$id/annotations \
-           --jq '.[] | {path, line: .start_line, message}' || echo "  alerts not readable: not checked" >&2
-       elif [ "$conclusion" != success ]; then echo "  $conclusion: not checked" >&2
+       if [ "$status" != completed ]; then echo "  pending: not checked" >&2; continue; fi
+       # Annotations are the new alerts; print each one's open alert (fixed or dismissed ones have none)
+       if [ "$count" -gt 0 ]; then
+         open=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?pr={pr_number}&state=open" \
+           --jq '.[] | "\(.most_recent_instance.location.path):\(.most_recent_instance.location.start_line) #\(.number) \(.rule.id)"') &&
+         locs=$(gh api --paginate repos/{owner}/{repo}/check-runs/$id/annotations --jq '.[] | "\(.path):\(.start_line)"') &&
+         while read -r loc; do echo "$open" | awk -v l="$loc" '$1 == l { print "  " $2, $3, $1 }'; done <<< "$locs" ||
+         echo "  alerts not readable: not checked" >&2
        fi
+       case $check in
+         *"configuration not found"*) echo "  incomplete: not checked" >&2 ;;
+         *) [ "$count" -gt 0 ] || [ "$conclusion" = success ] || echo "  $conclusion: not checked" >&2 ;;
+       esac
      done ;;
 esac
 ```
 
-- The check runs on the PR's head, so it is current with the last push, and it reports only alerts in code the PR changed. Its annotations are those new alerts; a check can pass with some ("2 new alerts", conclusion `success`). One that ends otherwise without annotations (`neutral`, "configuration not found") is not checked.
-- `not checked` (no check on the head yet, one still running, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the checks finish.
+- The check runs on the PR's head, so it is current with the last push, and it reports only alerts in code the PR changed. Its annotations are those new alerts; a check can pass with some ("2 new alerts", conclusion `success`). Each prints as `#<alert> <rule> <path>:<line>`, the number to fix or dismiss; an annotation with no open alert was already fixed or dismissed. A check titled "configuration not found" is incomplete even with annotations, and one that ends otherwise (`neutral`, `failure`) without annotations is not checked.
+- `not checked` (no check on the head yet, one still running, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the checks finish. Above the bottom of a stack the check may never run: check the PR below, and re-run after this PR retargets `{main-branch}`.
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
 - Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
