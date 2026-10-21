@@ -144,10 +144,14 @@ gh api --paginate repos/{owner}/{repo}/issues/{pr_number}/comments \
   --jq '.[] | {id, user: .user.login, created_at, url: .html_url, body}'
 
 # Code-scanning alerts the PR introduces: open on its merge ref, not open on {main-branch}.
-# An unanalyzed ref lists no alerts, so check both refs have an analysis first.
+# An unanalyzed ref lists no alerts, and a merge ref keeps its last analysis after a push,
+# so require an analysis of {main-branch} and one of the PR's current merge commit.
 analyzed() { n=$(gh api "repos/{owner}/{repo}/code-scanning/analyses?ref=$1&per_page=1" --jq length) &&
   [ "$n" -gt 0 ] || { echo "code scanning: no analysis for $1: not checked" >&2; false; }; }
-if analyzed refs/pull/{pr_number}/merge && analyzed refs/heads/{main-branch}; then
+current() { sha=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq .merge_commit_sha) &&
+  last=$(gh api "repos/{owner}/{repo}/code-scanning/analyses?ref=refs/pull/{pr_number}/merge&per_page=1" --jq '.[0].commit_sha') &&
+  [ "$last" = "$sha" ] || { echo "code scanning: analysis for #{pr_number} not current (pending): not checked" >&2; false; }; }
+if analyzed refs/pull/{pr_number}/merge && current && analyzed refs/heads/{main-branch}; then
   old=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/heads/{main-branch}&state=open" --jq '.[].number') &&
   gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
     --jq ".[] | select([.number] | inside([${old//$'\n'/,}]) | not) | {number, rule: .rule.id, path: .most_recent_instance.location.path, line: .most_recent_instance.location.start_line}" ||
@@ -156,7 +160,7 @@ fi
 ```
 
 - The baseline is `{main-branch}`, not the PR's base: a stack branch usually has no analysis, so every alert would look new. A stacked PR's merge ref holds the PRs below it, so their alerts show here too; fix each on the PR that introduced it.
-- `not checked` (no analysis yet, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so.
+- `not checked` (no analysis yet, none of the latest push yet, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the analysis finishes.
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
 - Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
