@@ -153,9 +153,9 @@ h=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq .head.sha) &&
 case $runs in
   error) echo "code scanning: checks not readable: not checked" >&2 ;;
   "") echo "code scanning: no check on this PR's head: not checked" >&2 ;;
-  *) echo "$runs" | while read -r id status conclusion count check; do
+  *) printf '%s\n' "$runs" | while read -r id st conclusion count check; do
        echo "$check"
-       if [ "$status" != completed ]; then echo "  pending: not checked" >&2; continue; fi
+       if [ "$st" != completed ]; then echo "  pending: not checked" >&2; continue; fi
        # Annotations are the new alerts. Match each to its alert by location and rule
        # (annotation title = alert rule.description for CodeQL and Semgrep; a tool where
        # it differs prints unmatched, never handled) and print the alert's state
@@ -187,6 +187,7 @@ esac
 **On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it; otherwise walk the bases (`framework/STACKED_PRS.md`, "Finding the Chain"):
 
 ```bash
+# Runs in bash or zsh: no variable named `status` (read-only in zsh), and lists are split by line, not by word
 fail() { echo "could not list PRs $1; stack sweep incomplete" >&2; }
 if ! stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number // empty'); then
   fail "for #{pr_number}"
@@ -203,16 +204,19 @@ else
     [ -n "$pr" ] && case $seen in *" $n "*) false;; esac || break
     echo "$n"; seen="$seen$n "
   done
-  # Above: open same-repo PRs whose base is this PR's head, until none is new
-  heads=$(gh pr view {pr_number} --json headRefName --jq .headRefName) || fail "above #{pr_number}"
+  # Above: open same-repo PRs whose base is this PR's head, until none is new. Not from a
+  # fork PR or one whose head is {main-branch}: their head name isn't a stack branch here
+  me=$(gh pr view {pr_number} --json headRefName,isCrossRepository --jq '"\(.isCrossRepository) \(.headRefName)"') || fail "above #{pr_number}"
+  heads=; [ "${me%% *}" = false ] && [ "${me#* }" != "{main-branch}" ] && heads=${me#* }
   while [ -n "$heads" ]; do
-    found=$(for h in $heads; do gh pr list --base "$h" --json number,headRefName,isCrossRepository \
-      --jq '.[] | select(.isCrossRepository | not) | "\(.number) \(.headRefName)"' || fail "above $h"; done)
+    found=$(while read -r h; do gh pr list --base "$h" --json number,headRefName,isCrossRepository \
+      --jq '.[] | select(.isCrossRepository | not) | "\(.number) \(.headRefName)"' || fail "above $h"; done <<< "$heads")
     heads=
     while read -r n h; do
       [ -n "$n" ] && case $seen in *" $n "*) false;; esac || continue
-      echo "$n"; seen="$seen$n "; heads="$heads $h"
+      echo "$n"; seen="$seen$n "; heads=$(printf '%s\n%s' "$heads" "$h")
     done <<< "$found"
+    heads=$(printf '%s\n' "$heads" | sed '/^$/d')
   done
 fi
 ```
