@@ -145,6 +145,7 @@ For each specialist with matching files, and each specialist the caller named, s
 Agent tool:
   description: "Review: {specialist.name}"
   model: {specialist.model}     <- from frontmatter (haiku, sonnet, or opus)
+  agent type: {read-only type with specialist.tools}   <- only if it declares `tools`
   prompt: |
     {specialist body}           <- everything below the frontmatter in the specialist file
 
@@ -155,7 +156,7 @@ Agent tool:
     {filtered diff}             <- only the files matching this specialist's globs
 ```
 
-A specialist that declares `tools` in its frontmatter (e.g. `framework-fit`) is also given those tools. Others get none.
+A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: in Claude Code, the read-only `Explore` agent for `[Read, Grep, Glob]`; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say in the report that `tools` was not enforced. A specialist without `tools` works from the diff in its prompt.
 
 #### Mode: prd or spec
 
