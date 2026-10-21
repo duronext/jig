@@ -143,24 +143,30 @@ gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/reviews \
 gh api --paginate repos/{owner}/{repo}/issues/{pr_number}/comments \
   --jq '.[] | {id, user: .user.login, created_at, url: .html_url, body}'
 
-# Code-scanning alerts the PR introduces: open on its merge ref, not open on {main-branch}.
-# An unanalyzed ref lists no alerts, and a merge ref keeps its last analysis after a push,
-# so require an analysis of {main-branch} and one of the PR's current merge commit.
-analyzed() { n=$(gh api "repos/{owner}/{repo}/code-scanning/analyses?ref=$1&per_page=1" --jq length) &&
-  [ "$n" -gt 0 ] || { echo "code scanning: no analysis for $1: not checked" >&2; false; }; }
-current() { sha=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq .merge_commit_sha) &&
-  last=$(gh api "repos/{owner}/{repo}/code-scanning/analyses?ref=refs/pull/{pr_number}/merge&per_page=1" --jq '.[0].commit_sha') &&
-  [ "$last" = "$sha" ] || { echo "code scanning: analysis for #{pr_number} not current (pending): not checked" >&2; false; }; }
-if analyzed refs/pull/{pr_number}/merge && current && analyzed refs/heads/{main-branch}; then
-  old=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/heads/{main-branch}&state=open" --jq '.[].number') &&
-  gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
-    --jq ".[] | select([.number] | inside([${old//$'\n'/,}]) | not) | {number, rule: .rule.id, path: .most_recent_instance.location.path, line: .most_recent_instance.location.start_line}" ||
-  echo "code scanning: could not list alerts: not checked" >&2
-fi
+# Code scanning: GitHub's own check on the PR's head, one per tool or category,
+# scoped to the code the PR changed
+h=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq .head.sha) &&
+  runs=$(gh api --paginate "repos/{owner}/{repo}/commits/$h/check-runs" --jq '.check_runs[]
+    | select(.app.slug == "github-advanced-security")
+    | "\(.id) \(.status) \(.conclusion) \(.output.annotations_count // 0) \(.name): \(.output.title)"') ||
+  runs=error
+case $runs in
+  error) echo "code scanning: checks not readable: not checked" >&2 ;;
+  "") echo "code scanning: no check on this PR's head: not checked" >&2 ;;
+  *) echo "$runs" | while read -r id status conclusion count check; do
+       echo "$check"
+       if [ "$status" != completed ]; then echo "  pending: not checked" >&2
+       elif [ "$count" -gt 0 ]; then
+         gh api --paginate repos/{owner}/{repo}/check-runs/$id/annotations \
+           --jq '.[] | {path, line: .start_line, message}' || echo "  alerts not readable: not checked" >&2
+       elif [ "$conclusion" != success ]; then echo "  $conclusion: not checked" >&2
+       fi
+     done ;;
+esac
 ```
 
-- The baseline is `{main-branch}`, not the PR's base: a stack branch usually has no analysis, so every alert would look new. A stacked PR's merge ref holds the PRs below it, so their alerts show here too; fix each on the PR that introduced it.
-- `not checked` (no analysis yet, none of the latest push yet, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the analysis finishes.
+- The check runs on the PR's head, so it is current with the last push, and it reports only alerts in code the PR changed. Its annotations are those new alerts; a check can pass with some ("2 new alerts", conclusion `success`). One that ends otherwise without annotations (`neutral`, "configuration not found") is not checked.
+- `not checked` (no check on the head yet, one still running, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the checks finish.
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
 - Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
