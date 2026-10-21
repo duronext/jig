@@ -126,7 +126,9 @@ what is worth doing next.
 
 - **Results CSV**, one schema for every experiment, e.g.
   `date,experiment,arm,round,cpu_user_s,cpu_sys_s,wall_s,max_rss_mb,notes`.
-  Record machine load in `notes`.
+  Record machine load in `notes`. `/usr/bin/time -l` (macOS) reports max RSS
+  in bytes and GNU `/usr/bin/time -v` in KB; convert to MB before recording
+  `max_rss_mb`.
 - **Results doc** (`*-perf.md`): what changed, methodology, results,
   learnings.
 - Link both from the PR description and the ticket.
