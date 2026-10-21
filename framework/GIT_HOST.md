@@ -70,7 +70,7 @@ Skills should never hardcode `gh` commands without checking the git host first.
 
 | Host | Command |
 |------|---------|
-| github | `gh pr list --base <branch> --json number,headRefName` |
+| github | `gh pr list --base <branch> --json number,headRefName,isCrossRepository` (fork PRs have `isCrossRepository: true`) |
 | gitlab | `glab mr list --target-branch <branch>` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=destination.branch.name="<branch>"` |
 
@@ -78,7 +78,7 @@ Skills should never hardcode `gh` commands without checking the git host first.
 
 | Host | Command |
 |------|---------|
-| github | `gh pr list --head <branch> --json number,baseRefName` |
+| github | `gh pr list --head <branch> --json number,baseRefName,isCrossRepository` (also matches fork PRs from a same-named branch; they have `isCrossRepository: true`) |
 | gitlab | `glab mr list --source-branch <branch>` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=source.branch.name="<branch>"` |
 

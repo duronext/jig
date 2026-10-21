@@ -167,21 +167,27 @@ if ! stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number /
 elif [ -n "$stack" ]; then
   gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number' || fail "in stack $stack"
 else
-  echo {pr_number}
-  # Below: the open PR whose head is this PR's base, until none is found
+  echo {pr_number}; seen=" {pr_number} "
+  main=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name) || fail "(no default branch)"
+  # Below: the open same-repo PR whose head is this PR's base, down to the default branch
   base=$(gh pr view {pr_number} --json baseRefName --jq .baseRefName) || fail "below #{pr_number}"
-  while [ -n "$base" ]; do
-    pr=$(gh pr list --head "$base" --json number,baseRefName \
-      --jq '.[:1][] | "\(.number) \(.baseRefName)"') || { fail "below $base"; break; }
-    [ -n "$pr" ] && echo "${pr% *}"; base=${pr#* }
+  while [ -n "$base" ] && [ "$base" != "$main" ]; do
+    pr=$(gh pr list --head "$base" --json number,baseRefName,isCrossRepository \
+      --jq '[.[] | select(.isCrossRepository | not)][:1][] | "\(.number) \(.baseRefName)"') || { fail "below $base"; break; }
+    n=${pr% *}; base=${pr#* }
+    [ -n "$pr" ] && case $seen in *" $n "*) false;; esac || break
+    echo "$n"; seen="$seen$n "
   done
-  # Above: open PRs whose base is this PR's head, until none is found
+  # Above: open same-repo PRs whose base is this PR's head, until none is new
   heads=$(gh pr view {pr_number} --json headRefName --jq .headRefName) || fail "above #{pr_number}"
   while [ -n "$heads" ]; do
-    found=$(for h in $heads; do gh pr list --base "$h" --json number,headRefName \
-      --jq '.[] | "\(.number) \(.headRefName)"' || fail "above $h"; done)
-    [ -n "$found" ] && echo "$found" | cut -d' ' -f1
-    heads=$(echo "$found" | cut -s -d' ' -f2)
+    found=$(for h in $heads; do gh pr list --base "$h" --json number,headRefName,isCrossRepository \
+      --jq '.[] | select(.isCrossRepository | not) | "\(.number) \(.headRefName)"' || fail "above $h"; done)
+    heads=
+    while read -r n h; do
+      [ -n "$n" ] && case $seen in *" $n "*) false;; esac || continue
+      echo "$n"; seen="$seen$n "; heads="$heads $h"
+    done <<< "$found"
   done
 fi
 ```
