@@ -251,6 +251,7 @@ That tells the reviewer nothing. What actually changed? Which files? Why?
 - `kickoff` during the SHIP stage
 - `finish` Option 2 (Push and Create PR)
 - `postmortem`, for a learning PR (PR in `framework/LEARNING_LOOP.md`)
+- `extend`, for a pack or core artifact's learning PR
 
 **Related skills:**
 - `review` -- run before creating the PR
