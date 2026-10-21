@@ -273,7 +273,7 @@ Apply mechanical scoring based on the highest severity finding. All findings are
 | `minor` only | 8-9 |
 | No findings | 10 |
 
-No exceptions, no bumps for positives. An error (`Nothing reviewed`, `Specialist not found`, or a specialist answering `Out of scope:`) gets no score: the report shows `Confidence Score: none (error)` and lists the error, so a caller never reads a 10.
+No exceptions, no bumps for positives. An error (`Nothing reviewed`, `Specialist not found`, or a specialist answering `Out of scope:`) gets no score: the report shows `Confidence Score: none (error)` and lists the error, so a caller never reads a 10. Callers handle it as a blocking result: fix the cause and re-run.
 
 Deduplication (mode-aware):
 
@@ -298,7 +298,7 @@ Produce the unified report. Adapt the header by mode:
 
 The rest of the report format is identical across modes:
 
-**Confidence Score**: X/10
+**Confidence Score**: X/10, or `none (error)` (Stage 6)
 **Risk Level**: Low/Medium/High
 **Specialists**: N dispatched, M skipped, K N/A, E errors
 **Logic reviewer**: {ran / skipped (fast-pass) / skipped (specialists)}
