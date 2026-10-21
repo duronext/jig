@@ -63,7 +63,7 @@ Report (patterns table, changes made, items needing judgment)
 
 ## Step 1: Interview
 
-Detect the PR from the current branch, or ask.
+Detect the PR from the current branch only when the user asked for a PR postmortem or gave no input. A lesson stated directly ("Jig should do X", a session, a retrospective) skips detection: go to **Other inputs** below.
 
 ```bash
 # Try to find a merged PR for the current branch
@@ -112,7 +112,7 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews
 | What was wrong | Hardcoded color value instead of theme token |
 | Principle violated | Use design system tokens for all visual properties |
 | How it was fixed | Replaced hex value with `token.colorPrimary` |
-| Who caught it | reviewer-username (human) |
+| Who caught it | reviewer-username (human); for other inputs, who or what surfaced it |
 
 **Categorize into pattern groups** -- discover from the data, do not force into preset buckets. Common categories from past postmortems:
 
@@ -218,17 +218,22 @@ If the same correctness bug appears 3+ times across different PRs or other input
 
 ## Step 6: Prepare the Workspace
 
-For a PR input, the PR is already merged and the user is likely still on the old branch, so stash and branch from latest main as below. For any other input, work may still be in flight: create the branch in a separate worktree (`worktree`) instead of stashing, and never stash while a `team-dev` or `sdd` run is active. For a core or pack lesson, do this in a Jig checkout; the PR goes to Jig.
+For a core or pack lesson, do this in a Jig checkout; the PR goes to Jig.
+
+**PR input.** The PR is already merged and the user is likely still on the old branch, so stash and branch from latest main:
 
 ```bash
-# Stash any uncommitted work (PR input only)
 git stash
-
-# Get onto latest main
 git checkout {main-branch} && git pull origin {main-branch}
-
-# Create improvement branch (-{topic} instead of -pr-{number} for other inputs)
 git checkout -b {username}/skill-improvements-from-pr-{number}
+```
+
+**Any other input.** Work may still be in flight (a `team-dev` or `sdd` run, uncommitted changes), so never stash or check out in the current tree. Create the branch in a new worktree from latest main, or with the `worktree` skill, and do the remaining steps there:
+
+```bash
+git fetch origin {main-branch}
+git worktree add .worktrees/skill-improvements-{topic} -b {username}/skill-improvements-{topic} origin/{main-branch}
+cd .worktrees/skill-improvements-{topic}
 ```
 
 Read `main-branch` from `jig.config.md` (default: `main`).
