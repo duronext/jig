@@ -110,7 +110,7 @@ Skills should never hardcode `gh` commands without checking the git host first.
 
 | Host | Command |
 |------|---------|
-| github | List: `gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{number}/merge&state=open"`. Dismiss: `gh api -X PATCH repos/{owner}/{repo}/code-scanning/alerts/{alert} -f state=dismissed -f dismissed_reason='false positive' -f dismissed_comment='why'` (reasons: `false positive`, `won't fix`, `used in tests`) |
+| github | List the PR's new alerts: the numbers from `gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{number}/merge&state=open"` minus those from the same call with `ref=refs/heads/<default-branch>` (a stack branch has no analysis of its own). Dismiss: `gh api -X PATCH repos/{owner}/{repo}/code-scanning/alerts/{alert} -f state=dismissed -f dismissed_reason='false positive' -f dismissed_comment='why'` (reasons: `false positive`, `won't fix`, `used in tests`) |
 | gitlab | The MR's security widget (Ultimate); dismiss findings there |
 | bitbucket | Code Insights reports: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/reports`; no dismissal API |
 

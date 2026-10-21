@@ -143,15 +143,19 @@ gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/reviews \
 gh api --paginate repos/{owner}/{repo}/issues/{pr_number}/comments \
   --jq '.[] | {id, user: .user.login, created_at, url: .html_url, body}'
 
-# Open code-scanning alerts on the PR
-gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
-  --jq '.[] | {number, rule: .rule.id, path: .most_recent_instance.location.path, line: .most_recent_instance.location.start_line}'
+# Code-scanning alerts the PR introduces: open on its merge ref, not open on the default branch
+main=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name) &&
+  old=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/heads/$main&state=open" --jq '.[].number') &&
+  gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
+    --jq ".[] | select([.number] | inside([${old//$'\n'/,}]) | not) | {number, rule: .rule.id, path: .most_recent_instance.location.path, line: .most_recent_instance.location.start_line}" ||
+  echo "code scanning not readable: not checked" >&2
 ```
 
-- A 403 or 404 from code scanning means it is not enabled or the token lacks the scope. Say so; don't report "no alerts".
+- The baseline is the default branch, not the PR's base: a stack branch usually has no analysis, so every alert would look new. A stacked PR's merge ref holds the PRs below it, so their alerts show here too; fix each on the PR that introduced it.
+- `code scanning not readable` (a 403 or 404: not enabled, or the token lacks the scope) means not checked. Say so; don't report "no alerts".
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
-- Code-scanning alerts are not replied to. Fix them, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
+- Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
 - Track by reviewer: every human reviewer who left feedback gets a reply.
 
 **On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it; otherwise walk the bases (`framework/STACKED_PRS.md`, "Finding the Chain"):
@@ -184,7 +188,7 @@ fi
 
 A failed `gh` call prints `stack sweep incomplete` rather than ending the walk quietly. If you see it, the sweep is not done: say which PRs could not be listed.
 
-**Stop when, on every PR, each inline thread is resolved, each review summary and top-level comment that needs an answer is answered, and each alert is fixed or dismissed. Say so.**
+**Stop when, on every PR, each inline thread is resolved, each review summary and top-level comment that needs an answer is answered, and each alert the PR introduces is fixed or dismissed. Say so.**
 
 ---
 
@@ -366,7 +370,7 @@ Fix it where it belongs, not on your current branch: switch to that PR's branch,
 - [ ] Reply posted to every addressed comment
 - [ ] Every addressed thread resolved via GraphQL
 - [ ] No unresolved threads remaining (unless intentionally deferred)
-- [ ] On every PR in the stack: every review summary and top-level comment from a human, or from a bot with review findings, answered by a reply that quotes or links it; open code-scanning alerts fixed or dismissed with a reason
+- [ ] On every PR in the stack: every review summary and top-level comment from a human, or from a bot with review findings, answered by a reply that quotes or links it; code-scanning alerts the PR introduces fixed or dismissed with a reason
 
 ---
 
