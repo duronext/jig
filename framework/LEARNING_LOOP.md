@@ -29,7 +29,7 @@ Decide who the lesson holds for. That sets the level it lives at.
 |-------|-----------|------|
 | Personal | One person | Their own harness config (user-level instructions or memory). Not the repo, not Jig. |
 | Harness | One agent harness, in any project | That harness's own user-level config. Jig's `adapters/` only when it is about loading Jig there. |
-| Team | One team or repo, including how the team's harness should work in this repo | `team/` skills and specialists, the project's CLAUDE.md, AGENTS.md or equivalent, `jig.config.md` |
+| Team | One team or repo, including how the team's harness should work in this repo | `team/` skills and specialists, `.claude/`, the project's agent instruction files at any level (CLAUDE.md, AGENTS.md or a harness's equivalent), `jig.config.md` |
 | Pack | Teams that share a stack, tool or tracker | `packs/` |
 | Core | Every team, on any stack, git host and harness | `core/` or `framework/`, through a PR to Jig |
 
@@ -56,6 +56,7 @@ Ship through `pr-create`. A learning PR's body opens with these sections, before
 - **Benefits**: what goes wrong today, and what each change prevents.
 - **How this follows Jig**: the Fit Checklist items the change touches, and how each holds.
 - **Fit review**: every `framework-fit` finding, fixed or left standing with its reason, one line each. This is the record a later postmortem counts.
+- **Copies**: each copy of the lesson at another level (Release and Propagate, below), added to the body when it is made.
 
 Its test plan lists each procedure run from the Fit Review, one item each with the input and the result, where an unticked item is an open finding; "No testing required" does not apply.
 
@@ -65,7 +66,7 @@ Name the lesson's input (the PR, session, retrospective or request) in a line. C
 
 Team-level changes take effect when they merge. Core and pack changes reach installed copies only after a release (see Releasing in Jig's CLAUDE.md), and teams then update as README's Updating section says. Until then the change exists only in the Jig repo.
 
-A lesson that also lands at another level (a copy in a team's or a person's own config) is copied after the PR's reviews settle, not while they run. List each copy in the PR, and carry every later fix to each one; a copy taken mid-review keeps the bugs the review then finds.
+A lesson that also lands at another level (a copy in a team's or a person's own config) is copied after the PR's reviews settle, not while they run; a copy taken mid-review keeps the bugs the review then finds. Add each copy to the PR's Copies line and carry every later fix to it. A copy that only bridges the wait for a release is deleted once the release reaches that level; one that adapts the lesson to its level (e.g. one host's exact commands) stays and is kept in step.
 
 ## 8. Close the Loop
 
