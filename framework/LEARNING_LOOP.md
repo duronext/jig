@@ -66,7 +66,7 @@ Name the lesson's input (the PR, session, retrospective or request) in a line. C
 
 Team-level changes take effect when they merge. Core and pack changes reach installed copies only after a release (see Releasing in Jig's CLAUDE.md), and teams then update as README's Updating section says. Until then the change exists only in the Jig repo.
 
-A lesson that also lands at another level (a copy in a team's or a person's own config) is copied after the PR's reviews settle, not while they run; a copy taken mid-review keeps the bugs the review then finds. Add each copy to the PR's Copies line and carry every later fix to it. A copy that only bridges the wait for a release is deleted once the release reaches that level; one that adapts the lesson to its level (e.g. one host's exact commands) stays and is kept in step.
+A lesson that also lands at another level (a copy in a team's or a person's own config) is copied after the PR's reviews settle, not while they run; a copy taken mid-review keeps the bugs the review then finds. Add each copy to the PR's Copies line and carry every later fix to it. A copy that only bridges the wait for a release ends with the release (Close the Loop, below); one that adapts the lesson to its level (e.g. one host's exact commands) stays and is kept in step.
 
 ## 8. Close the Loop
 

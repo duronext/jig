@@ -205,6 +205,8 @@ Jig is distributed as a Claude Code plugin. To get the latest version:
 /plugin install jig@duronext-jig --scope project
 ```
 
+After updating, delete any bridging copy of a Jig lesson you made in your own config while waiting for this release (the Copies line of its learning PR; see Close the Loop in `framework/LEARNING_LOOP.md`).
+
 ### Upgrading from 1.x
 
 Jig 2.0 renames the technical requirements document from **PRD** to **spec** and adds a new, plain-language **PRD**. Run `/jig:init` in a 1.x project and choose **Upgrade to 2.0**: it moves your config keys, renames old technical `*-prd.md` files to `*-spec.md`, and updates plan headers. `/jig:spec` is what `/jig:prd` used to be.
