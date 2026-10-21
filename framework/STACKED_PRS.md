@@ -39,8 +39,8 @@ Walk the bases. A PR's base branch is the PR below it (GIT_HOST: "Find the
 open PR/MR for a branch"); PRs whose base is this PR's head branch are above it
 (GIT_HOST: "Find dependent PRs/MRs"). Count only PRs whose head is in this
 repo (a search for head `main` also matches a fork's `main`), stop going down
-at the default branch, and stop at a PR already listed. On GitHub, a PR in a
-native stack also reports its stack directly (see below).
+at `main-branch` (`jig.config.md`), and stop at a PR already listed. On
+GitHub, a PR in a native stack also reports its stack directly (see below).
 
 ---
 

@@ -79,7 +79,7 @@ Run these in parallel. You need REST comment IDs (for replying) and GraphQL thre
 gh pr view --json number,url,title,body
 ```
 
-Extract owner/repo from `git remote get-url origin`. Use in all `gh api` calls below.
+Extract owner/repo from `git remote get-url origin`. Use in all `gh api` calls below. Read `main-branch` from `jig.config.md` (default: `main`).
 
 **Fetch PR comments (REST -- for replying):**
 
@@ -143,16 +143,20 @@ gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/reviews \
 gh api --paginate repos/{owner}/{repo}/issues/{pr_number}/comments \
   --jq '.[] | {id, user: .user.login, created_at, url: .html_url, body}'
 
-# Code-scanning alerts the PR introduces: open on its merge ref, not open on the default branch
-main=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name) &&
-  old=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/heads/$main&state=open" --jq '.[].number') &&
+# Code-scanning alerts the PR introduces: open on its merge ref, not open on {main-branch}.
+# An unanalyzed ref lists no alerts, so check both refs have an analysis first.
+analyzed() { n=$(gh api "repos/{owner}/{repo}/code-scanning/analyses?ref=$1&per_page=1" --jq length) &&
+  [ "$n" -gt 0 ] || { echo "code scanning: no analysis for $1: not checked" >&2; false; }; }
+if analyzed refs/pull/{pr_number}/merge && analyzed refs/heads/{main-branch}; then
+  old=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/heads/{main-branch}&state=open" --jq '.[].number') &&
   gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
     --jq ".[] | select([.number] | inside([${old//$'\n'/,}]) | not) | {number, rule: .rule.id, path: .most_recent_instance.location.path, line: .most_recent_instance.location.start_line}" ||
-  echo "code scanning not readable: not checked" >&2
+  echo "code scanning: could not list alerts: not checked" >&2
+fi
 ```
 
-- The baseline is the default branch, not the PR's base: a stack branch usually has no analysis, so every alert would look new. A stacked PR's merge ref holds the PRs below it, so their alerts show here too; fix each on the PR that introduced it.
-- `code scanning not readable` (a 403 or 404: not enabled, or the token lacks the scope) means not checked. Say so; don't report "no alerts".
+- The baseline is `{main-branch}`, not the PR's base: a stack branch usually has no analysis, so every alert would look new. A stacked PR's merge ref holds the PRs below it, so their alerts show here too; fix each on the PR that introduced it.
+- `not checked` (no analysis yet, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so.
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
 - Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
@@ -168,10 +172,9 @@ elif [ -n "$stack" ]; then
   gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number' || fail "in stack $stack"
 else
   echo {pr_number}; seen=" {pr_number} "
-  main=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name) || fail "(no default branch)"
-  # Below: the open same-repo PR whose head is this PR's base, down to the default branch
+  # Below: the open same-repo PR whose head is this PR's base, down to {main-branch}
   base=$(gh pr view {pr_number} --json baseRefName --jq .baseRefName) || fail "below #{pr_number}"
-  while [ -n "$base" ] && [ "$base" != "$main" ]; do
+  while [ -n "$base" ] && [ "$base" != "{main-branch}" ]; do
     pr=$(gh pr list --head "$base" --json number,baseRefName,isCrossRepository \
       --jq '[.[] | select(.isCrossRepository | not)][:1][] | "\(.number) \(.baseRefName)"') || { fail "below $base"; break; }
     n=${pr% *}; base=${pr#* }
