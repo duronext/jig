@@ -56,7 +56,7 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - Otherwise include specialists whose `stage` names the mode. `stage` is a single value (`prd`, `spec`, `plan`) or a list (`[spec, plan]`). The legacy value `both` means `[spec, plan]`.
-6. If the caller passes `specialists: [...]`, keep only those names, skip the tier filter, and skip Stage 2's glob filter: a named specialist reviews every changed path the caller passed. Otherwise filter by the requested tier:
+6. If the caller passes `specialists: [...]`, keep only those names, skip the tier filter, and skip Stage 2's glob filter: a named specialist reviews every changed path the caller passed. If a name matches no specialist discovered for this mode, stop and report `Specialist not found: {name}` as an error, never as a score. Without `specialists`, filter by the requested tier:
    - `tier: all` → include all specialists matching the mode
    - `tier: fast-pass` → include only `tier: fast-pass` specialists matching the mode
 
@@ -86,10 +86,10 @@ git diff <BASE_SHA>..<HEAD_SHA>
 git diff <BASE_SHA>..<HEAD_SHA> --name-only
 ```
 
-**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}` when there is none or the fetch fails:
+**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}`, saying so, when there is none or the fetch fails:
 ```bash
 remote=$(git config branch.{main-branch}.remote)
-if [ -n "$remote" ] && git fetch "$remote" {main-branch}; then main_ref="$remote/{main-branch}"; else main_ref={main-branch}; fi
+if [ -n "$remote" ] && git fetch "$remote" {main-branch}; then main_ref="$remote/{main-branch}"; else main_ref={main-branch}; echo "fit review: using local $main_ref (no remote, or fetch failed)" >&2; fi
 base=$(git merge-base "$main_ref" HEAD) || { echo "fit review: no merge base with $main_ref" >&2; exit 1; }
 { git diff "$base" --name-only -- <paths>; git ls-files --others --exclude-standard -- <paths>; } | sort -u
 git diff "$base" -- <paths>
