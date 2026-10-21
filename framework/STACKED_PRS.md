@@ -59,26 +59,43 @@ intent.
 **Rebase (only before review, or when the team wants linear history).**
 Rewrites every branch above; needs the user's approval to force-push.
 
+If the lower branch was only appended to (git 2.38+):
+
 ```bash
 git switch <top-branch>
 git rebase --update-refs <lower-branch>
 git push --force-with-lease origin <each-rebased-branch…>
 ```
 
-Without `--update-refs` (git < 2.38), rebase each branch in turn, bottom-up:
-`git rebase --onto <new-parent-tip> <old-parent-tip> <branch>`, recording each
-old tip before you move it.
+If it was rewritten (amended, squashed, rebased), or on older git, rebase each
+branch above in turn, bottom-up, cutting at the lower branch's old tip. A plain
+rebase would replay the old commits, whose content changed, as duplicates or
+conflicts. Record each branch's tip before you move it; it is the old tip for
+the branch above.
+
+```bash
+# <old-lower-tip>: the lower branch before it was rewritten (git reflog <lower-branch>)
+old=$(git rev-parse <next-branch>)
+git rebase --onto <lower-branch> <old-lower-tip> <next-branch>
+# repeat up the chain: <next-branch> is the new <lower-branch>, $old its <old-lower-tip>
+git push --force-with-lease origin <each-rebased-branch…>
+```
 
 ### Drop a PR from the middle
 
-**Under review (forward only).** Revert the dropped PR's own commits on the
-branch above it, then merge forward.
+**Under review (forward only).** On the branch above it, reverse the dropped
+PR's whole diff in one commit, then merge forward. This also undoes the
+conflict resolutions from its forward merges, and no commit order is involved.
 
 ```bash
 git switch <branch-above-dropped>
-git revert --no-edit $(git rev-list --no-merges <parent-branch>..<dropped-branch>)
+git diff <parent-branch>...<dropped-branch> | git apply -R --3way
+git commit -m "Revert #<dropped-pr>: drop it from the chain"
 # then merge forward up the chain, as above
 ```
+
+`--3way` stages the result and leaves conflict markers where the branch above
+changed the same lines; resolve them before committing.
 
 **Before review (rewrite).** Move every branch above onto the dropped PR's
 parent.
