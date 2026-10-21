@@ -156,27 +156,32 @@ gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_n
 **On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it; otherwise walk the bases (`framework/STACKED_PRS.md`, "Finding the Chain"):
 
 ```bash
-stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number // empty')
-if [ -n "$stack" ]; then
-  gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number'
+fail() { echo "could not list PRs $1; stack sweep incomplete" >&2; }
+if ! stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number // empty'); then
+  fail "for #{pr_number}"
+elif [ -n "$stack" ]; then
+  gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number' || fail "in stack $stack"
 else
   echo {pr_number}
   # Below: the open PR whose head is this PR's base, until none is found
-  base=$(gh pr view {pr_number} --json baseRefName --jq .baseRefName)
-  while pr=$(gh pr list --head "$base" --json number,baseRefName \
-      --jq '.[:1][] | "\(.number) \(.baseRefName)"') && [ -n "$pr" ]; do
-    echo "${pr% *}"; base=${pr#* }
+  base=$(gh pr view {pr_number} --json baseRefName --jq .baseRefName) || fail "below #{pr_number}"
+  while [ -n "$base" ]; do
+    pr=$(gh pr list --head "$base" --json number,baseRefName \
+      --jq '.[:1][] | "\(.number) \(.baseRefName)"') || { fail "below $base"; break; }
+    [ -n "$pr" ] && echo "${pr% *}"; base=${pr#* }
   done
   # Above: open PRs whose base is this PR's head, until none is found
-  heads=$(gh pr view {pr_number} --json headRefName --jq .headRefName)
+  heads=$(gh pr view {pr_number} --json headRefName --jq .headRefName) || fail "above #{pr_number}"
   while [ -n "$heads" ]; do
     found=$(for h in $heads; do gh pr list --base "$h" --json number,headRefName \
-      --jq '.[] | "\(.number) \(.headRefName)"'; done)
+      --jq '.[] | "\(.number) \(.headRefName)"' || fail "above $h"; done)
     [ -n "$found" ] && echo "$found" | cut -d' ' -f1
     heads=$(echo "$found" | cut -s -d' ' -f2)
   done
 fi
 ```
+
+A failed `gh` call prints `stack sweep incomplete` rather than ending the walk quietly. If you see it, the sweep is not done: say which PRs could not be listed.
 
 **Stop when, on every PR, each inline thread is resolved, each review summary and top-level comment is answered, and each alert is fixed or dismissed. Say so.**
 
