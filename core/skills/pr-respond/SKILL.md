@@ -204,8 +204,8 @@ else
     [ -n "$pr" ] && case $seen in *" $n "*) false;; esac || break
     echo "$n"; seen="$seen$n "
   done
-  # Above: open same-repo PRs whose base is this PR's head, until none is new; not from a
-  # fork PR or a {main-branch} head ("Finding the Chain")
+  # Above: open same-repo PRs whose base is this PR's head, until none is new. Never go up
+  # from a fork PR or a {main-branch} head, the start or any PR found ("Finding the Chain")
   me=$(gh pr view {pr_number} --json headRefName,isCrossRepository --jq '"\(.isCrossRepository) \(.headRefName)"') || fail "above #{pr_number}"
   heads=; [ "${me%% *}" = false ] && [ "${me#* }" != "{main-branch}" ] && heads=${me#* }
   while [ -n "$heads" ]; do
@@ -214,7 +214,8 @@ else
     heads=
     while read -r n h; do
       [ -n "$n" ] && case $seen in *" $n "*) false;; esac || continue
-      echo "$n"; seen="$seen$n "; heads=$(printf '%s\n%s' "$heads" "$h")
+      echo "$n"; seen="$seen$n "
+      [ "$h" = "{main-branch}" ] || heads=$(printf '%s\n%s' "$heads" "$h")
     done <<< "$found"
     heads=$(printf '%s\n' "$heads" | sed '/^$/d')
   done
