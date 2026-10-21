@@ -143,7 +143,7 @@ Dispatched by `/review` as parallel subagents. Language-agnostic:
 | `async-safety` | major | Race conditions, premature state flags, resource leaks, error path divergence |
 | `performance` | minor | N+1 patterns, unbounded operations, unnecessary computation, over-fetching |
 | `cli-invocation` | major | External CLI calls: flag semantics, path quoting, swallowed exit codes, command composition |
-| `framework-fit` | major | A change to Jig artifacts that doesn't fit Jig as a whole: a rule in two places, a missed registration, one team's habit in core. One opus run with read access. In a team's repo it reviews only `team/`, `.claude/`, `jig.config.md` and the project's agent instruction files (CLAUDE.md, AGENTS.md or a harness's equivalent, at any level), never the team's own `core/` or `framework/` |
+| `framework-fit` | major | A change to Jig artifacts that doesn't fit Jig as a whole: a rule in two places, a missed registration, one team's habit in core. One opus run with read access. In a team's repo it reviews only the Team homes in Classify ([LEARNING_LOOP.md](framework/LEARNING_LOOP.md)), never the team's own `core/` or `framework/` |
 
 Teams add their own specialists in `.claude/specialists/` (e.g., `typeorm.md`, `i18n.md`, `graphql-contracts.md`). The swarm discovers them automatically.
 
