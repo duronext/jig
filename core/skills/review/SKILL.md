@@ -220,7 +220,7 @@ All specialists in prd/spec/plan modes receive codebase access tools: Read, Grep
 
 Wait for all specialist subagents to complete. For each result:
 - If the response is exactly `N/A` → record as N/A (ran but found nothing)
-- If the response starts with `Out of scope:` → not clean: report it as an error naming those paths, never as N/A or a score
+- If the response starts with `Out of scope:` → from a specialist the caller named (the fit review), not clean: report it as an error naming those paths, never as N/A or a score. From one the swarm picked by its globs, record it as `out of scope`, like N/A, with no effect on the score
 - Otherwise → parse the findings (File, Finding, Fix/Suggestion lines)
 
 ### Stage 5: DEEP REVIEW
@@ -273,7 +273,7 @@ Apply mechanical scoring based on the highest severity finding. All findings are
 | `minor` only | 8-9 |
 | No findings | 10 |
 
-No exceptions, no bumps for positives. An error (`Nothing reviewed`, `Specialist not found`, or a specialist answering `Out of scope:`) gets no score; the report says so (Stage 7).
+No exceptions, no bumps for positives. An error (`Nothing reviewed`, `Specialist not found`, or a specialist the caller named answering `Out of scope:`) gets no score; the report says so (Stage 7).
 
 Deduplication (mode-aware):
 
@@ -335,14 +335,15 @@ The rest of the report format is identical across modes:
 
 | Specialist | Status | Findings |
 |---|---|---|
-| {name} | {N blocking / N major / N minor / clean / N/A / skipped / error: <reason>} | {one-line summary or —} |
+| {name} | {N blocking / N major / N minor / clean / N/A / out of scope / skipped / error: <reason>} | {one-line summary or —} |
 | logic-reviewer | {N blocking / N major / N minor / clean / skipped} | {one-line summary or —} |
 
 **Skipped vs N/A distinction:**
 - **Skipped** = specialist's globs matched zero changed files (never spawned; never applies to a specialist the caller named)
 - **N/A** = specialist ran but found nothing relevant in the diff
 - **Clean** = specialist ran, found relevant code, but no issues
-- **Error** = the specialist could not review what it was given (not found, or `Out of scope:`); never clean
+- **Out of scope** = a specialist the caller did not name ran and answered `Out of scope:` (e.g. `framework-fit` on a team's own `framework/`); counted with N/A
+- **Error** = the specialist could not review what it was given (not found, or a specialist the caller named answering `Out of scope:`); never clean
 
 ---
 
