@@ -142,7 +142,7 @@ Dispatched by `/review` as parallel subagents. Language-agnostic:
 | `error-handling` | major | Swallowed errors, missing handling, inconsistent patterns, context loss |
 | `async-safety` | major | Race conditions, premature state flags, resource leaks, error path divergence |
 | `performance` | minor | N+1 patterns, unbounded operations, unnecessary computation, over-fetching |
-| `framework-fit` | major | A change to Jig artifacts that doesn't fit Jig as a whole: a rule in two places, a missed registration, one team's habit in core. One opus run with read access. In a team's repo it runs only when a PR touches `.claude/skills`, `.claude/specialists`, `.claude/agents`, `team/`, `jig.config.md`, or the root CLAUDE.md, AGENTS.md or GEMINI.md |
+| `framework-fit` | major | A change to Jig artifacts that doesn't fit Jig as a whole: a rule in two places, a missed registration, one team's habit in core. One opus run with read access. In a team's repo it reviews only `.claude/skills`, `.claude/specialists`, `.claude/agents`, `team/`, `jig.config.md`, and the root CLAUDE.md, AGENTS.md and GEMINI.md, never the team's own `core/` or `framework/` |
 
 Teams add their own specialists in `.claude/specialists/` (e.g., `typeorm.md`, `i18n.md`, `graphql-contracts.md`). The swarm discovers them automatically.
 

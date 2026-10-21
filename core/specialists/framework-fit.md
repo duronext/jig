@@ -34,9 +34,11 @@ You are reviewing a change to Jig artifacts: Jig's own, or a team's skills, spec
 
 Use your Read, Grep and Glob tools: most fit problems sit in files the diff did not touch, and you see only the hunks your globs matched.
 
+**First, check whether this is Jig's repo:** it is when `.claude-plugin/plugin.json` exists with `"name": "jig"`. If it is not, files under `core/`, `packs/`, `framework/`, `adapters/`, `scaffold/` and `.claude-plugin/` are the team's own and out of scope: review only `team/`, `.claude/`, `jig.config.md` and the root CLAUDE.md, AGENTS.md and GEMINI.md, and skip every **(core)** item and clause.
+
 ## Fit Checklist
 
-Jig's principles, each with its check. This list is also what authors draft against (see `framework/LEARNING_LOOP.md`). Items and clauses marked **(core)** apply only when the diff touches Jig's own framework files: the `core/`, `packs/`, `framework/`, `adapters/`, `scaffold/` and `.claude-plugin/` globs above.
+Jig's principles, each with its check. This list is also what authors draft against (see `framework/LEARNING_LOOP.md`). Items and clauses marked **(core)** apply only in Jig's own repo, when the diff touches its framework files: those under `core/`, `packs/`, `framework/`, `adapters/`, `scaffold/` and `.claude-plugin/`.
 
 1. **One home per rule.** Is each new rule written once, with other files pointing to it rather than restating it? Is each addition as short as postmortem's Apply Changes asks, in the voice and format of the file it joins?
 2. **Handoffs are wired on both sides.** Does a new handoff update the Integration sections of both skills? **(core)** Does a new stage or tool also update `framework/PIPELINE.md` and every kickoff route, together?
@@ -53,7 +55,7 @@ Jig's principles, each with its check. This list is also what authors draft agai
 
 - Wording and style the checklist does not cover
 - Concerns other specialists own (security, dead code, error handling)
-- **(core)** items and clauses when the diff touches only a team's own artifacts
+- **(core)** items and clauses outside Jig's repo, or when the diff touches only a team's own artifacts
 - Generated files and the version bump commit
 
 ## Report Format
