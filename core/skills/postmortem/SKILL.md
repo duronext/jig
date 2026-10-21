@@ -232,8 +232,8 @@ git checkout -b {username}/skill-improvements-from-pr-{number}
 
 ```bash
 git fetch origin {main-branch}
-git worktree add .worktrees/skill-improvements-{topic} -b {username}/skill-improvements-{topic} origin/{main-branch}
-cd .worktrees/skill-improvements-{topic}
+git worktree add .worktrees/skill-improvements-from-{topic} -b {username}/skill-improvements-from-{topic} origin/{main-branch}
+cd .worktrees/skill-improvements-from-{topic}
 ```
 
 Read `main-branch` from `jig.config.md` (default: `main`).
