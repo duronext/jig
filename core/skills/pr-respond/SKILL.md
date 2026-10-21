@@ -150,6 +150,7 @@ gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_n
 
 - A 403 or 404 from code scanning means it is not enabled or the token lacks the scope. Say so; don't report "no alerts".
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
+- Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
 - Code-scanning alerts are not replied to. Fix them, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
 - Track by reviewer: every human reviewer who left feedback gets a reply.
 
@@ -183,7 +184,7 @@ fi
 
 A failed `gh` call prints `stack sweep incomplete` rather than ending the walk quietly. If you see it, the sweep is not done: say which PRs could not be listed.
 
-**Stop when, on every PR, each inline thread is resolved, each review summary and top-level comment is answered, and each alert is fixed or dismissed. Say so.**
+**Stop when, on every PR, each inline thread is resolved, each review summary and top-level comment that needs an answer is answered, and each alert is fixed or dismissed. Say so.**
 
 ---
 
@@ -365,7 +366,7 @@ Fix it where it belongs, not on your current branch: switch to that PR's branch,
 - [ ] Reply posted to every addressed comment
 - [ ] Every addressed thread resolved via GraphQL
 - [ ] No unresolved threads remaining (unless intentionally deferred)
-- [ ] On every PR in the stack: every review summary and top-level comment answered by a reply that quotes or links it; open code-scanning alerts fixed or dismissed with a reason
+- [ ] On every PR in the stack: every review summary and top-level comment from a human, or from a bot with review findings, answered by a reply that quotes or links it; open code-scanning alerts fixed or dismissed with a reason
 
 ---
 
