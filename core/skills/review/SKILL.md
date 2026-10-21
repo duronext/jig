@@ -56,7 +56,7 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - Otherwise include specialists whose `stage` names the mode. `stage` is a single value (`prd`, `spec`, `plan`) or a list (`[spec, plan]`). The legacy value `both` means `[spec, plan]`.
-6. If the caller passes `specialists: [...]`, keep only those names and skip the tier filter. Otherwise filter by the requested tier:
+6. If the caller passes `specialists: [...]`, keep only those names, skip the tier filter, and skip Stage 2's glob filter: a named specialist reviews every changed path the caller passed. Otherwise filter by the requested tier:
    - `tier: all` → include all specialists matching the mode
    - `tier: fast-pass` → include only `tier: fast-pass` specialists matching the mode
 
@@ -86,17 +86,22 @@ git diff <BASE_SHA>..<HEAD_SHA>
 git diff <BASE_SHA>..<HEAD_SHA> --name-only
 ```
 
-**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed:
+**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}` when there is none or the fetch fails:
 ```bash
-git fetch origin
-git diff $(git merge-base origin/{main-branch} HEAD) -- <paths>
-git diff $(git merge-base origin/{main-branch} HEAD) --name-only -- <paths>
-git ls-files --others --exclude-standard -- <paths>   # new files: review their whole content
+remote=$(git config branch.{main-branch}.remote)
+if [ -n "$remote" ] && git fetch "$remote" {main-branch}; then main_ref="$remote/{main-branch}"; else main_ref={main-branch}; fi
+base=$(git merge-base "$main_ref" HEAD) || { echo "fit review: no merge base with $main_ref" >&2; exit 1; }
+{ git diff "$base" --name-only -- <paths>; git ls-files --others --exclude-standard -- <paths>; } | sort -u
+git diff "$base" -- <paths>
+git diff --no-index /dev/null <untracked-file>   # once per untracked file: its whole content (exits 1 when it prints a diff)
 ```
+If `merge-base` fails, stop and report the error; never review an empty diff in its place.
 
-Extract the list of changed file paths. For each specialist, intersect its `globs` array with the changed file paths. A specialist whose globs match zero changed files is **skipped** — log it as `skipped: no matching files` but do not spawn it.
+Extract the list of changed file paths: the `--name-only` output, plus the untracked files for the fit review. **If the list is empty, stop and report `Nothing reviewed: no changed files` as an error**, never as a score, a pass or a `skipped` line.
 
-For each matching specialist, extract only the diff hunks for its matched files. This is the **filtered diff** that the specialist will review.
+For each specialist the caller did not name, intersect its `globs` array with the changed file paths. A specialist whose globs match zero changed files is **skipped** — log it as `skipped: no matching files` but do not spawn it.
+
+For each matching specialist, extract only the diff hunks for its matched files (every changed file, for a named specialist). This is the **filtered diff** that the specialist will review. An untracked file's hunk is its whole content.
 
 #### Mode: prd
 
@@ -134,7 +139,7 @@ For each matching specialist, extract only the diff hunks for its matched files.
 
 #### Mode: code
 
-For each specialist with matching files, spawn a parallel subagent using the Agent tool:
+For each specialist with matching files, and each specialist the caller named, spawn a parallel subagent using the Agent tool:
 
 ```
 Agent tool:
@@ -331,7 +336,7 @@ The rest of the report format is identical across modes:
 | logic-reviewer | {N blocking / N major / N minor / clean / skipped} | {one-line summary or —} |
 
 **Skipped vs N/A distinction:**
-- **Skipped** = specialist's globs matched zero changed files (never spawned)
+- **Skipped** = specialist's globs matched zero changed files (never spawned; never applies to a specialist the caller named)
 - **N/A** = specialist ran but found nothing relevant in the diff
 - **Clean** = specialist ran, found relevant code, but no issues
 
