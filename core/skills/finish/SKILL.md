@@ -72,6 +72,8 @@ git merge-base HEAD <main-branch>
 
 Or ask: "This branch split from `<main-branch>` -- is that correct?"
 
+**Stacked branch?** If this branch builds on another unmerged branch, that branch is the base. Read `framework/STACKED_PRS.md` before Option 1 or 2, and before merging, retargeting or dropping any PR in the chain: a stack merges into its own base, which may not be `<main-branch>`.
+
 ### Step 3: Present Options
 
 Present exactly these 4 options:

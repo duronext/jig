@@ -42,6 +42,46 @@ Skills should never hardcode `gh` commands without checking the git host first.
 |------|---------|
 | all | `git push -u origin HEAD` |
 
+### Create a PR/MR against a non-default base
+
+| Host | Command |
+|------|---------|
+| github | `gh pr create --base <branch> --title "title" --body "body"` |
+| gitlab | `glab mr create --target-branch <branch> --title "title" --description "body"` |
+| bitbucket | Bitbucket REST: `POST /2.0/repositories/{workspace}/{repo}/pullrequests` with `destination.branch.name` |
+
+### Change a PR/MR's base
+
+| Host | Command |
+|------|---------|
+| github | `gh pr edit {number} --base <branch>` (fails for a PR in a native stack; see `framework/STACKED_PRS.md`) |
+| gitlab | `glab mr update {iid} --target-branch <branch>` |
+| bitbucket | Bitbucket REST: `PUT /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` with `destination.branch.name` |
+
+### List CI checks for a PR/MR
+
+| Host | Command |
+|------|---------|
+| github | `gh pr checks {number}` |
+| gitlab | `glab ci status --branch <source-branch>` |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/statuses` |
+
+### Find dependent PRs/MRs (those based on a branch)
+
+| Host | Command |
+|------|---------|
+| github | `gh pr list --base <branch> --json number,headRefName` |
+| gitlab | `glab mr list --target-branch <branch>` |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=destination.branch.name="<branch>"` |
+
+### Find a PR's native stack
+
+| Host | Command |
+|------|---------|
+| github | `gh api repos/{owner}/{repo}/pulls/{number} --jq .stack` (null if not stacked), then `gh api repos/{owner}/{repo}/stacks/{stack_number}` |
+| gitlab | Not natively supported — walk bases with "Find dependent PRs/MRs" |
+| bitbucket | Not natively supported — walk bases with "Find dependent PRs/MRs" |
+
 ### Fetch PR/MR comments
 
 | Host | Command |

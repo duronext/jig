@@ -113,7 +113,7 @@ When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/
 
 ```
 jig/
-├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters)
+├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, stacked PRs)
 ├── core/
 │   ├── skills/          Pipeline skills (one dir per skill)
 │   ├── agents/          Core agents
@@ -196,6 +196,7 @@ This gives every teammate on the project the full Jig framework on clone — no 
 
 ### Key documents to read first
 - `framework/GIT_HOST.md` — git host adapter (GitHub/GitLab/Bitbucket command mapping)
+- `framework/STACKED_PRS.md` — building, retargeting and merging chains of dependent PRs (read by `pr-create`, `finish`, `pr-respond`)
 - `framework/PIPELINE.md` — the development pipeline
 - `framework/LIVE_PRD.md` — how the live PRD page and the pipeline share state
 - `framework/DISCOVERY.md` — how Jig finds and loads skills

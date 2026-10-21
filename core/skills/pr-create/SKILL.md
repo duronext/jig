@@ -16,6 +16,8 @@ alwaysApply: false
 
 **GIT HOST**: Commands in this skill use GitHub (`gh`) as the default. If `git-host` in `jig.config.md` is not `github`, read `framework/GIT_HOST.md` for the platform-specific command equivalents.
 
+**STACKED PRS**: If this PR builds on another unmerged branch, read `framework/STACKED_PRS.md` first. Use that branch in place of `{main-branch}` below (`git log <parent-branch>..HEAD`, `gh pr create --base <parent-branch>`), add the chain list to the body, and check CI on every PR in the chain, not just this one.
+
 ---
 
 ## When to Use
