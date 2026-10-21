@@ -156,12 +156,16 @@ case $runs in
   *) echo "$runs" | while read -r id status conclusion count check; do
        echo "$check"
        if [ "$status" != completed ]; then echo "  pending: not checked" >&2; continue; fi
-       # Annotations are the new alerts; print each one's alert and its state (open: fix or dismiss)
+       # Annotations are the new alerts. Match each to its alert by location and rule
+       # (annotation title = alert rule.description) and print the alert's state
        if [ "$count" -gt 0 ]; then
          alerts=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?pr={pr_number}" \
-           --jq '.[] | "\(.most_recent_instance.location.path):\(.most_recent_instance.location.start_line) #\(.number) \(.rule.id) \(.state)"') &&
-         locs=$(gh api --paginate repos/{owner}/{repo}/check-runs/$id/annotations --jq '.[] | "\(.path):\(.start_line)"') &&
-         while read -r loc; do m=$(echo "$alerts" | awk -v l="$loc" '$1 == l { print "  " $2, $3, $1, $4 }'); echo "${m:-  $loc: no alert at this location in any state: find it by rule and file}"; done <<< "$locs" ||
+           --jq '.[] | select(.state != "fixed") | "\(.most_recent_instance.location.path):\(.most_recent_instance.location.start_line)\t\(.rule.description)\t#\(.number) \(.rule.id) \(.state)"') &&
+         anns=$(gh api --paginate repos/{owner}/{repo}/check-runs/$id/annotations --jq '.[] | "\(.path):\(.start_line)\t\(.title)"') &&
+         while IFS=$'\t' read -r loc title; do
+           m=$(printf '%s\n' "$alerts" | awk -F'\t' -v l="$loc" -v t="$title" '$1 == l && $2 == t { print "  " $3, l }')
+           echo "${m:-  $loc ($title): no alert for this rule here: find it by rule and file}"
+         done <<< "$anns" ||
          echo "  alerts not readable: not checked" >&2
        fi
        case $check in
@@ -172,7 +176,7 @@ case $runs in
 esac
 ```
 
-- The check runs on the PR's head, so it is current with the last push, and it reports only alerts in code the PR changed. Its annotations are those new alerts; a check can pass with some ("2 new alerts", conclusion `success`). Each prints as `#<alert> <rule> <path>:<line> <state>`: an `open` one is to fix or dismiss, and a `dismissed` or `fixed` one is handled. An annotation with no alert at its location in any state prints as such; find its alert by rule and file before treating it as handled. A check titled "configuration not found" is incomplete even with annotations, and one that ends otherwise (`neutral`, `failure`) without annotations is not checked.
+- The check runs on the PR's head, so it is current with the last push, and it reports only alerts in code the PR changed. Its annotations are those new alerts; a check can pass with some ("2 new alerts", conclusion `success`). Each prints as `#<alert> <rule> <state> <path>:<line>`, matched on location and rule: `open` is to fix or dismiss, `dismissed` is handled. An annotation with no alert for its rule at its location prints with its rule text; find its alert by rule and file before treating it as handled. A check titled "configuration not found" is incomplete even with annotations, and one that ends otherwise (`neutral`, `failure`) without annotations is not checked.
 - `not checked` (no check on the head yet, one still running, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the checks finish. Above the bottom of a stack the check may never run: check the PR below, and re-run after this PR retargets `{main-branch}`.
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
