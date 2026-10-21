@@ -92,7 +92,8 @@ Spawn a fresh subagent with:
 - Relevant project context (architecture, conventions, related files)
 - Reference to `tdd` for TDD discipline
 - Clear instructions to implement, test, and commit
-- Instructions to stage explicit paths only (never `git add -A`, `git add .` or a whole directory) and never to commit the shared context doc or progress file (see Shared Rules and Long Tasks)
+- The shared context doc's path, if there is one, to read before starting (see Shared Rules and Long Tasks)
+- Instructions to stage explicit paths only (never `git add -A`, `git add .` or a whole directory) and never to commit the shared context doc or a resume file (see Shared Rules and Long Tasks)
 
 **Model selection guidance:**
 
@@ -127,6 +128,7 @@ Implementer subagents report one of four statuses:
 After the implementer reports DONE, dispatch a spec reviewer subagent:
 - Provide the original task text (the spec)
 - Provide the git diff of what was implemented
+- Provide the shared context doc, if there is one; its constraints are part of the spec
 - The reviewer checks: Does the implementation match the spec? Is anything missing? Is anything extra?
 
 **If spec reviewer finds issues:**
@@ -167,7 +169,7 @@ After all tasks are complete, dispatch a final review of the entire implementati
 
 ### Step 4: Finish
 
-After the final review passes, invoke `finish` to present completion options (merge, PR, keep, discard).
+After the final review passes, delete the shared context doc and any resume files left in the working tree, then invoke `finish` to present completion options (merge, PR, keep, discard).
 
 ---
 
@@ -205,8 +207,8 @@ Every implementer subagent needs:
 
 ### Shared Rules and Long Tasks
 
-- **Shared rules:** when several subagents need the same constraints and deliverable format, write them once in a doc in `plans-directory`, named by `filename-format` with kind `context`, and point the implementer and spec-reviewer prompts at it. Implementers never commit it (Dispatch Implementer Subagent says how to tell them); delete it before invoking `finish`. Send inventories to read-only research subagents (e.g. Claude Code's Explore agent), as `team-dev`'s `lead-playbook.md` describes.
-- **Long tasks:** if a task may outlive the session, tell the implementer in its prompt to keep a progress file (done, in flight, next steps, log locations). A re-dispatched subagent reads it first.
+- **Shared rules:** when several subagents need the same constraints and deliverable format, write them once in a doc in `plans-directory`, named by `filename-format` with kind `context`, and point the implementer and spec-reviewer prompts at it. Implementers never commit it (Dispatch Implementer Subagent says how to tell them); the Finish step deletes it. Send inventories to read-only research subagents (e.g. Claude Code's Explore agent), as `team-dev`'s `lead-playbook.md` describes.
+- **Long tasks:** if a task may outlive the session, tell the implementer in its prompt to keep a resume file as `team-dev`'s `lead-playbook.md` ("Pausing and Resuming") describes. Point a re-dispatched subagent at it.
 
 ### The Controller's Role
 
