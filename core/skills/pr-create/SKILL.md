@@ -255,3 +255,4 @@ That tells the reviewer nothing. What actually changed? Which files? Why?
 - `review` -- run before creating the PR
 - `pr-respond` -- for handling reviewer feedback after PR is created
 - `postmortem` -- uses PR data for retrospectives
+- `perf` -- its `*-perf.md` results doc is linked from the PR Summary

@@ -321,7 +321,7 @@ All feedback has been addressed:
 
 ## Feedback on Another PR in the Stack
 
-Fix it where it belongs, not on your current branch: switch to that PR's branch, run Steps 3-5 there, then carry the change up the chain by merging forward (`framework/STACKED_PRS.md`, "When a lower PR changes").
+Fix it where it belongs, not on your current branch: switch to that PR's branch, run Steps 3-5 there, then carry the change up the chain by merging forward (`framework/STACKED_PRS.md`, "When a lower PR changes"). Those forward merges and their pushes change other PRs, so confirm them with the user first (rule 6 there).
 
 ---
 
