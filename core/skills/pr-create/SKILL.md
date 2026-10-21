@@ -159,7 +159,7 @@ it asked for and how this addresses it.}
 Fixes {TICKET-REFERENCE}
 ```
 
-A learning PR (one that ships a lesson; see PR in `framework/LEARNING_LOOP.md`) opens with the two sections listed there, then this structure.
+A learning PR (one that ships a lesson; see PR in `framework/LEARNING_LOOP.md`) opens with the sections listed there, then this structure, and its test plan lists the procedure runs that section requires.
 
 ### Step 6: Push and create
 

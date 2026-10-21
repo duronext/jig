@@ -47,14 +47,17 @@ Plan each change against the Fit Checklist in `core/specialists/framework-fit.md
 
 ## 5. Fit Review
 
-Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review. A fit review reads; it does not execute: before the PR, run each new or changed command block or procedure once on a real input and record it in the test plan, where an unticked item is an open finding. List every finding in the PR body, fixed or left standing, one line each; that is the record a later postmortem counts.
+Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review. A fit review reads; it does not execute: before the PR, also run each new or changed command block or procedure once on a real input. PR, below, says where the findings and the runs are recorded.
 
 ## 6. PR
 
-Ship through `pr-create`. A learning PR's body opens with two sections, before the usual summary and test plan:
+Ship through `pr-create`. A learning PR's body opens with these sections, before the usual summary and test plan:
 
 - **Benefits**: what goes wrong today, and what each change prevents.
 - **How this follows Jig**: the Fit Checklist items the change touches, and how each holds.
+- **Fit review**: every `framework-fit` finding, fixed or left standing with its reason, one line each. This is the record a later postmortem counts.
+
+Its test plan lists each procedure run from the Fit Review, one item each with the input and the result, where an unticked item is an open finding; "No testing required" does not apply.
 
 Name the lesson's input (the PR, session, retrospective or request) in a line. Commits and pushes wait for the user's approval, as everywhere in Jig.
 
