@@ -90,13 +90,15 @@ conflict resolutions from its forward merges, and no commit order is involved.
 
 ```bash
 git switch <branch-above-dropped>
-git diff <parent-branch>...<dropped-branch> | git apply -R --3way
+git diff --binary <parent-branch>...<dropped-branch> | git apply -R --3way
 git commit -m "Revert #<dropped-pr>: drop it from the chain"
 # then merge forward up the chain, as above
 ```
 
-`--3way` stages the result and leaves conflict markers where the branch above
-changed the same lines; resolve them before committing.
+`--binary` carries binary files (images, fonts, snapshots) in the patch;
+without it `git apply` rejects them and reverts nothing. `--3way` stages the
+result and leaves conflict markers where the branch above changed the same
+lines; resolve them before committing.
 
 **Before review (rewrite).** Move every branch above onto the dropped PR's
 parent.
