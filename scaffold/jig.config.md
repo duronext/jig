@@ -47,7 +47,7 @@ main-branch: main
 
 ```yaml
 plans-directory: docs/plans
-filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | spec | plan | context
+filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | spec | plan | perf | context
 # prd-sync: none            # none | linear | jira | github (pack-driven)
 # spec-sync: none
 # plan-sync: none

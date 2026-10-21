@@ -114,6 +114,7 @@ Jig ships as a plugin with core skills, agents, and review specialists. Your tea
 | `pr-respond` | PR feedback | Fetches unresolved comments, analyzes each (valid fix vs false positive), implements fixes, commits, pushes, replies, and resolves threads. The full loop. |
 | `postmortem` | Retrospective | After merge, analyzes what reviewers caught to find gaps in skills and specialists. Diagnoses whether the swarm or logic reviewer should have caught it, then fixes the gap. |
 | `debug` | Systematic debugging | Iron law: no fixes without root cause investigation. Four phases — investigate, analyze patterns, test hypothesis, implement. Escalates to "question the architecture" after 3 failed fixes. |
+| `perf` | Performance investigation | Fixes the measurement protocol before the first run: CPU time, interleaved A/B pairs, an idle gate. Profiles before choosing levers, proves each knob took effect, and ablates the combination before shipping. |
 | `verify` | Verification gate | Evidence before assertions. Run the command, read the output, THEN claim it works. Prevents "should pass now" claims without proof. |
 | `tdd` | Test-driven development | Red-green-refactor. No production code without a failing test first. Wrote code before the test? Delete it. Start over. |
 | `ticket` | Ticket creation | Interviews you, writes the ticket, files it in your configured tracker (Linear, Jira, GitHub Issues), and sets up the branch. |

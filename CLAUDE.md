@@ -64,6 +64,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `pr-respond` | PR comment response — analyze, fix, commit, push, reply, resolve |
 | `postmortem` | Post-merge retrospective with specialist/logic reviewer diagnosis |
 | `debug` | Systematic debugging — root cause before fixes, always |
+| `perf` | Performance investigation — measurement protocol, profile first, ablate before shipping |
 | `verify` | Evidence before assertions — run it before claiming it works |
 | `tdd` | Red-green-refactor discipline |
 | `finish` | Branch completion — merge, PR, keep, or discard |

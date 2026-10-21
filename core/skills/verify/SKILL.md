@@ -91,6 +91,7 @@ Skip any step = lying, not verifying
 | "No regressions" | Full test suite passes | Only new tests run |
 | "CI will pass" | Run under CI's conditions (see "CI Conditions" below) | Local run with gitignored env files, warm caches, full install, local worker counts |
 | "Build fix works" | Build with the build cache bypassed | A cache hit (replays an earlier result) |
+| "Faster" / "cheaper" | Paired, interleaved CPU-time runs of the combination being shipped (see `perf`) | A single before/after run, wall time on a busy machine, each fix measured alone |
 | "Works in production" | Production verification (health check, smoke test) | Works locally |
 
 ---
@@ -222,6 +223,7 @@ The cost of running a verification command is seconds. The cost of a false claim
 **Related skills:**
 - `tdd` -- TDD's verify-red and verify-green steps are verification instances
 - `debug` -- Phase 4 requires verification before claiming fix success
+- `perf` -- the measurement protocol behind any "faster" or "cheaper" claim
 
 ---
 

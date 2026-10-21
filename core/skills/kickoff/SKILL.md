@@ -47,6 +47,7 @@ graph LR
   classify["CLASSIFY<br/>work type"] --> discover["DISCOVER<br/>ticket + branch"]
   discover -.->|tool| brainstorm["BRAINSTORM<br/>ideation (optional)"]
   discover -.->|tool| debug["DEBUG<br/>root cause (bugs)"]
+  discover -.->|tool| perf["PERF<br/>measure (perf goals)"]
   discover --> prd["PRD<br/>product doc (features)"]
   prd --> review_prd["REVIEW:prd<br/>tier all"]
   review_prd --> spec["SPEC<br/>technical contract"]
@@ -70,7 +71,7 @@ graph LR
 
 Each stage has a **gate**. You don't move forward until the gate is satisfied.
 
-`BRAINSTORM` and `DEBUG` are **discovery-time tools**, not stages — they hang off `DISCOVER` and are invoked on demand (by the user or offered by kickoff) when the work benefits from exploration or root-cause investigation. They produce understanding, not artifacts, and return control to the workflow when done.
+`BRAINSTORM`, `DEBUG` and `PERF` are **discovery-time tools**, not stages — they hang off `DISCOVER` and are invoked on demand (by the user or offered by kickoff) when the work benefits from exploration, root-cause investigation or measurement. They produce understanding, not pipeline documents (`perf` also records its measurements in a `*-perf.md`), and return control to the workflow when done. `perf`'s ship-time checks run through `verify`.
 
 `REVIEW` is a **multi-stage gate engine**: it runs after PRD, after SPEC and after PLAN (`tier: all`), and during/after BUILD (`tier: fast-pass` per-task during, `tier: all` pre-ship). The same skill, four modes: `prd`, `spec`, `plan`, `code`. See `core/skills/review/SKILL.md`.
 
@@ -88,8 +89,8 @@ Before anything else, determine the work type. This controls pipeline depth.
 graph TD
   start{"What kind of work?"}
   start -->|broken / incorrect| bug["BUG<br/>Discovery tool: debug<br/>Spec: light (optional)<br/>Plan: 1-3 tasks<br/>Build: sequential<br/>Learn: optional"]
-  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tool: brainstorm (optional)<br/>PRD: one-pager if large<br/>Spec: light or full<br/>Plan: standard<br/>Build: SDD or team-dev<br/>Learn: optional"]
-  start -->|new capability| feature["FEATURE<br/>Discovery tool: brainstorm (recommended)<br/>PRD: recommended<br/>Spec: full<br/>Plan: detailed<br/>Build: team-dev<br/>Learn: yes"]
+  start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tools: brainstorm (optional),<br/>perf (speed/cost goals)<br/>PRD: one-pager if large<br/>Spec: light or full<br/>Plan: standard<br/>Build: SDD or team-dev<br/>Learn: optional"]
+  start -->|new capability| feature["FEATURE<br/>Discovery tools: brainstorm (recommended),<br/>perf (speed/cost goals)<br/>PRD: recommended<br/>Spec: full<br/>Plan: detailed<br/>Build: team-dev<br/>Learn: yes"]
   start -->|config / chore / refactor| task["TASK / CHORE<br/>Skip discovery tools<br/>Plan: minimal<br/>Build: direct<br/>Learn: no"]
 ```
 
@@ -166,7 +167,7 @@ For **bugs**: offer the light spec when the fix touches more than one layer; oth
 
 ## Discovery Tools (optional, on-demand)
 
-During or after DISCOVER, the user may benefit from one of two discovery-time tools. Offer them when appropriate; never force them.
+During or after DISCOVER, the user may benefit from one of three discovery-time tools. Offer them when appropriate; never force them.
 
 ### Brainstorm
 
@@ -181,6 +182,12 @@ If user accepts, **INVOKE `jig:brainstorm` using the Skill tool.** It returns co
 Offer for: bugs where the root cause isn't obvious from the ticket.
 
 If user accepts, **INVOKE `jig:debug` using the Skill tool.** It returns control to kickoff when done.
+
+### Perf
+
+Offer for: work whose goal is speed or cost (a build, test suite, CI pipeline, endpoint or job).
+
+If user accepts, **INVOKE `jig:perf` using the Skill tool.** It returns control to kickoff when done.
 
 ### Gate Check
 
@@ -290,6 +297,7 @@ CLASSIFY
   └──> DISCOVER (always)
          ├╌╌╌> BRAINSTORM (optional tool, returns to DISCOVER)
          ├╌╌╌> DEBUG (optional tool, returns to DISCOVER)
+         ├╌╌╌> PERF (optional tool, returns to DISCOVER)
          │
          ├──> PRD (features, large improvements)
          │    └──> REVIEW:prd → SPEC
@@ -346,6 +354,7 @@ When looping back, update the plan document to reflect changes.
 | Spec | `Skill: jig:spec` | `*-spec.md` with acceptance checklist |
 | Brainstorm (tool) | `Skill: jig:brainstorm` | Understanding, no artifact |
 | Debug (tool) | `Skill: jig:debug` | Root cause, no artifact |
+| Perf (tool) | `Skill: jig:perf` | `{plans-directory}/*-perf.md` + `.csv` |
 | Plan | `Skill: jig:plan` | `{plans-directory}/*-plan.md` |
 | Build | `Skill: jig:build` | Implemented + tested code |
 | Review | `Skill: jig:review` | Audited code |
