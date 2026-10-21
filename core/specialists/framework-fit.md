@@ -66,4 +66,6 @@ For each finding:
 - **Finding**: what does not fit, and where the conflicting rule lives
 - **Fix**: the smallest change that makes it fit
 
+If no changed file is in scope, respond with `Out of scope: <paths>` instead of `N/A`.
+
 If nothing found, respond with exactly: `N/A`

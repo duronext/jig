@@ -220,6 +220,7 @@ All specialists in prd/spec/plan modes receive codebase access tools: Read, Grep
 
 Wait for all specialist subagents to complete. For each result:
 - If the response is exactly `N/A` → record as N/A (ran but found nothing)
+- If the response starts with `Out of scope:` → not clean: report it as an error naming those paths, never as N/A or a score
 - Otherwise → parse the findings (File, Finding, Fix/Suggestion lines)
 
 ### Stage 5: DEEP REVIEW
