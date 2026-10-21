@@ -22,6 +22,7 @@
     "./core/skills/pr-respond",
     "./core/skills/postmortem",
     "./core/skills/debug",
+    "./core/skills/perf",
     "./core/skills/verify",
     "./core/skills/tdd",
     "./core/skills/finish",

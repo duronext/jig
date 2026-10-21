@@ -42,13 +42,85 @@ Skills should never hardcode `gh` commands without checking the git host first.
 |------|---------|
 | all | `git push -u origin HEAD` |
 
+### Create a PR/MR against a non-default base
+
+| Host | Command |
+|------|---------|
+| github | `gh pr create --base <branch> --title "title" --body "body"` |
+| gitlab | `glab mr create --target-branch <branch> --title "title" --description "body"` |
+| bitbucket | Bitbucket REST: `POST /2.0/repositories/{workspace}/{repo}/pullrequests` with `destination.branch.name` |
+
+### Change a PR/MR's base
+
+| Host | Command |
+|------|---------|
+| github | `gh pr edit {number} --base <branch>` (fails for a PR in a native stack; see `framework/STACKED_PRS.md`) |
+| gitlab | `glab mr update {iid} --target-branch <branch>` |
+| bitbucket | Bitbucket REST: `PUT /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` with `destination.branch.name` |
+
+### Update a PR/MR description
+
+| Host | Command |
+|------|---------|
+| github | `gh pr edit {number} --body-file <file>` |
+| gitlab | `glab mr update {iid} --description "$(cat <file>)"` |
+| bitbucket | Bitbucket REST: `PUT /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` with `description` |
+
+### List CI checks for a PR/MR
+
+| Host | Command |
+|------|---------|
+| github | `gh pr checks {number}` |
+| gitlab | `glab ci status --branch <source-branch>` |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/statuses` |
+
+### Find dependent PRs/MRs (those based on a branch)
+
+| Host | Command |
+|------|---------|
+| github | `gh pr list --base <branch> --limit 1000 --json number,headRefName,isCrossRepository` (fork PRs have `isCrossRepository: true`; without `--limit` it stops at 30) |
+| gitlab | `glab mr list --target-branch <branch> --per-page 100` (`--page` for more) |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=destination.branch.name="<branch>"`, following each page's `next` link |
+
+### Find the open PR/MR for a branch (by its head branch)
+
+| Host | Command |
+|------|---------|
+| github | `gh pr list --head <branch> --limit 1000 --json number,baseRefName,isCrossRepository` (also matches fork PRs from a same-named branch; they have `isCrossRepository: true`) |
+| gitlab | `glab mr list --source-branch <branch> --per-page 100` (`--page` for more) |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=source.branch.name="<branch>"`, following each page's `next` link |
+
+### Find a PR's native stack
+
+| Host | Command |
+|------|---------|
+| github | `gh api repos/{owner}/{repo}/pulls/{number} --jq .stack` (null if not stacked), then `gh api repos/{owner}/{repo}/stacks/{stack_number}` |
+| gitlab | Not natively supported — walk bases with "Find the open PR/MR for a branch" and "Find dependent PRs/MRs" |
+| bitbucket | Not natively supported — walk bases with "Find the open PR/MR for a branch" and "Find dependent PRs/MRs" |
+
 ### Fetch PR/MR comments
 
 | Host | Command |
 |------|---------|
-| github | `gh api repos/{owner}/{repo}/pulls/{number}/comments` |
-| gitlab | `glab api projects/{id}/merge_requests/{iid}/notes` |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/comments` |
+| github | `gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments` |
+| gitlab | `glab api --paginate projects/{id}/merge_requests/{iid}/notes` |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/comments`, following each page's `next` link until there is none |
+
+### Fetch review summaries and top-level PR/MR comments
+
+| Host | Command |
+|------|---------|
+| github | `gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews` (review bodies) and `gh api --paginate repos/{owner}/{repo}/issues/{number}/comments` (top-level comments) |
+| gitlab | Included in the notes endpoint above (`glab api --paginate projects/{id}/merge_requests/{iid}/notes`) |
+| bitbucket | Included in the comments endpoint above (top-level comments have no `inline` object) |
+
+### Code-scanning alerts on a PR/MR
+
+| Host | Command |
+|------|---------|
+| github | List: GitHub's code-scanning checks on the PR's head, one per tool or category and scoped to the PR's changes: the `check_runs` with `app.slug` `github-advanced-security` from `gh api --paginate "repos/{owner}/{repo}/commits/<head-sha>/check-runs"` (`<head-sha>`: `gh api repos/{owner}/{repo}/pulls/{number} --jq .head.sha`). None, one not `completed`, one titled "configuration not found" (even with annotations), or one neither `success` nor annotated: not checked. Its new alerts, even when it passed: `gh api --paginate repos/{owner}/{repo}/check-runs/{id}/annotations`; each annotation matches the alert in `gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?pr={number}"` (every state but `fixed`) with the same `most_recent_instance.location` (`path` + `start_line`) and rule (annotation `title` = alert `rule.description`, verified for CodeQL and Semgrep; where another tool differs it matches nothing and falls to "no such alert"), which gives its `{alert}` number and `state` (`open`: fix or dismiss; `dismissed`: handled; no such alert: find it by rule and file). Dismiss: `gh api -X PATCH repos/{owner}/{repo}/code-scanning/alerts/{alert} -f state=dismissed -f dismissed_reason='false positive' -f dismissed_comment='why'` (reasons: `false positive`, `won't fix`, `used in tests`) |
+| gitlab | The MR's security widget (Ultimate); dismiss findings there |
+| bitbucket | Code Insights reports: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/reports`; no dismissal API |
 
 ### Reply to a comment
 

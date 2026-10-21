@@ -67,7 +67,7 @@ Skip any step = lying, not verifying
 
 **IDENTIFY** -- What would prove the claim you are about to make? A test command, a build command, a lint command, a curl request. Name the exact command.
 
-**RUN** -- Execute the full command. Not a subset. Not a cached result. Not "I ran it earlier." Fresh execution, right now, in this message.
+**RUN** -- Execute the full command. Not a subset. Not a cached result. Not "I ran it earlier." Fresh execution, right now, in this message. A build-system cache hit is a cached result: it replays a past run and can stay green while the tree no longer builds (some build tools leave dependency layout out of the cache key). When verifying a build fix, bypass the cache.
 
 **READ** -- Read the full output. Check the exit code. Count the failures, errors, and warnings. Do not skim. Do not assume.
 
@@ -89,6 +89,9 @@ Skip any step = lying, not verifying
 | "Agent completed task" | VCS diff shows correct changes | Agent reports "success" |
 | "Requirements met" | Line-by-line checklist against spec | Tests passing (tests may not cover all requirements) |
 | "No regressions" | Full test suite passes | Only new tests run |
+| "CI will pass" | Run under CI's conditions (see "CI Conditions" below) | Local run with gitignored env files, warm caches, full install, local worker counts |
+| "Build fix works" | Build with the build cache bypassed | A cache hit (replays an earlier result) |
+| "Faster" / "cheaper" | Paired, interleaved CPU-time runs of the combination being shipped (see `perf`) | A single before/after run, wall time on a busy machine, each fix measured alone |
 | "Works in production" | Production verification (health check, smoke test) | Works locally |
 
 ---
@@ -122,6 +125,8 @@ If you catch yourself doing any of these, STOP and run the gate function:
 | "Different words so rule doesn't apply" | Spirit over letter |
 | "I ran it a few messages ago" | Stale evidence. Run it again. |
 | "The change is trivial" | Trivial changes break things too |
+| "It passed locally" | Local has your env files, warm caches and full install. CI has none of them. Reproduce CI. |
+| "The build was green (cached)" | A cache hit is a replay, not a build. Bypass the cache. |
 
 ---
 
@@ -146,6 +151,20 @@ WRONG:    "I've written a regression test" (without red-green verification)
 ```
 CORRECT:  [Run build] -> [See: exit 0, no errors] -> "Build succeeds"
 WRONG:    "Linter passed" (linter does not check compilation)
+```
+
+### CI Conditions
+
+Before claiming CI will pass -- and always when the change touches env, install, dependency or build config, or when CI and local disagree -- match what CI does. Read the CI workflow file, then:
+
+1. **Clean checkout.** Run in a fresh clone or a plain `git worktree add` so gitignored files (`.env`, local overrides) are absent. A test that passes only because a local env file sets a variable fails in CI. (Jig's `worktree` skill syncs env files, so don't use it for this check.)
+2. **Same install.** Use CI's exact install command, including any filter or scope. A partial install can lay out dependencies differently from a full one.
+3. **Same env and concurrency.** Set the env vars the workflow sets (`CI=true`, ...) and its worker/thread counts.
+4. **Cold caches.** Bypass build and test caches (e.g. turbo `--force`, nx `--skip-nx-cache`, Gradle `--rerun-tasks`, Bazel `bazel clean` plus `--noremote_accept_cached`).
+
+```
+CORRECT:  Clean checkout + CI install + CI env + no cache -> [See: exit 0] -> "Matches CI: build and tests pass"
+WRONG:    "Passes on my machine" (with .env present and a warm cache)
 ```
 
 ### Requirements
@@ -204,6 +223,7 @@ The cost of running a verification command is seconds. The cost of a false claim
 **Related skills:**
 - `tdd` -- TDD's verify-red and verify-green steps are verification instances
 - `debug` -- Phase 4 requires verification before claiming fix success
+- `perf` -- the measurement protocol behind any "faster" or "cheaper" claim
 
 ---
 

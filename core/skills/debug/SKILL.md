@@ -322,6 +322,7 @@ If systematic investigation reveals the issue is truly environmental, timing-dep
 **Related skills:**
 - `tdd` -- for creating the failing test case (Phase 4, Step 1)
 - `verify` -- for verifying the fix worked before claiming success
+- `perf` -- after fixing a speed or cost regression, measure the fix with its protocol
 
 ---
 

@@ -2,8 +2,9 @@
 name: pr-respond
 description: >
   Use when reviewing PR comments, responding to code review feedback, or
-  addressing reviewer suggestions on the current branch. Triggered by
-  "respond to PR comments", "address review feedback", or /pr-respond.
+  addressing reviewer suggestions on the current branch or the PRs stacked
+  with it. Triggered by "respond to PR comments", "address review feedback",
+  or /pr-respond.
 tier: workflow
 alwaysApply: false
 ---
@@ -21,7 +22,7 @@ alwaysApply: false
 **Analyze. Fix. Commit. Push. Reply. Resolve.** That's the job.
 
 ```
-FETCH unresolved comments + thread IDs
+FETCH every comment source + thread IDs (on every PR in the stack)
   |
 ANALYZE each comment (valid fix? false positive? needs clarification?)
   |
@@ -41,6 +42,8 @@ RESOLVE every addressed thread
 ```
 
 **The pipeline is not optional.** Do not stop after implementing fixes. Do not stop after committing. The job is not done until replies are posted and threads are resolved on GitHub. A comment without a reply and resolution is unfinished work.
+
+**Re-run once reviewers and bots have responded to a push.** On a stack, sweep every PR in it, not just the one you pushed (see `framework/STACKED_PRS.md`).
 
 ---
 
@@ -76,25 +79,26 @@ Run these in parallel. You need REST comment IDs (for replying) and GraphQL thre
 gh pr view --json number,url,title,body
 ```
 
-Extract owner/repo from `git remote get-url origin`. Use in all `gh api` calls below.
+Extract owner/repo from `git remote get-url origin`. Use in all `gh api` calls below. Read `main-branch` from `jig.config.md` (default: `main`).
 
 **Fetch PR comments (REST -- for replying):**
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{pr_number}/comments \
+gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/comments \
   --jq '.[] | {id: .id, path: .path, line: .line, body: .body, user: .user.login, created_at: .created_at}'
 ```
 
 **Fetch unresolved thread IDs (GraphQL -- for resolving):**
 
-The REST API gives you comment IDs (for replying), but resolving threads requires GraphQL thread IDs. Fetch both.
+The REST API gives you comment IDs (for replying), but resolving threads requires GraphQL thread IDs. Fetch both. `--paginate` follows `endCursor` until `hasNextPage` is false, so threads past the first 100 are included. Owner and repo go in with `-f` (always a string); `-F` would turn a name like `2023` into a number. Only the PR number takes `-F`.
 
 ```bash
-gh api graphql -f query='
-{
-  repository(owner: "OWNER", name: "REPO") {
-    pullRequest(number: PR_NUM) {
-      reviewThreads(first: 50) {
+gh api graphql --paginate -f owner={owner} -f repo={repo} -F pr={pr_number} -f query='
+query($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100, after: $endCursor) {
+        pageInfo { hasNextPage endCursor }
         nodes {
           id
           isResolved
@@ -126,7 +130,101 @@ gh api repos/{owner}/{repo}/pulls/comments/{comment_id} \
 
 The single-comment endpoint drops the PR number from the path. Using `/pulls/{pr_number}/comments/{id}` will return a 404.
 
-**If there are no unresolved comments, say so and stop.**
+### Sweep every comment source
+
+Inline review threads are only one place feedback lands. Human reviewers often leave their main points in a review summary, which the thread query above does not return. Check all four sources: inline threads (the query above), plus:
+
+```bash
+# Review summaries (the body of an approve / comment / request-changes review)
+gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/reviews \
+  --jq '.[] | select(.body != "") | {id, user: .user.login, state, submitted_at, url: .html_url, body}'
+
+# Top-level PR comments (humans and bots)
+gh api --paginate repos/{owner}/{repo}/issues/{pr_number}/comments \
+  --jq '.[] | {id, user: .user.login, created_at, url: .html_url, body}'
+
+# Code scanning: GitHub's own check on the PR's head, one per tool or category,
+# scoped to the code the PR changed
+h=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq .head.sha) &&
+  runs=$(gh api --paginate "repos/{owner}/{repo}/commits/$h/check-runs" --jq '.check_runs[]
+    | select(.app.slug == "github-advanced-security")
+    | "\(.id) \(.status) \(.conclusion) \(.output.annotations_count // 0) \(.name): \(.output.title)"') ||
+  runs=error
+case $runs in
+  error) echo "code scanning: checks not readable: not checked" >&2 ;;
+  "") echo "code scanning: no check on this PR's head: not checked" >&2 ;;
+  *) printf '%s\n' "$runs" | while read -r id st conclusion count check; do
+       echo "$check"
+       if [ "$st" != completed ]; then echo "  pending: not checked" >&2; continue; fi
+       # Annotations are the new alerts. Match each to its alert by location and rule
+       # (annotation title = alert rule.description for CodeQL and Semgrep; a tool where
+       # it differs prints unmatched, never handled) and print the alert's state
+       if [ "$count" -gt 0 ]; then
+         alerts=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?pr={pr_number}" \
+           --jq '.[] | select(.state != "fixed") | "\(.most_recent_instance.location.path):\(.most_recent_instance.location.start_line)\t\(.rule.description)\t#\(.number) \(.rule.id) \(.state)"') &&
+         anns=$(gh api --paginate repos/{owner}/{repo}/check-runs/$id/annotations --jq '.[] | "\(.path):\(.start_line)\t\(.title)"') &&
+         while IFS=$'\t' read -r loc title; do
+           m=$(printf '%s\n' "$alerts" | L="$loc" T="$title" awk -F'\t' '$1 == ENVIRON["L"] && $2 == ENVIRON["T"] { print "  " $3, $1 }')
+           echo "${m:-  $loc ($title): no alert for this rule here: find it by rule and file}"
+         done <<< "$anns" ||
+         echo "  alerts not readable: not checked" >&2
+       fi
+       case $check in
+         *"configuration not found"*) echo "  incomplete: not checked" >&2 ;;
+         *) [ "$count" -gt 0 ] || [ "$conclusion" = success ] || echo "  $conclusion: not checked" >&2 ;;
+       esac
+     done ;;
+esac
+```
+
+- The check runs on the PR's head, so it is current with the last push, and it reports only alerts in code the PR changed. Its annotations are those new alerts; a check can pass with some ("2 new alerts", conclusion `success`). Each prints as `#<alert> <rule> <state> <path>:<line>`, matched on location and rule: `open` is to fix or dismiss, `dismissed` is handled. An annotation with no alert for its rule at its location prints with its rule text; find its alert by rule and file before treating it as handled. A check titled "configuration not found" is incomplete even with annotations, and one that ends otherwise (`neutral`, `failure`) without annotations is not checked.
+- `not checked` (no check on the head yet, one still running, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the checks finish. Above the bottom of a stack the check may never run: check the PR below, and re-run after this PR retargets `{main-branch}`.
+- Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
+- Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
+- Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
+- Track by reviewer: every human reviewer who left feedback gets a reply.
+
+**On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it; otherwise walk the bases (`framework/STACKED_PRS.md`, "Finding the Chain"):
+
+```bash
+# Runs in bash or zsh: no variable named `status` (read-only in zsh), and lists are split by line, not by word
+fail() { echo "could not list PRs $1; stack sweep incomplete" >&2; }
+if ! stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number // empty'); then
+  fail "for #{pr_number}"
+elif [ -n "$stack" ]; then
+  gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number' || fail "in stack $stack"
+else
+  echo {pr_number}; seen=" {pr_number} "
+  # Below: the open same-repo PR whose head is this PR's base, down to {main-branch}
+  base=$(gh pr view {pr_number} --json baseRefName --jq .baseRefName) || fail "below #{pr_number}"
+  while [ -n "$base" ] && [ "$base" != "{main-branch}" ]; do
+    pr=$(gh pr list --head "$base" --limit 1000 --json number,baseRefName,isCrossRepository \
+      --jq '[.[] | select(.isCrossRepository | not)][:1][] | "\(.number) \(.baseRefName)"') || { fail "below $base"; break; }
+    n=${pr% *}; base=${pr#* }
+    [ -n "$pr" ] && case $seen in *" $n "*) false;; esac || break
+    echo "$n"; seen="$seen$n "
+  done
+  # Above: open same-repo PRs whose base is this PR's head, until none is new. Never go up
+  # from a fork PR or a {main-branch} head, the start or any PR found ("Finding the Chain")
+  me=$(gh pr view {pr_number} --json headRefName,isCrossRepository --jq '"\(.isCrossRepository) \(.headRefName)"') || fail "above #{pr_number}"
+  heads=; [ "${me%% *}" = false ] && [ "${me#* }" != "{main-branch}" ] && heads=${me#* }
+  while [ -n "$heads" ]; do
+    found=$(while read -r h; do gh pr list --base "$h" --limit 1000 --json number,headRefName,isCrossRepository \
+      --jq '.[] | select(.isCrossRepository | not) | "\(.number) \(.headRefName)"' || fail "above $h"; done <<< "$heads")
+    heads=
+    while read -r n h; do
+      [ -n "$n" ] && case $seen in *" $n "*) false;; esac || continue
+      echo "$n"; seen="$seen$n "
+      [ "$h" = "{main-branch}" ] || heads=$(printf '%s\n%s' "$heads" "$h")
+    done <<< "$found"
+    heads=$(printf '%s\n' "$heads" | sed '/^$/d')
+  done
+fi
+```
+
+A failed `gh` call prints `stack sweep incomplete` rather than ending the walk quietly. If you see it, the sweep is not done: say which PRs could not be listed.
+
+**Stop when, on every PR, each inline thread is resolved, each review summary and top-level comment that needs an answer is answered, and each alert the PR introduces is fixed or dismissed. Say so.**
 
 ---
 
@@ -262,6 +360,12 @@ All feedback has been addressed:
 
 ---
 
+## Feedback on Another PR in the Stack
+
+Fix it where it belongs, not on your current branch: switch to that PR's branch, run Steps 3-5 there, then carry the change up the chain by merging forward (`framework/STACKED_PRS.md`, "When a lower PR changes"). The commit and push on that branch, and the forward merges and pushes above it, change other PRs, so confirm them with the user first (rule 6 there).
+
+---
+
 ## Response Style
 
 - Friendly, lowercase, concise
@@ -302,6 +406,7 @@ All feedback has been addressed:
 - [ ] Reply posted to every addressed comment
 - [ ] Every addressed thread resolved via GraphQL
 - [ ] No unresolved threads remaining (unless intentionally deferred)
+- [ ] On every PR in the stack: every review summary and top-level comment from a human, or from a bot with review findings, answered by a reply that quotes or links it; code-scanning alerts the PR introduces fixed or dismissed with a reason
 
 ---
 

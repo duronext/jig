@@ -48,6 +48,9 @@ Rules:
 - Tasks in different groups → parallel
 - If unsure about overlap → err on the side of sequential
 
+### Send Inventories to Research Subagents
+If the analysis needs an inventory ("which files use X", "what does this flag control"), dispatch read-only research subagents (e.g. Claude Code's Explore agent). They write nothing, so several can run at once, alongside implementers.
+
 ## Phase 2: Team Setup
 
 ### Create Team
@@ -64,6 +67,20 @@ TaskCreate with:
   - activeForm: present continuous description
   - blockedBy: dependent task IDs
 ```
+
+### Write the Shared Context Doc
+Teammates start blank. Write one doc in `plans-directory`, named by `filename-format` with kind `context` (e.g. `docs/plans/2026-05-27-export-feature-context.md`), and fill the `{shared-context-doc}` slot in the implementer and spec-reviewer prompts with its path. It holds what every agent needs and nothing task-specific:
+
+- **Constraints** the user set (what must not change, what is off limits)
+- **Working-tree rules**: one shared tree, which files each teammate owns, never touch git
+- **Heavy runs**: the gating rule below, worker and memory caps
+- **Measurement protocol**, if the work involves timing or benchmarks (see `perf`)
+- **Deliverable format**: report shape, file names, result schema
+
+Update the doc, not individual prompts, when a rule changes, and tell running teammates to re-read it. It is a working file: never stage it, and delete it in Phase 5. Anything durable belongs in the plan or spec.
+
+### Gate Heavy Runs
+Parallel teammates share one machine; each running a full test suite or build at full worker count can exhaust its memory and crash the session (one session crashed at ~90 GB RSS with every agent running a suite at 15 workers). If tasks involve heavy runs (full suites, builds, benchmarks), decide before spawning how they share it: one at a time, or a small semaphore script that admits a fixed number with capped workers and memory. Put the rule in the shared context doc.
 
 ### Spawn Implementers
 For each initial parallel task:
@@ -108,6 +125,8 @@ Task tool:
 - Repeat until compliant
 
 ### Quality Review Result
+
+The quality review does not see the shared context doc. Before accepting its result, check the task's diff against the doc's Constraints yourself; a broken constraint is an issue like any other.
 
 **If approved:**
 - Mark task as completed (TaskUpdate)
@@ -189,8 +208,25 @@ Wait for shutdown confirmation, then spawn new implementer with the next task.
    Wait for all confirmations
    TeamDelete
    ```
+   Delete the shared context doc and any `RESUME-*.md` files.
 
 5. **Hand off** — use `finish`
+
+## Pausing and Resuming
+
+To pause an implementer (machine contention, a blocking decision, end of session), send:
+
+```
+SendMessage:
+  type: message
+  recipient: implementer-N
+  content: "Pause. Stop at the next safe point. Stop only the processes
+    and containers you started. Write RESUME-implementer-N.md at the root
+    of the working tree: what's done, what's in flight, next steps, and
+    where the logs are. Then report back."
+```
+
+A resumed or replacement implementer reads its resume file and the shared context doc before anything else. Resume files are working files: never stage them, and delete each one once its task passes review.
 
 ## Decision Quick Reference
 
@@ -207,6 +243,8 @@ Wait for shutdown confirmation, then spawn new implementer with the next task.
 | All tasks done | Final integration review → verification → cleanup |
 | Implementer stuck | Check pane, send guidance, last resort: replace |
 | File conflict risk | Use blockedBy, never parallelize overlapping files |
+| Heavy run needed while peers run | Follow the gating rule in the shared context doc |
+| Need to pause an implementer | Send the pause message; they write RESUME-<name>.md |
 
 ## Appendix: Commit and Push Policy
 
