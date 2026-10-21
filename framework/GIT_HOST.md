@@ -58,6 +58,14 @@ Skills should never hardcode `gh` commands without checking the git host first.
 | gitlab | `glab mr update {iid} --target-branch <branch>` |
 | bitbucket | Bitbucket REST: `PUT /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` with `destination.branch.name` |
 
+### Update a PR/MR description
+
+| Host | Command |
+|------|---------|
+| github | `gh pr edit {number} --body-file <file>` |
+| gitlab | `glab mr update {iid} --description "$(cat <file>)"` |
+| bitbucket | Bitbucket REST: `PUT /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` with `description` |
+
 ### List CI checks for a PR/MR
 
 | Host | Command |

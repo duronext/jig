@@ -25,7 +25,8 @@ last section.
 4. **Once review starts, merge forward; don't rewrite.** See "When a lower PR
    changes".
 5. **Keep a chain list in every PR body** (bottom to top, the current PR
-   marked). Update every body when the chain changes.
+   marked). Update every body when the chain changes (GIT_HOST: "Update a
+   PR/MR description").
 6. **Ask first.** Committing (including a drop-PR revert), pushing (including
    the forward-merge pushes up the chain), force-pushing, closing a PR,
    unstacking and merging change what others see. Confirm each with the user
