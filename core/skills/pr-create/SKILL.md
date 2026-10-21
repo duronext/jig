@@ -221,7 +221,7 @@ That tells the reviewer nothing. What actually changed? Which files? Why?
 ## Pre-Submit Checklist
 
 - [ ] `review` run -- score 8+ (or blocking/major issues addressed)
-- [ ] All CI checks pass locally (build, tests)
+- [ ] All CI checks pass locally (build, tests); CI's conditions reproduced if env, install, dependency or build config changed (see `verify`)
 - [ ] PR description matches actual implementation
 - [ ] Appropriate test coverage for the change type
 - [ ] No merge conflicts with base branch
