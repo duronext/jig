@@ -90,6 +90,22 @@ Skills should never hardcode `gh` commands without checking the git host first.
 | gitlab | `glab api projects/{id}/merge_requests/{iid}/notes` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/comments` |
 
+### Fetch review summaries and top-level PR/MR comments
+
+| Host | Command |
+|------|---------|
+| github | `gh api repos/{owner}/{repo}/pulls/{number}/reviews` (review bodies) and `gh api repos/{owner}/{repo}/issues/{number}/comments` (top-level comments) |
+| gitlab | Included in the notes endpoint above (`glab api projects/{id}/merge_requests/{iid}/notes`) |
+| bitbucket | Included in the comments endpoint above (top-level comments have no `inline` object) |
+
+### Code-scanning alerts on a PR/MR
+
+| Host | Command |
+|------|---------|
+| github | List: `gh api "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{number}/merge&state=open"`. Dismiss: `gh api -X PATCH repos/{owner}/{repo}/code-scanning/alerts/{alert} -f state=dismissed -f dismissed_reason='false positive' -f dismissed_comment='why'` (reasons: `false positive`, `won't fix`, `used in tests`) |
+| gitlab | The MR's security widget (Ultimate); dismiss findings there |
+| bitbucket | Code Insights reports: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/reports`; no dismissal API |
+
 ### Reply to a comment
 
 | Host | Command |

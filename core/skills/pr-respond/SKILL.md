@@ -2,8 +2,9 @@
 name: pr-respond
 description: >
   Use when reviewing PR comments, responding to code review feedback, or
-  addressing reviewer suggestions on the current branch. Triggered by
-  "respond to PR comments", "address review feedback", or /pr-respond.
+  addressing reviewer suggestions on the current branch or the PRs stacked
+  with it. Triggered by "respond to PR comments", "address review feedback",
+  or /pr-respond.
 tier: workflow
 alwaysApply: false
 ---
@@ -21,7 +22,7 @@ alwaysApply: false
 **Analyze. Fix. Commit. Push. Reply. Resolve.** That's the job.
 
 ```
-FETCH unresolved comments + thread IDs
+FETCH every comment source + thread IDs (on every PR in the stack)
   |
 ANALYZE each comment (valid fix? false positive? needs clarification?)
   |
@@ -41,6 +42,8 @@ RESOLVE every addressed thread
 ```
 
 **The pipeline is not optional.** Do not stop after implementing fixes. Do not stop after committing. The job is not done until replies are posted and threads are resolved on GitHub. A comment without a reply and resolution is unfinished work.
+
+**Re-run once reviewers and bots have responded to a push.** On a stack, sweep every PR in it, not just the one you pushed (see `framework/STACKED_PRS.md`).
 
 ---
 
@@ -126,7 +129,39 @@ gh api repos/{owner}/{repo}/pulls/comments/{comment_id} \
 
 The single-comment endpoint drops the PR number from the path. Using `/pulls/{pr_number}/comments/{id}` will return a 404.
 
-**If there are no unresolved comments, say so and stop.**
+### Sweep every comment source
+
+Inline review threads are only one place feedback lands. Human reviewers often leave their main points in a review summary, which the thread query above does not return. Check all four sources: inline threads (the query above), plus:
+
+```bash
+# Review summaries (the body of an approve / comment / request-changes review)
+gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews \
+  --jq '.[] | select(.body != "") | {id, user: .user.login, state, submitted_at, body}'
+
+# Top-level PR comments (humans and bots)
+gh api repos/{owner}/{repo}/issues/{pr_number}/comments \
+  --jq '.[] | {id, user: .user.login, created_at, body}'
+
+# Open code-scanning alerts on the PR
+gh api "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
+  --jq '.[] | {number, rule: .rule.id, path: .most_recent_instance.location.path, line: .most_recent_instance.location.start_line}'
+```
+
+- A 403 or 404 from code scanning means it is not enabled or the token lacks the scope. Say so; don't report "no alerts".
+- Review summaries and top-level comments have no thread to resolve. Answer the ones newer than your last reply with one `gh pr comment` that quotes each point.
+- Code-scanning alerts are not replied to. Fix them, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
+- Track by reviewer: every human reviewer who left feedback gets a reply.
+
+**On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it:
+
+```bash
+stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number')
+gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number'
+```
+
+If `.stack` is null, walk the bases instead: the PR's base branch is the PR below; `gh pr list --base <head-branch>` finds the PR above.
+
+**If no PR has an unresolved thread, an open alert, or a review summary or top-level comment newer than your last reply, say so and stop.**
 
 ---
 
@@ -262,6 +297,12 @@ All feedback has been addressed:
 
 ---
 
+## Feedback on Another PR in the Stack
+
+Fix it where it belongs, not on your current branch: switch to that PR's branch, run Steps 3-5 there, then carry the change up the chain by merging forward (`framework/STACKED_PRS.md`, "When a lower PR changes").
+
+---
+
 ## Response Style
 
 - Friendly, lowercase, concise
@@ -302,6 +343,7 @@ All feedback has been addressed:
 - [ ] Reply posted to every addressed comment
 - [ ] Every addressed thread resolved via GraphQL
 - [ ] No unresolved threads remaining (unless intentionally deferred)
+- [ ] On every PR in the stack: review summaries and top-level comments newer than your last reply answered; open code-scanning alerts fixed or dismissed with a reason
 
 ---
 
