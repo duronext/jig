@@ -54,7 +54,7 @@ Jig's principles, each with its check. This list is also what authors draft agai
 ## What to Ignore
 
 - Wording and style the checklist does not cover
-- Concerns other specialists own (security, dead code, error handling)
+- Concerns other specialists own in code (security, dead code, error handling); items 2 and 4 still apply to Jig's own procedures and settings
 - **(core)** items and clauses outside Jig's repo, or when the diff touches only a team's own artifacts
 - Generated files and the version bump commit
 
