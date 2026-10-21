@@ -93,6 +93,8 @@ stage: enum | enum[]      # Optional. prd | spec | plan, or a list — pipeline 
                           # Absent = code review only (backward compatible).
 globs: string[]           # File patterns this specialist cares about
 severity: enum            # blocking | major | minor — how findings are weighted
+tools: string[]           # Optional. Code mode only: tools the specialist gets
+                          # beyond the diff, e.g. [Read, Grep, Glob]. Absent = none.
 ---
 ```
 

@@ -21,6 +21,7 @@ alwaysApply: false
 ### Mode: code (default)
 - `code-review` agent invokes this with `mode: code, tier: all` (pre-PR, full swarm)
 - `team-dev` quality gate invokes this with `mode: code, tier: fast-pass` (per-task, blocking checks only)
+- `postmortem` and `extend` invoke this with `mode: code, specialists: [framework-fit]` and the paths they changed, for the fit review (`framework/LEARNING_LOOP.md`)
 - Direct invocation via `/review` for manual code reviews
 
 ### Mode: prd
@@ -38,7 +39,7 @@ alwaysApply: false
 - Direct invocation via `/review` with a plan document path
 - Automatic for medium-to-large features and improvements
 
-**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` or `spec` mode.
+**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations, unless the caller passed `specialists`. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` or `spec` mode.
 
 ---
 
@@ -50,12 +51,12 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 
 1. Scan `team/specialists/`, `packs/*/specialists/`, and `core/specialists/` for `*.md` files
 2. Read each file and parse the YAML frontmatter
-3. Extract: `name`, `description`, `model`, `tier`, `stage`, `globs`, `severity`
+3. Extract: `name`, `description`, `model`, `tier`, `stage`, `globs`, `severity`, and `tools` if present
 4. Deduplicate by `name` (team > pack > core)
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - Otherwise include specialists whose `stage` names the mode. `stage` is a single value (`prd`, `spec`, `plan`) or a list (`[spec, plan]`). The legacy value `both` means `[spec, plan]`.
-6. Filter by the requested tier:
+6. If the caller passes `specialists: [...]`, keep only those names and skip the tier filter. Otherwise filter by the requested tier:
    - `tier: all` → include all specialists matching the mode
    - `tier: fast-pass` → include only `tier: fast-pass` specialists matching the mode
 
@@ -83,6 +84,14 @@ Read `main-branch` from `jig.config.md` (default: `main`).
 ```bash
 git diff <BASE_SHA>..<HEAD_SHA>
 git diff <BASE_SHA>..<HEAD_SHA> --name-only
+```
+
+**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed:
+```bash
+git fetch origin
+git diff $(git merge-base origin/{main-branch} HEAD) -- <paths>
+git diff $(git merge-base origin/{main-branch} HEAD) --name-only -- <paths>
+git ls-files --others --exclude-standard -- <paths>   # new files: review their whole content
 ```
 
 Extract the list of changed file paths. For each specialist, intersect its `globs` array with the changed file paths. A specialist whose globs match zero changed files is **skipped** — log it as `skipped: no matching files` but do not spawn it.
@@ -140,6 +149,8 @@ Agent tool:
 
     {filtered diff}             <- only the files matching this specialist's globs
 ```
+
+A specialist that declares `tools` in its frontmatter (e.g. `framework-fit`) is also given those tools. Others get none.
 
 #### Mode: prd or spec
 
@@ -209,7 +220,7 @@ Wait for all specialist subagents to complete. For each result:
 
 #### Mode: code
 
-**Skip this stage when `tier: fast-pass`.** The code logic reviewer only runs for pre-PR reviews (`tier: all`).
+**Skip this stage when `tier: fast-pass`, or when the caller passed `specialists`.** The code logic reviewer only runs for pre-PR reviews (`tier: all`).
 
 After collecting swarm findings, dispatch the code logic reviewer:
 
@@ -283,7 +294,7 @@ The rest of the report format is identical across modes:
 **Confidence Score**: X/10
 **Risk Level**: Low/Medium/High
 **Specialists**: N dispatched, M skipped, K N/A
-**Logic reviewer**: {ran / skipped (fast-pass)}
+**Logic reviewer**: {ran / skipped (fast-pass) / skipped (specialists)}
 
 ### Blocking Issues
 {if any — grouped by specialist}
@@ -335,7 +346,7 @@ See `tiers.md` for tier definitions, severity levels, and the default specialist
 ## Adding a New Specialist
 
 1. Create a new `.md` file in `team/specialists/` (for team-specific) or `core/specialists/` (for framework)
-2. Add frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`
+2. Add frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`, and `tools` only if the specialist must read files outside the diff
 3. **For PRD/spec/plan specialists**: add `stage: prd`, `stage: spec`, `stage: plan`, or a list such as `stage: [spec, plan]`
 4. **For code review specialists**: omit `stage` (backward compatible default)
 5. Write the review prompt body with: What to check, What to ignore, Report format
@@ -370,4 +381,4 @@ The `spec` skill invokes this with `mode: spec` after drafting a spec. Specialis
 The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialists whose `stage` includes `plan` are dispatched, followed by the plan logic reviewer (Opus). Automatic for medium-to-large work.
 
 ### With `postmortem`
-When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it.
+When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer.
