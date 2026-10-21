@@ -143,6 +143,7 @@ After spec compliance passes, dispatch the code quality review:
 - **REQUIRED**: Use `review` skill at `fast-pass` tier
 - Provide the git diff (base SHA to HEAD SHA) for this task's commits
 - The review swarm checks security, dead code, error handling, and other fast-pass specialists
+- If there is a shared context doc, check the diff against its Constraints before accepting the result, as `team-dev`'s `lead-playbook.md` ("Quality Review Result") describes
 
 **If quality review finds issues:**
 - Send the findings back to the implementer subagent

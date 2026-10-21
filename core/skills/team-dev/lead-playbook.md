@@ -126,6 +126,8 @@ Task tool:
 
 ### Quality Review Result
 
+The quality review does not see the shared context doc. Before accepting its result, check the task's diff against the doc's Constraints yourself; a broken constraint is an issue like any other.
+
 **If approved:**
 - Mark task as completed (TaskUpdate)
 - Proceed to next task assignment (see Phase 4)
