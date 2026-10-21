@@ -157,13 +157,14 @@ case $runs in
        echo "$check"
        if [ "$status" != completed ]; then echo "  pending: not checked" >&2; continue; fi
        # Annotations are the new alerts. Match each to its alert by location and rule
-       # (annotation title = alert rule.description) and print the alert's state
+       # (annotation title = alert rule.description for CodeQL and Semgrep; a tool where
+       # it differs prints unmatched, never handled) and print the alert's state
        if [ "$count" -gt 0 ]; then
          alerts=$(gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?pr={pr_number}" \
            --jq '.[] | select(.state != "fixed") | "\(.most_recent_instance.location.path):\(.most_recent_instance.location.start_line)\t\(.rule.description)\t#\(.number) \(.rule.id) \(.state)"') &&
          anns=$(gh api --paginate repos/{owner}/{repo}/check-runs/$id/annotations --jq '.[] | "\(.path):\(.start_line)\t\(.title)"') &&
          while IFS=$'\t' read -r loc title; do
-           m=$(printf '%s\n' "$alerts" | awk -F'\t' -v l="$loc" -v t="$title" '$1 == l && $2 == t { print "  " $3, l }')
+           m=$(printf '%s\n' "$alerts" | L="$loc" T="$title" awk -F'\t' '$1 == ENVIRON["L"] && $2 == ENVIRON["T"] { print "  " $3, $1 }')
            echo "${m:-  $loc ($title): no alert for this rule here: find it by rule and file}"
          done <<< "$anns" ||
          echo "  alerts not readable: not checked" >&2
