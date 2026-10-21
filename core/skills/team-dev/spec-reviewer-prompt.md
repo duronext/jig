@@ -10,6 +10,11 @@ Task tool (general-purpose):
   prompt: |
     You are reviewing whether an implementation matches its specification.
 
+    ## Shared Rules
+
+    Read {shared-context-doc} before reviewing. Its constraints are part
+    of the spec.
+
     ## Spec Acceptance Checklist (if available)
 
     [If the plan header contains a `> **Spec:** docs/plans/...` line,

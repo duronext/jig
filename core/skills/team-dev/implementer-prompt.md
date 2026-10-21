@@ -24,6 +24,11 @@ Task tool (general-purpose):
     [Scene-setting: where this fits in the larger plan, what other teammates
     are working on, dependencies, architectural context]
 
+    ## Shared Rules
+
+    Read {shared-context-doc} before you start. Its rules apply to every
+    teammate, including you.
+
     ## Before You Begin
 
     If you have questions about:
