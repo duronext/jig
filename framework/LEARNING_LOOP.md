@@ -29,7 +29,7 @@ Decide who the lesson holds for. That sets the level it lives at.
 |-------|-----------|------|
 | Personal | One person | Their own harness config (user-level instructions or memory). Not the repo, not Jig. |
 | Harness | One agent harness, in any project | That harness's own user-level config. Jig's `adapters/` only when it is about loading Jig there. |
-| Team | One team or repo, including how the team's harness should work in this repo | `team/` skills and specialists, `.claude/`, the project's agent instruction files at any level (CLAUDE.md, AGENTS.md or a harness's equivalent), `jig.config.md` |
+| Team | One team or repo, including how the team's harness should work in this repo | `team/` skills and specialists, the harness's project folder (e.g. `.claude/`), the project's agent instruction files at any level (CLAUDE.md, AGENTS.md or a harness's equivalent), `jig.config.md` |
 | Pack | Teams that share a stack, tool or tracker | `packs/` |
 | Core | Every team, on any stack, git host and harness | `core/` or `framework/`, through a PR to Jig |
 
@@ -70,4 +70,4 @@ A lesson that also lands at another level (a copy in a team's or a person's own 
 
 ## 8. Close the Loop
 
-If the work behind the lesson has a live PRD, `postmortem` adds a `learn` entry to its log (see `LIVE_PRD.md`). Tell whoever raised the lesson where it landed.
+If the work behind the lesson has a live PRD, `postmortem` adds a `learn` entry to its log (see `LIVE_PRD.md`). Tell whoever raised the lesson where it landed. When a release reaches a level that holds a bridging copy (the PR's Copies line), whoever made the copy deletes it.
