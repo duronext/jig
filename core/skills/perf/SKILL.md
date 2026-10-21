@@ -27,8 +27,9 @@ beside it.
 - Speeding up a build, test suite, CI pipeline, request path or batch job
 - Comparing two or more approaches by measurement
 - Deciding which of several optimizations to ship together
-- `kickoff` offers it during DISCOVER for work with a speed or cost goal;
-  `verify` sends you back here before any "faster" or "cheaper" claim
+- `kickoff` offers it during DISCOVER for work with a speed or cost goal, and
+  after `debug` on a speed or cost regression; `verify` sends you back here
+  before any "faster" or "cheaper" claim
 
 **Do NOT use when:**
 - Something got slower and the cause is unknown: start with `debug`, then come
@@ -172,7 +173,7 @@ describes, and run timing-sensitive benchmarks one at a time.
 ## Integration
 
 **Called by:**
-- `kickoff` during DISCOVER, for work with a speed or cost goal
+- `kickoff` during DISCOVER, for work with a speed or cost goal, or after `debug` on a speed or cost regression
 - Direct invocation via `/perf`
 
 **Referenced by:**
