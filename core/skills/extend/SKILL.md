@@ -52,7 +52,7 @@ These questions drive the decision tree below. Do not ask all four if the first 
 
 ## Step 2: Determine Artifact Type
 
-Based on the interview, route to the correct artifact type:
+First check the level with Classify in `framework/LEARNING_LOOP.md`: a personal preference, or a harness lesson not tied to this project, is not a Jig artifact, and a pack or core artifact goes to Jig rather than `team/`. Then, based on the interview, route to the correct artifact type:
 
 ```
 "I want to enforce a rule"
@@ -118,6 +118,8 @@ Based on the interview, route to the correct artifact type:
 ---
 
 ## Step 4: Scaffold the Artifact
+
+Draft it against the Fit Checklist in `core/specialists/framework-fit.md`.
 
 ### For Skills
 
@@ -215,6 +217,7 @@ tier: {fast-pass | full-only}
 globs:
   - "{glob-pattern}"
 severity: {blocking | major | minor}
+tools: [Read, Grep, Glob]       # Only if it must read files outside the diff
 ---
 ```
 
@@ -346,6 +349,8 @@ After creating the artifact, verify it will be discovered and loaded correctly:
    - No placeholders (TBD, TODO) in the final artifact
    - Cross-references use the format: `**REQUIRED**: Use {skill-name} for {reason}`
 
+6. **Fit review:** run Fit Review in `framework/LEARNING_LOOP.md` on the artifact's paths.
+
 Report the verification results to the user.
 
 ---
@@ -361,6 +366,7 @@ These framework documents define the schemas and systems this skill works with:
 | `framework/DISCOVERY.md` | How skills/specialists/agents are found and loaded |
 | `framework/CONCERNS_CHECKLIST.md` | How concerns are wired into spec authoring |
 | `framework/PIPELINE.md` | Pipeline stages and gate checks |
+| `framework/LEARNING_LOOP.md` | Which level an artifact belongs at, and the fit review before it ships |
 | `scaffold/SKILL_TEMPLATE.md` | Quick-start template with checklist |
 
 ---
@@ -391,7 +397,7 @@ These framework documents define the schemas and systems this skill works with:
 - Direct invocation via `/extend`
 
 **Related skills:**
-- `review` -- specialists created here are discovered by the review swarm
+- `review` -- specialists created here are discovered by the review swarm; it also runs the fit review (`framework-fit`)
 - `spec` -- concerns added to the checklist are surfaced during spec authoring
 - `postmortem` -- identifies gaps that lead to new artifacts
 
@@ -426,3 +432,4 @@ Before committing the new artifact:
 - [ ] Added to Concerns Checklist in `jig.config.md` (if applicable)
 - [ ] No duplicate `name` in the discovery chain (or override is intentional)
 - [ ] Verification step passed (frontmatter valid, location correct, globs tested)
+- [ ] Fit Review in `framework/LEARNING_LOOP.md` done

@@ -159,6 +159,8 @@ it asked for and how this addresses it.}
 Fixes {TICKET-REFERENCE}
 ```
 
+A learning PR (one that ships a lesson; see PR in `framework/LEARNING_LOOP.md`) opens with the two sections listed there, then this structure.
+
 ### Step 6: Push and create
 
 ```bash
@@ -248,6 +250,7 @@ That tells the reviewer nothing. What actually changed? Which files? Why?
 **Called by:**
 - `kickoff` during the SHIP stage
 - `finish` Option 2 (Push and Create PR)
+- `postmortem`, for a learning PR (PR in `framework/LEARNING_LOOP.md`)
 
 **Related skills:**
 - `review` -- run before creating the PR

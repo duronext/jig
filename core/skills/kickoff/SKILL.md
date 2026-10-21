@@ -277,7 +277,7 @@ Stage key in `jig.config.md`: `prd-check`. Skip this step if the config's `stage
 
 ## Step 8: LEARN (features only, optional for others)
 
-**INVOKE `jig:postmortem` using the Skill tool.** It analyzes reviewer comments for patterns, identifies gaps in skills, and updates skills or configs. This closes the feedback loop.
+**INVOKE `jig:postmortem` using the Skill tool.** It runs Jig's learning loop (`framework/LEARNING_LOOP.md`) on the merged PR's review comments and anything else learned during the work: it routes each lesson to one home, applies it, and reviews its fit with Jig. This is how Jig improves itself.
 
 ---
 
@@ -351,4 +351,4 @@ When looping back, update the plan document to reflect changes.
 | Review | `Skill: jig:review` | Audited code |
 | PRD check | `Skill: jig:prd` (check mode) | Outcomes verified, trace filled |
 | Ship | `Skill: jig:pr-create` | Merged PR |
-| Learn | `Skill: jig:postmortem` | Updated skills |
+| Learn | `Skill: jig:postmortem` | Fit-reviewed skill changes |

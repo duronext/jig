@@ -1,17 +1,19 @@
 ---
 name: postmortem
 description: >
-  Use when a PR has been merged after receiving review feedback and you want to
-  extract lessons learned. Analyzes reviewer comments, identifies gaps in skills
-  and specialists, and applies fixes. Triggered by "run a postmortem", "PR retro",
-  "lessons learned from this PR", or /postmortem.
+  Use when a lesson should improve Jig or the project's skills: review feedback
+  on a merged PR, a working session, a retrospective, another harness's notes
+  or skills, a request that "Jig should do X", or recurring fit-review findings.
+  Entry point for Jig's learning loop: classifies and routes each lesson,
+  applies it, and runs a fit review. Triggered by "run a postmortem", "PR
+  retro", "lessons learned", "Jig should", or /postmortem.
 tier: workflow
 alwaysApply: false
 ---
 
-# PR Postmortem
+# Postmortem
 
-**PURPOSE**: After a PR merges, analyze what reviewers caught to find gaps in skills, specialists, and review checklists -- then fix those gaps. Every merged PR becomes training data for making the system better next time.
+**PURPOSE**: Find the gaps in skills, specialists, and review checklists that a lesson exposes -- then fix those gaps. A merged PR's review comments are the usual input; every other input in Capture in `framework/LEARNING_LOOP.md` goes through the same steps. This skill runs Jig's learning loop, so every lesson makes the system better next time.
 
 **GIT HOST**: Commands in this skill use GitHub (`gh`) as the default. If `git-host` in `jig.config.md` is not `github`, read `framework/GIT_HOST.md` for the platform-specific command equivalents.
 
@@ -23,32 +25,36 @@ alwaysApply: false
 
 - A PR has been merged after receiving review feedback
 - "Run a postmortem", "PR retro", "lessons learned from this PR"
+- A lesson from any other input in Capture in `framework/LEARNING_LOOP.md` (a working session, a retrospective, another harness's notes or skills, "Jig should do X", recurring fit-review findings)
 - `kickoff` suggests this after the LEARN stage for features
 - `/postmortem` invoked directly
 
 **Do NOT use when:**
 - The PR has not been merged yet (use `pr-respond` instead)
-- The PR received no review comments (nothing to learn from)
+- The only input is a merged PR with no review comments (nothing to learn from)
 
 ---
 
 ## Workflow
 
 ```
-Interview (detect PR from branch or ask)
+Interview (merged PR, or another input)
   |
-Fetch PR data (metadata, comments, reviews)
-  |
-Analyze comments (separate human from bot, focus on real fixes)
+Gather: PR    --> fetch PR data, analyze comments
+        other --> gather that input's evidence
   |
 Extract patterns (what was wrong, principle violated, how fixed)
+  |
+Classify level (personal, harness, team, pack, core)
   |
 Cross-reference existing skills (is the pattern already documented?)
   |
 Route: pattern violation --> Specialist Diagnosis
        correctness bug  --> Logic Reviewer Diagnosis
   |
-Apply changes to skill files directly
+Apply changes, drafted against the Fit Checklist
+  |
+Fit review (Fit Review in framework/LEARNING_LOOP.md)
   |
 Report (patterns table, changes made, items needing judgment)
 ```
@@ -68,7 +74,9 @@ If found, confirm: "Found PR #XXXX -- is that the one you want to audit?"
 
 If not found, ask:
 
-> Which PR would you like to run a postmortem on? Provide a PR number or URL.
+> Which PR would you like to run a postmortem on? Provide a PR number or URL -- or describe the lesson and where it came from.
+
+**Other inputs** (see Capture in `framework/LEARNING_LOOP.md`): skip the PR fetch in Step 2 and the filter in Step 3. Gather the evidence that input calls for, keep lessons backed by a fix, failure, or correction, and fill Step 3's fields with the input in place of the reviewer. Then go to Step 4.
 
 ---
 
@@ -123,7 +131,9 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews
 
 ## Step 4: Cross-Reference Existing Skills
 
-Scan the project's skills and specialists directories to find relevant files. For each pattern group:
+First classify each pattern's level -- personal, harness, team, pack, or core -- per Classify in `framework/LEARNING_LOOP.md`. Personal lessons, and harness lessons not tied to this project, leave the repo: give them to the user for their own harness config, and stop there for them.
+
+For the rest, scan the project's skills and specialists directories to find relevant files. For each pattern group:
 
 1. Search `team/skills/`, `packs/*/skills/`, and `core/skills/` for related skills
 2. Search `team/specialists/`, `packs/*/specialists/`, and `core/specialists/` for related specialists
@@ -199,7 +209,7 @@ When a missed finding is a correctness bug that the logic reviewer should have c
 
 **When to promote a logic finding to a specialist instead:**
 
-If the same correctness bug appears 3+ times across different PRs, it has become a *pattern*, not a one-off logic issue. At that point:
+If the same correctness bug appears 3+ times across different PRs or other inputs, it has become a *pattern*, not a one-off logic issue. At that point:
 - Create a new swarm specialist (or add to an existing one) that checks for this specific anti-pattern
 - The specialist catches it cheaply and fast (haiku/sonnet) so the logic reviewer does not need to
 - This is how the system self-optimizes: rare bugs start as logic reviewer catches, frequent bugs graduate to specialists
@@ -208,28 +218,28 @@ If the same correctness bug appears 3+ times across different PRs, it has become
 
 ## Step 6: Prepare the Workspace
 
-The PR is already merged. The user is likely still on the old branch.
+For a PR input, the PR is already merged and the user is likely still on the old branch, so stash and branch from latest main as below. For any other input, work may still be in flight: create the branch in a separate worktree (`worktree`) instead of stashing, and never stash while a `team-dev` or `sdd` run is active. For a core or pack lesson, do this in a Jig checkout; the PR goes to Jig.
 
 ```bash
-# Stash any uncommitted work
+# Stash any uncommitted work (PR input only)
 git stash
 
 # Get onto latest main
 git checkout {main-branch} && git pull origin {main-branch}
 
-# Create improvement branch
+# Create improvement branch (-{topic} instead of -pr-{number} for other inputs)
 git checkout -b {username}/skill-improvements-from-pr-{number}
 ```
 
 Read `main-branch` from `jig.config.md` (default: `main`).
 
-If a ticket should be created for the improvements, offer to do so using the project's configured `ticket-system` from `jig.config.md`. Use title format: "Skill improvements -- lessons from PR #{number}".
+If a ticket should be created for the improvements, offer to do so using the project's configured `ticket-system` from `jig.config.md`. Use title format: "Skill improvements -- lessons from {PR #number or topic}".
 
 ---
 
 ## Step 7: Apply Changes
 
-Edit skill and specialist files directly. Follow the existing style of each file:
+Draft each change against the Fit Checklist in `core/specialists/framework-fit.md`, then edit skill and specialist files directly. Follow the existing style of each file:
 - **Pitfalls** -> table rows (`| Problem | Solution |`)
 - **Anti-patterns** -> code examples with clear good/bad markers
 - **Checklists** -> bullet points with `-`
@@ -250,19 +260,24 @@ Edit skill and specialist files directly. Follow the existing style of each file
 
 ---
 
-## Step 8: Report and Hand Off
+## Step 8: Fit Review
+
+Run the fit review (Fit Review in `framework/LEARNING_LOOP.md`) on the paths you changed.
+
+---
+
+## Step 9: Report and Hand Off
 
 If the merged work has a live PRD (`> **PRD:**` in its plan or spec), add one `learn` entry to its log naming the one or two lessons that changed a skill or specialist, in plain words. See `framework/LIVE_PRD.md`.
 
 Present a structured summary:
 
 ```markdown
-## PR Postmortem: PR #{number} -- "{title}"
+## Postmortem: {PR #number -- "title", or the input}
 
-### Comments Analyzed
-- X comments from human reviewers
-- Y comments from bots (Z actionable)
-- N led to code changes
+### Input Analyzed
+- PR: X comments from human reviewers, Y from bots (Z actionable), N led to code changes
+- Other input: the evidence gathered, and N lessons kept
 
 ### Patterns Found
 
@@ -277,17 +292,20 @@ Present a structured summary:
 - `core/specialists/performance.md`: Added memoization check
 - ...
 
+### Fit Review
+- framework-fit: rounds run, findings fixed, and any left standing with why
+
 ### Items Needing Human Judgment
 - [Anything ambiguous or subjective]
 ```
 
-Then: "Ready to commit and push? Or want to review the diffs first?"
+Then: "Ready to commit and push? Or want to review the diffs first?" With approval, ship through `pr-create` as a learning PR (PR in `framework/LEARNING_LOOP.md`); a core or pack change then waits for Release and Propagate.
 
 ---
 
 ## Where to Put Guidance
 
-When deciding where a pattern belongs, use the narrowest applicable scope:
+When deciding where a pattern belongs, use the narrowest applicable scope. This table picks the home within the project; Classify in `framework/LEARNING_LOOP.md` decides first whether the lesson belongs in the project, a pack, Jig core, or the user's own harness config.
 
 | Scope | Location | Example |
 |-------|----------|---------|
@@ -314,6 +332,8 @@ When deciding where a pattern belongs, use the narrowest applicable scope:
 | Hardcoding ticket system references | Read `ticket-system` from `jig.config.md` -- offer to create tickets using the configured system |
 | Forgetting to update automated reviewer configs | When adding a review-checkable rule to a skill, propagate to reviewer configs if applicable |
 | Duplicating patterns across skills and specialists | One primary location per pattern. Other locations reference it, not repeat it |
+| Writing one person's or one harness's preference into a shared skill | Classify the level first. Personal and harness lessons go in the user's own harness config |
+| Trusting the edit because each file reads well | Most misfits sit in files the diff did not touch. Run the fit review |
 
 ---
 
@@ -321,10 +341,11 @@ When deciding where a pattern belongs, use the narrowest applicable scope:
 
 **Called by:**
 - `kickoff` during the LEARN stage (post-merge)
+- Direct invocation for a lesson from any other input
 
 **Related skills:**
-- `review` -- the review swarm whose specialists this skill improves
-- `pr-create` -- the PR whose comments this skill analyzes
+- `review` -- the review swarm whose specialists this skill improves, and whose `framework-fit` runs the fit review
+- `pr-create` -- the PR whose comments this skill analyzes, and the skill that ships the learning PR
 - `pr-respond` -- for addressing feedback before the postmortem
 - `extend` -- if the postmortem reveals the need for an entirely new skill or specialist
 
@@ -334,9 +355,10 @@ When deciding where a pattern belongs, use the narrowest applicable scope:
 
 | Element | Rule |
 |---------|------|
-| Input | PR number or URL (auto-detect from branch) |
+| Input | Merged PR (auto-detect from branch), or any other input in `framework/LEARNING_LOOP.md` Capture |
 | Output | Edited skill/specialist files + structured report |
-| Branch | `{username}/skill-improvements-from-pr-{number}` |
+| Branch | `{username}/skill-improvements-from-pr-{number}` (or `-{topic}`) |
+| Fit | Draft against the Fit Checklist; run Fit Review in `framework/LEARNING_LOOP.md` |
 | Ticket | Optional -- offer to create via configured ticket system |
 | Scope | Only patterns that led to real code changes -- skip noise |
 | Style | Match the existing style of each skill/specialist file |

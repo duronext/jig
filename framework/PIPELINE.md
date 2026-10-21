@@ -97,11 +97,11 @@ Create the PR, push, get it merged.
 
 ### 9. Learn
 
-Post-merge retrospective. What went well? What should improve?
+How Jig improves itself. After a merge, and whenever a lesson turns up anywhere else, the learning loop captures it, classifies it, routes it to one home, drafts the change, reviews its fit with Jig, and ships it as a PR. Core changes reach teams with the next release. See `LEARNING_LOOP.md`.
 
-- **Skill:** `postmortem`
-- **Output:** Lessons learned, skill improvement suggestions, process refinements
-- **Work type overrides:** Features always learn. Bugs and improvements optionally. Tasks skip.
+- **Skill:** `postmortem`, the entry point for every input in `LEARNING_LOOP.md`, not only merged-PR review comments
+- **Output:** Skill, specialist or config changes that pass the `framework-fit` review; a `learn` entry on a live PRD
+- **Work type overrides:** Features always learn. Bugs and improvements optionally. Tasks skip. Outside the pipeline, `postmortem` runs on any lesson at any time.
 
 ## Work Type Routing
 
