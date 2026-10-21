@@ -92,6 +92,7 @@ Spawn a fresh subagent with:
 - Relevant project context (architecture, conventions, related files)
 - Reference to `tdd` for TDD discipline
 - Clear instructions to implement, test, and commit
+- Instructions to stage explicit paths only (never `git add -A`, `git add .` or a whole directory) and never to commit the shared context doc or progress file (see Shared Rules and Long Tasks)
 
 **Model selection guidance:**
 
@@ -203,8 +204,8 @@ Every implementer subagent needs:
 
 ### Shared Rules and Long Tasks
 
-- **Shared rules:** when several subagents need the same constraints and deliverable format, write them once in a doc in `plans-directory`, named by `filename-format` with kind `context`, and point the implementer and spec-reviewer prompts at it. Implementers never commit it; delete it before invoking `finish`. Send inventories to read-only research subagents (e.g. Claude Code's Explore agent), as `team-dev`'s `lead-playbook.md` describes.
-- **Long tasks:** if a task may outlive the session, tell the implementer in its prompt to keep a progress file (done, in flight, next steps, log locations) and not to commit it. A re-dispatched subagent reads it first.
+- **Shared rules:** when several subagents need the same constraints and deliverable format, write them once in a doc in `plans-directory`, named by `filename-format` with kind `context`, and point the implementer and spec-reviewer prompts at it. Implementers never commit it (Dispatch Implementer Subagent says how to tell them); delete it before invoking `finish`. Send inventories to read-only research subagents (e.g. Claude Code's Explore agent), as `team-dev`'s `lead-playbook.md` describes.
+- **Long tasks:** if a task may outlive the session, tell the implementer in its prompt to keep a progress file (done, in flight, next steps, log locations). A re-dispatched subagent reads it first.
 
 ### The Controller's Role
 
