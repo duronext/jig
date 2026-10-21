@@ -91,8 +91,8 @@ gh pr view {number} --json title,body,state,mergedAt,headRefName,files
 # All inline review comments (paginated)
 gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate
 
-# Review summaries
-gh api repos/{owner}/{repo}/pulls/{number}/reviews
+# Review summaries (paginated)
+gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 ```
 
 ---
