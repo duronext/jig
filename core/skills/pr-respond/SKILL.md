@@ -84,20 +84,21 @@ Extract owner/repo from `git remote get-url origin`. Use in all `gh api` calls b
 **Fetch PR comments (REST -- for replying):**
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{pr_number}/comments \
+gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/comments \
   --jq '.[] | {id: .id, path: .path, line: .line, body: .body, user: .user.login, created_at: .created_at}'
 ```
 
 **Fetch unresolved thread IDs (GraphQL -- for resolving):**
 
-The REST API gives you comment IDs (for replying), but resolving threads requires GraphQL thread IDs. Fetch both.
+The REST API gives you comment IDs (for replying), but resolving threads requires GraphQL thread IDs. Fetch both. `--paginate` follows `endCursor` until `hasNextPage` is false, so threads past the first 100 are included.
 
 ```bash
-gh api graphql -f query='
-{
-  repository(owner: "OWNER", name: "REPO") {
-    pullRequest(number: PR_NUM) {
-      reviewThreads(first: 50) {
+gh api graphql --paginate -F owner={owner} -F repo={repo} -F pr={pr_number} -f query='
+query($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      reviewThreads(first: 100, after: $endCursor) {
+        pageInfo { hasNextPage endCursor }
         nodes {
           id
           isResolved

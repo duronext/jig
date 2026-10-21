@@ -94,7 +94,7 @@ Skills should never hardcode `gh` commands without checking the git host first.
 
 | Host | Command |
 |------|---------|
-| github | `gh api repos/{owner}/{repo}/pulls/{number}/comments` |
+| github | `gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments` |
 | gitlab | `glab api projects/{id}/merge_requests/{iid}/notes` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/comments` |
 
