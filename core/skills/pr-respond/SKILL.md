@@ -135,33 +135,49 @@ Inline review threads are only one place feedback lands. Human reviewers often l
 
 ```bash
 # Review summaries (the body of an approve / comment / request-changes review)
-gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews \
-  --jq '.[] | select(.body != "") | {id, user: .user.login, state, submitted_at, body}'
+gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/reviews \
+  --jq '.[] | select(.body != "") | {id, user: .user.login, state, submitted_at, url: .html_url, body}'
 
 # Top-level PR comments (humans and bots)
-gh api repos/{owner}/{repo}/issues/{pr_number}/comments \
-  --jq '.[] | {id, user: .user.login, created_at, body}'
+gh api --paginate repos/{owner}/{repo}/issues/{pr_number}/comments \
+  --jq '.[] | {id, user: .user.login, created_at, url: .html_url, body}'
 
 # Open code-scanning alerts on the PR
-gh api "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
+gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{pr_number}/merge&state=open" \
   --jq '.[] | {number, rule: .rule.id, path: .most_recent_instance.location.path, line: .most_recent_instance.location.start_line}'
 ```
 
 - A 403 or 404 from code scanning means it is not enabled or the token lacks the scope. Say so; don't report "no alerts".
-- Review summaries and top-level comments have no thread to resolve. Answer the ones newer than your last reply with one `gh pr comment` that quotes each point.
+- Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Code-scanning alerts are not replied to. Fix them, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
 - Track by reviewer: every human reviewer who left feedback gets a reply.
 
-**On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it:
+**On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it; otherwise walk the bases (`framework/STACKED_PRS.md`, "Finding the Chain"):
 
 ```bash
-stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number')
-gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number'
+stack=$(gh api repos/{owner}/{repo}/pulls/{pr_number} --jq '.stack.number // empty')
+if [ -n "$stack" ]; then
+  gh api repos/{owner}/{repo}/stacks/$stack --jq '.pull_requests[].number'
+else
+  echo {pr_number}
+  # Below: the open PR whose head is this PR's base, until none is found
+  base=$(gh pr view {pr_number} --json baseRefName --jq .baseRefName)
+  while pr=$(gh pr list --head "$base" --json number,baseRefName \
+      --jq '.[:1][] | "\(.number) \(.baseRefName)"') && [ -n "$pr" ]; do
+    echo "${pr% *}"; base=${pr#* }
+  done
+  # Above: open PRs whose base is this PR's head, until none is found
+  heads=$(gh pr view {pr_number} --json headRefName --jq .headRefName)
+  while [ -n "$heads" ]; do
+    found=$(for h in $heads; do gh pr list --base "$h" --json number,headRefName \
+      --jq '.[] | "\(.number) \(.headRefName)"'; done)
+    [ -n "$found" ] && echo "$found" | cut -d' ' -f1
+    heads=$(echo "$found" | cut -s -d' ' -f2)
+  done
+fi
 ```
 
-If `.stack` is null, walk the bases instead: the PR's base branch is the PR below; `gh pr list --base <head-branch>` finds the PR above.
-
-**If no PR has an unresolved thread, an open alert, or a review summary or top-level comment newer than your last reply, say so and stop.**
+**Stop when, on every PR, each inline thread is resolved, each review summary and top-level comment is answered, and each alert is fixed or dismissed. Say so.**
 
 ---
 
@@ -343,7 +359,7 @@ Fix it where it belongs, not on your current branch: switch to that PR's branch,
 - [ ] Reply posted to every addressed comment
 - [ ] Every addressed thread resolved via GraphQL
 - [ ] No unresolved threads remaining (unless intentionally deferred)
-- [ ] On every PR in the stack: review summaries and top-level comments newer than your last reply answered; open code-scanning alerts fixed or dismissed with a reason
+- [ ] On every PR in the stack: every review summary and top-level comment answered by a reply that quotes or links it; open code-scanning alerts fixed or dismissed with a reason
 
 ---
 

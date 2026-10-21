@@ -74,13 +74,21 @@ Skills should never hardcode `gh` commands without checking the git host first.
 | gitlab | `glab mr list --target-branch <branch>` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=destination.branch.name="<branch>"` |
 
+### Find the open PR/MR for a branch (by its head branch)
+
+| Host | Command |
+|------|---------|
+| github | `gh pr list --head <branch> --json number,baseRefName` |
+| gitlab | `glab mr list --source-branch <branch>` |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=source.branch.name="<branch>"` |
+
 ### Find a PR's native stack
 
 | Host | Command |
 |------|---------|
 | github | `gh api repos/{owner}/{repo}/pulls/{number} --jq .stack` (null if not stacked), then `gh api repos/{owner}/{repo}/stacks/{stack_number}` |
-| gitlab | Not natively supported — walk bases with "Find dependent PRs/MRs" |
-| bitbucket | Not natively supported — walk bases with "Find dependent PRs/MRs" |
+| gitlab | Not natively supported — walk bases with "Find the open PR/MR for a branch" and "Find dependent PRs/MRs" |
+| bitbucket | Not natively supported — walk bases with "Find the open PR/MR for a branch" and "Find dependent PRs/MRs" |
 
 ### Fetch PR/MR comments
 
@@ -94,7 +102,7 @@ Skills should never hardcode `gh` commands without checking the git host first.
 
 | Host | Command |
 |------|---------|
-| github | `gh api repos/{owner}/{repo}/pulls/{number}/reviews` (review bodies) and `gh api repos/{owner}/{repo}/issues/{number}/comments` (top-level comments) |
+| github | `gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews` (review bodies) and `gh api --paginate repos/{owner}/{repo}/issues/{number}/comments` (top-level comments) |
 | gitlab | Included in the notes endpoint above (`glab api projects/{id}/merge_requests/{iid}/notes`) |
 | bitbucket | Included in the comments endpoint above (top-level comments have no `inline` object) |
 
@@ -102,7 +110,7 @@ Skills should never hardcode `gh` commands without checking the git host first.
 
 | Host | Command |
 |------|---------|
-| github | List: `gh api "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{number}/merge&state=open"`. Dismiss: `gh api -X PATCH repos/{owner}/{repo}/code-scanning/alerts/{alert} -f state=dismissed -f dismissed_reason='false positive' -f dismissed_comment='why'` (reasons: `false positive`, `won't fix`, `used in tests`) |
+| github | List: `gh api --paginate "repos/{owner}/{repo}/code-scanning/alerts?ref=refs/pull/{number}/merge&state=open"`. Dismiss: `gh api -X PATCH repos/{owner}/{repo}/code-scanning/alerts/{alert} -f state=dismissed -f dismissed_reason='false positive' -f dismissed_comment='why'` (reasons: `false positive`, `won't fix`, `used in tests`) |
 | gitlab | The MR's security widget (Ultimate); dismiss findings there |
 | bitbucket | Code Insights reports: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/reports`; no dismissal API |
 

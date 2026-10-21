@@ -34,9 +34,10 @@ last section.
 
 ## Finding the Chain
 
-Walk the bases. A PR's base branch is the PR below it; PRs whose base is this
-PR's head branch are above it (GIT_HOST: "Find dependent PRs/MRs"). On GitHub,
-a PR in a native stack also reports its stack directly (see below).
+Walk the bases. A PR's base branch is the PR below it (GIT_HOST: "Find the
+open PR/MR for a branch"); PRs whose base is this PR's head branch are above it
+(GIT_HOST: "Find dependent PRs/MRs"). On GitHub, a PR in a native stack also
+reports its stack directly (see below).
 
 ---
 
