@@ -135,7 +135,7 @@ Add **context-specific items** when applicable:
 
 **Title**: Follow the project's commit convention from `jig.config.md` (e.g., `type(scope): description`), under 70 chars.
 
-**Body**: Use this structure:
+**Body**: If `perf` measured this work, link its results doc (`*-perf.md` in `plans-directory`) from the Summary. Use this structure:
 
 ```markdown
 ## Summary

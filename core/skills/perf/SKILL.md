@@ -131,7 +131,8 @@ what is worth doing next.
   `max_rss_mb`.
 - **Results doc** (`*-perf.md`): what changed, methodology, results,
   learnings.
-- Link both from the PR description and the ticket.
+- Link both from the ticket. `pr-create` links the results doc from the PR
+  description once the levers ship.
 - Keep the harness and scripts in the repo, not in a temp directory, so the
   next person can rerun them.
 
@@ -176,6 +177,7 @@ describes, and run timing-sensitive benchmarks one at a time.
 
 **Referenced by:**
 - `verify` -- its "faster" or "cheaper" claims follow this protocol (Steps 5 and 7)
+- `pr-create` -- links the results doc from the PR description
 
 **Terminal state:**
 - Return control to `kickoff`, the invoking skill or the user. No auto-invoked implementation.
