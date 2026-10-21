@@ -47,7 +47,7 @@ Plan each change against the Fit Checklist in `core/specialists/framework-fit.md
 
 ## 5. Fit Review
 
-Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review. A fit review reads; it does not execute: before the PR, also run each new or changed command block or procedure once on a real input. PR, below, says where the findings and the runs are recorded.
+Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review. A fit review reads; it does not execute: before the PR, also run each new or changed command block or procedure once on a real input, and once on the input most likely to break it (a fork PR, a binary file, a name that looks like a number, an empty result, a repo with existing alerts or bot comments, a consumer repo). PR, below, says where the findings and the runs are recorded.
 
 ## 6. PR
 
@@ -64,6 +64,8 @@ Name the lesson's input (the PR, session, retrospective or request) in a line. C
 ## 7. Release and Propagate
 
 Team-level changes take effect when they merge. Core and pack changes reach installed copies only after a release (see Releasing in Jig's CLAUDE.md), and teams then update as README's Updating section says. Until then the change exists only in the Jig repo.
+
+A lesson that also lands at another level (a copy in a team's or a person's own config) is copied after the PR's reviews settle, not while they run. List each copy in the PR, and carry every later fix to each one; a copy taken mid-review keeps the bugs the review then finds.
 
 ## 8. Close the Loop
 
