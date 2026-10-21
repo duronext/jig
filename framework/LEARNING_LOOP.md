@@ -47,7 +47,7 @@ Plan each change against the Fit Checklist in `core/specialists/framework-fit.md
 
 ## 5. Fit Review
 
-Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way. List every finding in the PR body, fixed or left standing, one line each; that is the record a later postmortem counts.
+Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review. A fit review reads; it does not execute: before the PR, run each new or changed command block or procedure once on a real input and record it in the test plan, where an unticked item is an open finding. List every finding in the PR body, fixed or left standing, one line each; that is the record a later postmortem counts.
 
 ## 6. PR
 
