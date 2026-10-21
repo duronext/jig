@@ -90,10 +90,10 @@ gh api --paginate repos/{owner}/{repo}/pulls/{pr_number}/comments \
 
 **Fetch unresolved thread IDs (GraphQL -- for resolving):**
 
-The REST API gives you comment IDs (for replying), but resolving threads requires GraphQL thread IDs. Fetch both. `--paginate` follows `endCursor` until `hasNextPage` is false, so threads past the first 100 are included.
+The REST API gives you comment IDs (for replying), but resolving threads requires GraphQL thread IDs. Fetch both. `--paginate` follows `endCursor` until `hasNextPage` is false, so threads past the first 100 are included. Owner and repo go in with `-f` (always a string); `-F` would turn a name like `2023` into a number. Only the PR number takes `-F`.
 
 ```bash
-gh api graphql --paginate -F owner={owner} -F repo={repo} -F pr={pr_number} -f query='
+gh api graphql --paginate -f owner={owner} -f repo={repo} -F pr={pr_number} -f query='
 query($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
   repository(owner: $owner, name: $repo) {
     pullRequest(number: $pr) {
