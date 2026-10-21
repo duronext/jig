@@ -153,10 +153,10 @@ Agent tool:
 
     ## Diff to Review
 
-    {filtered diff}             <- only the files matching this specialist's globs
+    {filtered diff}             <- matching files only; every changed file for a named specialist
 ```
 
-A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: in Claude Code, the read-only `Explore` agent for `[Read, Grep, Glob]`; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say in the report that `tools` was not enforced. A specialist without `tools` works from the diff in its prompt.
+A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: in Claude Code, the read-only `Explore` agent for `[Read, Grep, Glob]`; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
 
 #### Mode: prd or spec
 
@@ -301,6 +301,7 @@ The rest of the report format is identical across modes:
 **Risk Level**: Low/Medium/High
 **Specialists**: N dispatched, M skipped, K N/A
 **Logic reviewer**: {ran / skipped (fast-pass) / skipped (specialists)}
+**Tools**: {enforced / not enforced: <specialists> / none declared}
 
 ### Blocking Issues
 {if any — grouped by specialist}

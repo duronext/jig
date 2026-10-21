@@ -37,6 +37,6 @@ Read and follow the `review` skill (`core/skills/review/SKILL.md`) for the compl
 ## Important
 
 - Dispatch ALL matching specialists -- never skip one to save time
-- Use each specialist's declared `model` from frontmatter (haiku, sonnet, or opus)
+- Use each specialist's declared `model` (haiku, sonnet, or opus) and, if present, `tools` from frontmatter
 - Score caps are HARD -- no exceptions
 - The Specialist Summary table must distinguish: dispatched / skipped / N/A / clean

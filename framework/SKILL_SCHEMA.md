@@ -95,7 +95,8 @@ globs: string[]           # File patterns this specialist cares about
 severity: enum            # blocking | major | minor — how findings are weighted
 tools: string[]           # Optional. Code mode only: read-only tools the specialist
                           # needs beyond the diff, e.g. [Read, Grep, Glob]. Absent =
-                          # works from the diff alone. `review`'s Dispatch enforces it.
+                          # works from the diff alone. `review`'s Dispatch enforces it
+                          # where the harness can, and reports when it cannot.
 ---
 ```
 
