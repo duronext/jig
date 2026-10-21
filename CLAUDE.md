@@ -172,7 +172,7 @@ Commit conventions (format, types, scopes, co-author rules) are defined in `jig.
 2. Read `framework/TIER_SYSTEM.md` to choose the right tier
 3. Create `core/skills/{name}/SKILL.md`
 4. Add to the `skills` array in `.claude-plugin/plugin.json`
-5. Add a row to the Core Skills tables in this file and in `README.md`, and a `skill-item` to the matching stage card in `docs/index.html`
+5. Add a row to the Core Skills tables in this file and in `README.md`, and a `skill-item` to the matching stage card in `docs/index.html` (or its name to the DevEx strip, for a skill outside the pipeline like `worktree`)
 6. If it is a pipeline stage or tool, update `framework/PIPELINE.md` and every kickoff route together
 7. If the skill should surface during spec authoring, add it to the concerns checklist in `jig.config.md`
 
@@ -194,7 +194,13 @@ This gives every teammate on the project the full Jig framework on clone — no 
 1. Create `core/specialists/{name}.md` with frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`
 2. The body below the frontmatter IS the specialist's prompt
 3. `review` discovers it automatically — no config needed
-4. Add a row to the matching inventory table in `core/skills/review/tiers.md`
+4. Add a row to the matching inventory table in `core/skills/review/tiers.md`; for a code-review specialist, also a row to README's Core Specialists table and its name to the Specialists strip in `docs/index.html`
+
+### Adding a pack skill or specialist
+1. Create `packs/{pack}/skills/{prefix}-{name}/SKILL.md` or `packs/{pack}/specialists/{name}.md`
+2. List it in the pack's `pack.json`, and in its `README.md` if it has one
+3. For a skill, add it to the `skills` array in `.claude-plugin/plugin.json`
+4. For the `engineering` pack, add a row to README's Engineering Starter Pack table and its name to the Starter pack strip in `docs/index.html`
 
 ### Adding a framework doc
 1. Create `framework/{NAME}.md`
@@ -203,7 +209,7 @@ This gives every teammate on the project the full Jig framework on clone — no 
 ### Adding a core agent
 1. Create `core/agents/{name}.md`
 2. Add it to the `agents` array in `.claude-plugin/plugin.json`
-3. Add a row to the Core Agents tables in this file and in `README.md`
+3. Add a row to the Core Agents tables in this file and in `README.md` and to the Agent Mapping table in `adapters/codex/AGENTS.md.template`, and its name to the Agents strip in `docs/index.html`
 
 ### Releasing
 Core and pack changes reach installed copies only after a release.
@@ -217,6 +223,8 @@ Core and pack changes reach installed copies only after a release.
 - `framework/LIVE_PRD.md` — how the live PRD page and the pipeline share state
 - `framework/DISCOVERY.md` — how Jig finds and loads skills
 - `framework/SKILL_SCHEMA.md` — frontmatter spec for all skills
+- `framework/TIER_SYSTEM.md` — how tiers control activation
+- `framework/CONCERNS_CHECKLIST.md` — configurable concerns checklist for specs
 - `docs/specs/2026-03-28-jig-framework-design.md` — the original design spec
 
 ## Git Workflow
