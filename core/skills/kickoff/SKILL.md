@@ -88,7 +88,7 @@ Before anything else, determine the work type. This controls pipeline depth.
 ```mermaid
 graph TD
   start{"What kind of work?"}
-  start -->|broken / incorrect| bug["BUG<br/>Discovery tool: debug<br/>Spec: light (optional)<br/>Plan: 1-3 tasks<br/>Build: sequential<br/>Learn: optional"]
+  start -->|broken / incorrect| bug["BUG<br/>Discovery tools: debug,<br/>perf after debug (speed/cost regression)<br/>Spec: light (optional)<br/>Plan: 1-3 tasks<br/>Build: sequential<br/>Learn: optional"]
   start -->|making existing thing better| improvement["IMPROVEMENT<br/>Discovery tools: brainstorm (optional),<br/>perf (speed/cost goals)<br/>PRD: one-pager if large<br/>Spec: light or full<br/>Plan: standard<br/>Build: SDD or team-dev<br/>Learn: optional"]
   start -->|new capability| feature["FEATURE<br/>Discovery tools: brainstorm (recommended),<br/>perf (speed/cost goals)<br/>PRD: recommended<br/>Spec: full<br/>Plan: detailed<br/>Build: team-dev<br/>Learn: yes"]
   start -->|config / chore / refactor| task["TASK / CHORE<br/>Skip discovery tools<br/>Plan: minimal<br/>Build: direct<br/>Learn: no"]
@@ -185,7 +185,7 @@ If user accepts, **INVOKE `jig:debug` using the Skill tool.** It returns control
 
 ### Perf
 
-Offer for: work whose goal is speed or cost (a build, test suite, CI pipeline, endpoint or job).
+Offer for: work whose goal is speed or cost (a build, test suite, CI pipeline, endpoint or job), and after `debug` on a bug that is a speed or cost regression.
 
 If user accepts, **INVOKE `jig:perf` using the Skill tool.** It returns control to kickoff when done.
 

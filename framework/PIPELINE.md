@@ -112,7 +112,7 @@ Post-merge retrospective. What went well? What should improve?
 | Discover | Yes | Yes | Yes | Yes |
 | Brainstorm tool | Rare | Recommended | Optional | Skip |
 | Debug tool | If unclear | Skip | Skip | Skip |
-| Perf tool | Skip | If speed/cost goal | If speed/cost goal | Skip |
+| Perf tool | After `debug`, if speed or cost regressed | If speed/cost goal | If speed/cost goal | Skip |
 | PRD | Skip | Recommended | One-pager if large | Skip |
 | Spec | Light, optional | Full | Light or full | Skip |
 | Plan | 1-3 tasks | Detailed | Standard | Minimal |
