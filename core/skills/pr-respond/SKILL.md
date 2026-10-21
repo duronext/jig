@@ -198,18 +198,18 @@ else
   # Below: the open same-repo PR whose head is this PR's base, down to {main-branch}
   base=$(gh pr view {pr_number} --json baseRefName --jq .baseRefName) || fail "below #{pr_number}"
   while [ -n "$base" ] && [ "$base" != "{main-branch}" ]; do
-    pr=$(gh pr list --head "$base" --json number,baseRefName,isCrossRepository \
+    pr=$(gh pr list --head "$base" --limit 1000 --json number,baseRefName,isCrossRepository \
       --jq '[.[] | select(.isCrossRepository | not)][:1][] | "\(.number) \(.baseRefName)"') || { fail "below $base"; break; }
     n=${pr% *}; base=${pr#* }
     [ -n "$pr" ] && case $seen in *" $n "*) false;; esac || break
     echo "$n"; seen="$seen$n "
   done
-  # Above: open same-repo PRs whose base is this PR's head, until none is new. Not from a
-  # fork PR or one whose head is {main-branch}: their head name isn't a stack branch here
+  # Above: open same-repo PRs whose base is this PR's head, until none is new; not from a
+  # fork PR or a {main-branch} head ("Finding the Chain")
   me=$(gh pr view {pr_number} --json headRefName,isCrossRepository --jq '"\(.isCrossRepository) \(.headRefName)"') || fail "above #{pr_number}"
   heads=; [ "${me%% *}" = false ] && [ "${me#* }" != "{main-branch}" ] && heads=${me#* }
   while [ -n "$heads" ]; do
-    found=$(while read -r h; do gh pr list --base "$h" --json number,headRefName,isCrossRepository \
+    found=$(while read -r h; do gh pr list --base "$h" --limit 1000 --json number,headRefName,isCrossRepository \
       --jq '.[] | select(.isCrossRepository | not) | "\(.number) \(.headRefName)"' || fail "above $h"; done <<< "$heads")
     heads=
     while read -r n h; do
