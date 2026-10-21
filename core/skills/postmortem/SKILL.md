@@ -228,13 +228,7 @@ git checkout {main-branch} && git pull origin {main-branch}
 git checkout -b {username}/skill-improvements-from-pr-{number}
 ```
 
-**Any other input.** Work may still be in flight (a `team-dev` or `sdd` run, uncommitted changes), so never stash or check out in the current tree. Create the branch in a new worktree from latest main, or with the `worktree` skill, and do the remaining steps there:
-
-```bash
-git fetch origin {main-branch}
-git worktree add .worktrees/skill-improvements-from-{topic} -b {username}/skill-improvements-from-{topic} origin/{main-branch}
-cd .worktrees/skill-improvements-from-{topic}
-```
+**Any other input.** Work may still be in flight (a `team-dev` or `sdd` run, uncommitted changes), so never stash or check out in the current tree. Create the branch `{username}/skill-improvements-from-{topic}` with the `worktree` skill, from latest `{main-branch}`, and do the remaining steps there.
 
 Read `main-branch` from `jig.config.md` (default: `main`).
 
@@ -353,6 +347,7 @@ When deciding where a pattern belongs, use the narrowest applicable scope. This 
 - `pr-create` -- the PR whose comments this skill analyzes, and the skill that ships the learning PR
 - `pr-respond` -- for addressing feedback before the postmortem
 - `extend` -- if the postmortem reveals the need for an entirely new skill or specialist
+- `worktree` -- creates the branch for a lesson from any input other than a merged PR
 
 ---
 
