@@ -26,9 +26,10 @@ last section.
    changes".
 5. **Keep a chain list in every PR body** (bottom to top, the current PR
    marked). Update every body when the chain changes.
-6. **Ask first.** Force-pushing, closing a PR, unstacking and merging change
-   what others see. Confirm each with the user before running it; `finish`'s
-   rules apply.
+6. **Ask first.** Committing (including a drop-PR revert), pushing (including
+   the forward-merge pushes up the chain), force-pushing, closing a PR,
+   unstacking and merging change what others see. Confirm each with the user
+   before running it; `finish`'s rules apply.
 
 ---
 
