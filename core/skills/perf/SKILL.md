@@ -135,6 +135,15 @@ what is worth doing next.
 - Keep the harness and scripts in the repo, not in a temp directory, so the
   next person can rerun them.
 
+### Step 8: Return control
+
+Summarize in conversation which levers measured as wins in the combination,
+with their numbers and the `*-perf.md` path, then return control to `kickoff`
+or the invoking skill (or the user, if invoked directly).
+
+**Do NOT go on to implement the levers.** They go through PRD, spec and plan
+like any other change, with the results doc as their evidence.
+
 ---
 
 ## Running Probes in Parallel
@@ -163,8 +172,13 @@ describes, and run timing-sensitive benchmarks one at a time.
 
 **Called by:**
 - `kickoff` during DISCOVER, for work with a speed or cost goal
-- `verify` -- before any "faster" or "cheaper" claim (Steps 5 and 7)
 - Direct invocation via `/perf`
+
+**Referenced by:**
+- `verify` -- its "faster" or "cheaper" claims follow this protocol (Steps 5 and 7)
+
+**Terminal state:**
+- Return control to `kickoff`, the invoking skill or the user. No auto-invoked implementation.
 
 **Related skills:**
 - `debug` -- root cause first when something regressed
