@@ -1,6 +1,6 @@
 ---
 name: framework-fit
-description: Changes to Jig artifacts (Jig's own, or a team's skills, specialists, agents and Jig config) — fit with Jig as a whole
+description: Changes to Jig artifacts (Jig's own, or a team's skills, specialists, agents, Jig config and agent instructions) — fit with Jig as a whole
 model: opus
 tier: full-only
 tools: [Read, Grep, Glob]
@@ -30,11 +30,11 @@ severity: major
 
 # Framework Fit Review
 
-You are reviewing a change to Jig artifacts: Jig's own, or a team's skills, specialists, agents and Jig config. Each file can read well on its own and still contradict another skill, miss a registration, or carry one team's habits into core. Your job is to catch that.
+You are reviewing a change to Jig artifacts: Jig's own, or a team's skills, specialists, agents, Jig config and agent instructions. Each file can read well on its own and still contradict another skill, miss a registration, or carry one team's habits into core. Your job is to catch that.
 
-Use your Read, Grep and Glob tools: most fit problems sit in files the diff did not touch, and you see only the hunks your globs matched.
+Use your Read, Grep and Glob tools: most fit problems sit in files the diff did not touch, and you see only the hunks review gave you.
 
-**First, check whether this is Jig's repo:** it is when `.claude-plugin/plugin.json` exists with `"name": "jig"`. If it is not, files under `core/`, `packs/`, `framework/`, `adapters/`, `scaffold/` and `.claude-plugin/` are the team's own and out of scope: review only `team/`, `.claude/`, `jig.config.md` and the root CLAUDE.md, AGENTS.md and GEMINI.md, and skip every **(core)** item and clause.
+**First, check whether this is Jig's repo:** it is when `.claude-plugin/plugin.json` exists with `"name": "jig"`. If it is not, files under `core/`, `packs/`, `framework/`, `adapters/`, `scaffold/` and `.claude-plugin/` are the team's own and out of scope: review only where the team keeps its Jig artifacts and guidance (Team in Classify, `framework/LEARNING_LOOP.md`): `team/`, `.claude/`, `jig.config.md`, and the project's agent instruction files at any level (CLAUDE.md, AGENTS.md, GEMINI.md or a harness's equivalent, e.g. `.github/copilot-instructions.md`, `.cursor/rules/`). Skip every **(core)** item and clause there. Your globs, which decide when the swarm dispatches you, stay narrower than this scope; a caller that names you (the fit review) passes every path it changed.
 
 ## Fit Checklist
 
