@@ -78,17 +78,17 @@ Skills should never hardcode `gh` commands without checking the git host first.
 
 | Host | Command |
 |------|---------|
-| github | `gh pr list --base <branch> --json number,headRefName,isCrossRepository` (fork PRs have `isCrossRepository: true`) |
-| gitlab | `glab mr list --target-branch <branch>` |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=destination.branch.name="<branch>"` |
+| github | `gh pr list --base <branch> --limit 1000 --json number,headRefName,isCrossRepository` (fork PRs have `isCrossRepository: true`; without `--limit` it stops at 30) |
+| gitlab | `glab mr list --target-branch <branch> --per-page 100` (`--page` for more) |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=destination.branch.name="<branch>"`, following each page's `next` link |
 
 ### Find the open PR/MR for a branch (by its head branch)
 
 | Host | Command |
 |------|---------|
-| github | `gh pr list --head <branch> --json number,baseRefName,isCrossRepository` (also matches fork PRs from a same-named branch; they have `isCrossRepository: true`) |
-| gitlab | `glab mr list --source-branch <branch>` |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=source.branch.name="<branch>"` |
+| github | `gh pr list --head <branch> --limit 1000 --json number,baseRefName,isCrossRepository` (also matches fork PRs from a same-named branch; they have `isCrossRepository: true`) |
+| gitlab | `glab mr list --source-branch <branch> --per-page 100` (`--page` for more) |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests?q=source.branch.name="<branch>"`, following each page's `next` link |
 
 ### Find a PR's native stack
 
