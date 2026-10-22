@@ -122,6 +122,7 @@ section headings, same YAML-in-fenced-blocks format.
 3. **Branching** — format (derived), main-branch (detected)
 4. **Concerns Checklist** — Q4 selections + core defaults
 5. **Review** — default swarm-tiers, models
+5a. **PR Brief** — commented out (defaults: `language: plain`, `runs: 2`, `attention: []`)
 5b. **PRD** — `prd-publish: artifact`
 5c. **PRD Review / Spec Review** — default `prd-swarm-tiers` and `spec-swarm-tiers`
 6. **Execution** — default parallel-threshold, strategy, mode

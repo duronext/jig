@@ -121,6 +121,7 @@ Jig ships as a plugin with core skills, agents, and review specialists. Your tea
 | `tdd` | Test-driven development | Red-green-refactor. No production code without a failing test first. Wrote code before the test? Delete it. Start over. |
 | `ticket` | Ticket creation | Interviews you, writes the ticket, files it in your configured tracker (Linear, Jira, GitHub Issues), and sets up the branch. |
 | `worktree` | Parallel workspaces | Creates or removes provisioned git worktrees, syncing env files and dependencies, for isolated parallel development. |
+| `pr-brief` | Reviewer brief | Briefs you on someone else's PR before you review it. Runs independent read-only reviews (two by default), merges them, re-verifies every item in the code, and shows you a private brief. Never posts; asks what to do next. |
 | `finish` | Branch completion | Verifies tests pass, then presents 4 options: merge locally, create PR, keep branch as-is, or discard. Handles worktree cleanup. |
 | `extend` | Framework extension | The meta-skill. Interviews you about what you need, determines the right artifact (skill, specialist, agent, pack, or config change), scaffolds it with valid frontmatter, and wires it into discovery. |
 

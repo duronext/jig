@@ -392,3 +392,6 @@ The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialis
 
 ### With `postmortem`
 When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer.
+
+### With `pr-brief`
+This skill reviews your own changes. To brief yourself on someone else's PR, use `pr-brief`.

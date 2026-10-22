@@ -29,6 +29,7 @@
     "./core/skills/ticket",
     "./core/skills/extend",
     "./core/skills/worktree",
+    "./core/skills/pr-brief",
     "./core/skills/init",
     "./packs/engineering/skills/eng-copywriting",
     "./packs/engineering/skills/eng-logging",

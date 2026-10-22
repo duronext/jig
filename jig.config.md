@@ -73,6 +73,15 @@ deep-review-model: opus
 specialist-model-default: haiku
 ```
 
+## PR Brief
+
+```yaml
+# language: plain        # plain | ste (ASD-STE100 Simplified Technical English)
+# runs: 2                # independent review runs before the merge (1 or more)
+# attention: []          # repo risks every brief checks, e.g. "regulated tenants",
+#                        # "public API schema", "customer data exports"
+```
+
 ## PRD
 
 ```yaml

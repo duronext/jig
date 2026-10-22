@@ -176,6 +176,32 @@ mcp__atlassian__search_issues with:
   project: "PROJ"
 ```
 
+## Reading a ticket
+
+For skills that need a ticket's context, such as `pr-brief`. Use the server's
+get-issue tool (e.g. `getJiraIssue` on Atlassian's server, `jira_get_issue` on
+sooperset), or the REST API (`/rest/api/2` on Data Center):
+
+```
+GET /rest/api/3/issue/{key}?fields=summary,description,status,creator,reporter,assignee,parent,issuelinks
+GET /rest/api/3/issue/{key}/comment?startAt={n}   # page until startAt + maxResults >= total
+GET /rest/api/3/issue/{key}/remotelink            # web links, sometimes PRs
+```
+
+- **Relations** — `issuelinks` (each with its link type) and `parent`.
+- **Linked PRs** — Jira's development panel has no public API. Run "Find PRs
+  that mention an issue" in `framework/GIT_HOST.md` with the issue key, and
+  add any PR in `remotelink`.
+- A call that fails means the ticket is unread, not empty.
+
+### Closing behavior
+
+Unknown by default. Transitions on PR merge come from the site's automation
+rules and its Git integration (for example smart commits such as
+`PROJ-123 #done`), which this pack cannot see. Say the result is unknown
+unless the team has told you how its rules work. The same applies when
+several PRs link to one issue.
+
 ## Status
 
 Core functionality documented. Tested against Atlassian Cloud. Data Center support depends on which MCP server is used. Contributions welcome for edge cases.
