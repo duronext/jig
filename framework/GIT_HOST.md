@@ -205,11 +205,22 @@ or per-PR alert list on its own also holds alerts the PR did not add.
 | gitlab | `glab mr view {iid} -R {group}/{project} --output json` (base SHA: `diff_refs.base_sha`; head: `diff_refs.head_sha`. A single-MR read has `diff_refs`; MR list results do not) |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` (base SHA: `destination.commit.hash`; head: `source.commit.hash`. Both may be short: compare them as a prefix, or get the full hash from `GET /2.0/repositories/{workspace}/{repo}/commit/<hash>`, field `hash`) |
 
+### Find a PR's merge base
+
+The commit the host diffs the PR against: the best common ancestor of the
+base SHA and the head SHA from "View a PR by number".
+
+| Host | Command |
+|------|---------|
+| github | `gh api repos/{owner}/{repo}/compare/<base-sha>...<head-sha> --jq .merge_base_commit.sha` (`<base-sha>`: `baseRefOid`; `<head-sha>`: `headRefOid`) |
+| gitlab | No extra call: `diff_refs.base_sha` from "View a PR by number" is the merge base |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/merge-base/<base-sha>..<head-sha>` (two dots), field `hash`, possibly short: compare it as a prefix. When there are several best common ancestors it returns one, and which one is unspecified |
+
 ### Fetch a PR's diff
 
 | Host | Command |
 |------|---------|
-| github | `gh pr diff {number} -R {owner}/{repo}` (GitHub refuses a diff over 20,000 lines with HTTP 406; then fetch the head and base and build it locally in the host's format, whatever the user's git config: `git -c core.hooksPath=/dev/null diff --no-ext-diff --no-color --ignore-submodules=none --src-prefix=a/ --dst-prefix=b/ -U3 -M <base-sha>...<head-sha>`) |
+| github | `gh pr diff {number} -R {owner}/{repo}` (GitHub refuses a diff over 20,000 lines with HTTP 406; then fetch the head and base and build it locally in the host's format, whatever the user's git config: `git -c core.hooksPath=/dev/null diff --no-ext-diff --no-textconv --no-color --ignore-submodules=none --src-prefix=a/ --dst-prefix=b/ -U3 -M <base-sha>...<head-sha>`) |
 | gitlab | `glab mr diff {iid} -R {group}/{project} --raw` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diff` (answers with a redirect; follow it, e.g. `curl -L`) |
 
@@ -222,15 +233,21 @@ before you use it. If the row's fetch fails or gives another commit (e.g. a
 merged or closed PR whose branch is gone), fetch the head SHA itself where
 the host allows it: `git fetch --no-tags <remote> <head-sha>:<local-ref>`
 (the full SHA). The same command fetches any other commit by SHA, such as
-the base SHA from "View a PR by number". Run `worktree add` with
-`-c core.hooksPath=/dev/null`: it runs the post-checkout hook from the new
-worktree, so a hook manager could run the PR's own config.
+the base SHA from "View a PR by number".
+
+Check out with hooks, filters, symlinks and submodules off, because the
+checkout runs the post-checkout hook and any configured filter (e.g. Git LFS)
+on the PR's content, and a committed link could point outside the tree. With
+`core.symlinks=false` a link (mode 120000) checks out as a plain file holding
+its target path:
+`GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null -c core.symlinks=false -c filter.lfs.process= -c filter.lfs.smudge=cat -c filter.lfs.required=false -c submodule.recurse=false worktree add --detach <dir> <local-ref>`
+(the checkout command below).
 
 | Host | Command |
 |------|---------|
-| github | `git fetch --no-tags <remote> +pull/{number}/head:<local-ref>`, then `git -c core.hooksPath=/dev/null worktree add --detach <dir> <local-ref>` (works for fork PRs; the ref lives in the base repo). Fetch by SHA: allowed |
-| gitlab | `git fetch --no-tags <remote> +merge-requests/{iid}/head:<local-ref>`, then `git -c core.hooksPath=/dev/null worktree add --detach <dir> <local-ref>` (works for fork MRs; GitLab deletes this ref 14 days after the MR closes or merges). Fetch by SHA: allowed |
-| bitbucket | No PR ref. `git fetch --no-tags <remote> +refs/heads/<source.branch.name>:<local-ref>`; for a fork PR, fetch from the clone URL in `source.repository` in place of `<remote>`, without adding a remote. `source.commit.hash` is short: compare it as a prefix. Then `git -c core.hooksPath=/dev/null worktree add --detach <dir> <local-ref>`. Fetch by SHA: unknown (not documented; Atlassian closed the request to enable it, BCLOUD-15423, as Won't Fix); try it once and record a failure as unreachable |
+| github | `git fetch --no-tags <remote> +pull/{number}/head:<local-ref>`, then the checkout command (works for fork PRs; the ref lives in the base repo). Fetch by SHA: allowed |
+| gitlab | `git fetch --no-tags <remote> +merge-requests/{iid}/head:<local-ref>`, then the checkout command (works for fork MRs; GitLab deletes this ref 14 days after the MR closes or merges). Fetch by SHA: allowed |
+| bitbucket | No PR ref; fetch the head by SHA (allowed: tested on bitbucket.org/atlassian/atlassian-event, a full SHA fetched with protocol v0 and v2; a short hash did not). Resolve the short `source.commit.hash` with `GET /2.0/repositories/<source.repository.full_name>/commit/<hash>`, field `hash`, then `git fetch --no-tags <url> <full-sha>:<local-ref>` and the checkout command. `<url>` is `<remote>` for a PR in the same repo; for a fork PR, `https://bitbucket.org/<source.repository.full_name>.git`, without adding a remote |
 
 ### Fetch review threads with resolution state
 
@@ -269,7 +286,19 @@ Read the file at `<rev>`: the commit the caller names, else `<remote>/<base>`.
 | github | The first of `.github/CODEOWNERS`, `CODEOWNERS`, `docs/CODEOWNERS` that `git show <rev>:<file>` prints; the last matching pattern wins. Syntax errors: `gh api repos/{owner}/{repo}/codeowners/errors` |
 | gitlab | The first of `CODEOWNERS`, `docs/CODEOWNERS`, `.gitlab/CODEOWNERS` that `git show <rev>:<file>` prints; the last matching pattern wins, per `[Section]` |
 | bitbucket | `git show <rev>:.bitbucket/CODEOWNERS` (with `.bitbucket/teams.yaml` for `@teams/...`); the last matching pattern wins |
-| all | No file, or no pattern matches: recent committers, `git log <rev> --since=1.year --format='%aN' -- <path> \| sort \| uniq -c \| sort -rn` (`%aN` applies `.mailmap`; owners by history, not by rule) |
+| all | No file, or no pattern matches: recent committers. Write the path NUL-terminated to a file (`<pathfile>`, from git output, never typed from PR text) and run `xargs -0 git --literal-pathspecs log <rev> --since=1.year --format='%an <%ae>' -- < <pathfile> \| sort \| uniq -c \| sort -rn` (`git log` has no `--pathspec-from-file`; `xargs` runs git with no shell, and `--literal-pathspecs` turns off glob and magic. Raw `%an <%ae>`, not `%aN`: git reads `.mailmap` from the current directory's working tree, which can hold the PR's own, and `mailmap.file`/`mailmap.blob` do not turn that off. Group one person's names and emails yourself. Owners by history, not by rule) |
+
+### Find the PR that merged a commit
+
+Confirms who stands behind a commit: the author of the PR that merged it, as
+the host records it, not the git author name, which anyone can set. No merged
+PR, or more than one: unconfirmed.
+
+| Host | Command |
+|------|---------|
+| github | `gh api repos/{owner}/{repo}/commits/<sha>/pulls --jq '[.[] \| select(.merged_at != null) \| {number, author: .user.login, merged_at}]'` (the endpoint also lists open PRs that contain the commit; keep only merged ones) |
+| gitlab | `glab api "projects/{id}/repository/commits/<sha>/merge_requests?state=merged"`, field `author.username` (the `state` filter needs GitLab 18.2 or later; without it, keep `state == "merged"`) |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/commit/<sha>/pullrequests`, following each page's `next` link; keep `state == "MERGED"`, field `author`. Needs the Pull Request Commit Links app installed on the repo; a failure is unconfirmed |
 
 ### Find required approvals for a branch
 

@@ -3,10 +3,10 @@
 You get {n} briefs for the same PR: the files {runs} in `{folder}`.
 Each came from an independent run that followed the
 review rules below, with no access to the others. The inputs are in
-`{folder}`, and `tree/` is the repo at the PR head. You may read anything
-there. Modify nothing. Never post anywhere, and never call a tool that writes.
-The Evidence discipline of the rules below applies to you, including never
-running code from the PR.
+`{folder}`, and `tree/` is the repo at the PR head. Modify nothing. Never
+post anywhere, and never call a tool that writes. The Evidence discipline of
+the rules below applies to you, including its read scope and never running
+code from the PR.
 
 1. **Combine the items.** Take the union of all defects and decisions from
    every run.
