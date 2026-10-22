@@ -156,7 +156,7 @@ Agent tool:
     {filtered diff}             <- matching files only; every changed file for a named specialist
 ```
 
-A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: the harness's read-only agent, or one defined with exactly that tool list (`framework/HARNESS.md` says which each harness has). If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
+A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: the harness's read-only agent, or one defined with exactly that tool list (`framework/HARNESS.md` says which each harness has). If the session has no such agent, or the harness cannot limit a subagent's tools, say so on the report's **Tools** line; never fall back silently to an agent that can write. A specialist without `tools` works from the diff in its prompt.
 
 #### Mode: prd or spec
 

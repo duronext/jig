@@ -15,13 +15,13 @@ const path = require("path");
 
 const root = path.resolve(process.argv[2] || path.join(__dirname, ".."));
 const HOSTS = ["github", "gitlab", "bitbucket"];
-const SKILL_MAX_BODY = 499;
+const SKILL_MAX_LINES = 499; // the whole file, frontmatter included
 
 const failures = [];
 const fail = (file, line, reason) =>
   failures.push(`${path.relative(root, file) || file}:${line}: ${reason}`);
 
-const read = (file) => fs.readFileSync(file, "utf8");
+const read = (file) => fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n");
 const exists = (p) => fs.existsSync(p);
 const dirs = (p) =>
   exists(p)
@@ -75,10 +75,11 @@ function frontmatter(text) {
     }
     fields[kv[1]] = value.replace(/^["']|["']$/g, "");
   }
-  return { fields, bodyLines: text.slice(m[0].length).split("\n").length };
+  return { fields };
 }
 
-// 1. plugin.json paths exist, and every core skill and agent is listed.
+// 1. plugin.json paths exist; every core and pack skill and core agent is
+// listed there, and every pack skill in its pack's pack.json.
 const pluginFile = path.join(root, ".claude-plugin", "plugin.json");
 const pluginText = read(pluginFile);
 const plugin = JSON.parse(pluginText);
@@ -96,9 +97,25 @@ for (const key of ["skills", "agents"]) {
 const coreSkills = dirs(path.join(root, "core", "skills")).filter((d) =>
   exists(path.join(root, "core", "skills", d, "SKILL.md")),
 );
-for (const d of coreSkills) {
-  if (!listed.has(path.join(root, "core", "skills", d))) {
-    fail(path.join(root, "core/skills", d, "SKILL.md"), 1, "not in the skills array of .claude-plugin/plugin.json");
+const packSkills = dirs(path.join(root, "packs")).flatMap((pack) =>
+  dirs(path.join(root, "packs", pack, "skills"))
+    .filter((d) => exists(path.join(root, "packs", pack, "skills", d, "SKILL.md")))
+    .map((d) => ({ pack, name: d, dir: path.join(root, "packs", pack, "skills", d) })),
+);
+for (const dir of [
+  ...coreSkills.map((d) => path.join(root, "core", "skills", d)),
+  ...packSkills.map((s) => s.dir),
+]) {
+  if (!listed.has(dir)) {
+    fail(path.join(dir, "SKILL.md"), 1, "not in the skills array of .claude-plugin/plugin.json");
+  }
+}
+for (const { pack, name, dir } of packSkills) {
+  const packFile = path.join(root, "packs", pack, "pack.json");
+  const skills = exists(packFile) ? JSON.parse(read(packFile)).skills || [] : null;
+  if (!skills) fail(path.join(dir, "SKILL.md"), 1, `packs/${pack}/pack.json does not exist`);
+  else if (!skills.includes(name)) {
+    fail(path.join(dir, "SKILL.md"), 1, `not in the skills array of packs/${pack}/pack.json`);
   }
 }
 const agentsDir = path.join(root, "core", "agents");
@@ -141,14 +158,11 @@ for (const doc of ["CLAUDE.md", "README.md"]) {
 // 3. SKILL.md frontmatter and length.
 const skillFiles = [
   ...coreSkills.map((d) => path.join(root, "core", "skills", d, "SKILL.md")),
-  ...dirs(path.join(root, "packs")).flatMap((pack) =>
-    dirs(path.join(root, "packs", pack, "skills"))
-      .map((d) => path.join(root, "packs", pack, "skills", d, "SKILL.md"))
-      .filter(exists),
-  ),
+  ...packSkills.map((s) => path.join(s.dir, "SKILL.md")),
 ];
 for (const file of skillFiles) {
-  const fm = frontmatter(read(file));
+  const text = read(file);
+  const fm = frontmatter(text);
   if (!fm) {
     fail(file, 1, "no YAML frontmatter");
     continue;
@@ -157,10 +171,11 @@ for (const file of skillFiles) {
     if (!(key in fm.fields)) fail(file, 1, `frontmatter has no ${key}`);
   }
   if ("description" in fm.fields && !fm.fields.description.startsWith("Use when")) {
-    fail(file, findLine(read(file), "description:"), 'description does not start "Use when"');
+    fail(file, findLine(text, "description:"), 'description does not start "Use when"');
   }
-  if (fm.bodyLines > SKILL_MAX_BODY) {
-    fail(file, 1, `body is ${fm.bodyLines} lines (under 500 allowed)`);
+  const lines = text.endsWith("\n") ? text.split("\n").length - 1 : text.split("\n").length;
+  if (lines > SKILL_MAX_LINES) {
+    fail(file, 1, `is ${lines} lines; a SKILL.md stays under 500, frontmatter included`);
   }
 }
 
