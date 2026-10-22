@@ -41,10 +41,8 @@ you: `plain` by default (rules below), or `ste`. In every language:
 - Say what happens and to whom; lead with the effect, then the reason.
 - No hedges or filler: "it's worth noting", "importantly", "essentially",
   "in order to".
-- None of these words: invariant, backbone, load-bearing, first-class,
-  seamless, robust, leverage, utilize, synergy, north star, single source of
-  truth, best-in-class, holistic, paradigm, ecosystem (unless it is
-  literally one). Quoted text may keep them.
+- None of the words in `core/specialists/plain-language.md`, Claude-speak
+  and filler; quoted text may keep them.
 - Markdown bold for leads, as the layout shows. Names of files, symbols,
   tables, services and jobs are fine, in backticks.
 - The template's separators (`—`, `→`, `·`) stay as the layout shows them.

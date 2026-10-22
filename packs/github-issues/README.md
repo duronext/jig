@@ -41,6 +41,8 @@ gh issue view {number} -R {owner}/{repo} --json number,url,title,body,state,stat
 
 - **ID form** — `#<n>` or `<owner>/<repo>#<n>`. A `#<n>` can also be a PR, and
   `gh issue view` reads PRs too: if `gh pr view <n>` succeeds, it is a PR.
+- **Ticket keys** — n/a: issues are `#<n>` in the PR's own repo.
+- **Tracker URL prefix** — n/a: issues live in the PR's own repo.
 - **Relations** — `parent`, `subIssues`, `blockedBy`, `blocking` need gh 2.94.0
   or later. On an older gh the whole call fails with an unknown-field error:
   run it again without those four fields and record the relations as

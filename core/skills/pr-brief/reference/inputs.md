@@ -15,12 +15,13 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
 
   `pr, tree, base_commit, main_commits_since_base, diff, base_pr,
   required_approvals, checks, inline, reviews, conversation, alerts, ticket,
-  linked_prs, linked_diffs, codeowners, areas, docs_authors`
+  ticket_keys, linked_prs, linked_diffs, codeowners, areas, docs_authors`
 
   Fixed `empty` forms: `base_pr: empty (base is main)`,
   `main_commits_since_base: empty (merged or closed)`,
-  `ticket: empty (no ticket reference)` and
-  `linked_prs: empty (no ticket reference)`. Add a line per binary file
+  `ticket: empty (no ticket reference)`,
+  `ticket_keys: empty (no project keys)` (`ticket-system` `github`, unset or
+  `none`) and `linked_prs: empty (no ticket reference)`. Add a line per binary file
   (`binary: <path> (content not reviewed)`) and per symlink
   (`symlink: <path> (target text only)`, step 6), and the lines SKILL.md
   adds for the runs, the merge and the agent type.
@@ -64,21 +65,47 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
     - a record number, or a fixed edit of every record, through a NUL and
       newline swap (BSD `sed` has no `-z`):
       `tr '\0\n' '\n\0' < <list> | sed -n '3p;17p' | tr '\0\n' '\n\0'`.
-  - Ticket IDs: take them with the pack's ID form over the saved files
-    (`grep -oiE '<regex>' <file>`) and use only the matches that belong to
-    the configured tracker. When `ticket-prefix` or the tracker section's
-    own key is set (Jira `project-key`, Linear `team` when it is a key,
-    e.g. `ENG`), use only keys with that prefix; Jira also takes keys of
-    other projects the tracker resolves. When none is set, match the pack's
-    ID form case-insensitively (`grep -oiE`, e.g. `[A-Z][A-Z0-9]+-[0-9]+`
-    for Linear or Jira; a Linear branch is lowercase), normalize to the
-    pack's form, and look each one up: text such as `UTF-8` matches the
-    shape, so drop an ID the tracker reports as not found (count it in
-    `sources.md`). A lookup that fails or is denied is not "not found": keep
-    the ID and record `ticket: unreachable (<error>)`. A GitHub
-    issue only in the PR's own `{owner}/{repo}`.
-    Reading is safe because drafts never restate ticket text (SKILL.md's
-    quote rule).
+  - Ticket IDs. GitHub issues (`ticket-system` `github` or unset): only
+    `#<n>` in the PR's own `{owner}/{repo}`, with no project keys.
+    `none`: Step 10's no-ticket path. Linear or Jira: project keys come
+    from configuration and the tracker, never from the PR text. The keys
+    are the union of `ticket-prefix`, the tracker section's own key (Jira
+    `project-key`, Linear `team` when it is a key, e.g. `ENG`) and the
+    tracker's key list from the pack's "Ticket keys" bullet; keep only keys
+    matching `^[A-Z][A-Z0-9]+$`. If the list cannot be read, use the
+    configured keys and write
+    `ticket_keys: unreachable (<error>; matched <KEYS> only)`. No key at all:
+    `ticket: unreachable (no ticket keys)`.
+
+    For both paths, search decoded text, never JSON, and drop every word
+    that holds `/` (a path, another repo's `owner/repo#n`, or a URL that is
+    not the tracker's):
+
+    ```bash
+    jq -r '.head_branch' <folder>/pr.json > <folder>/id-branch.txt
+    { jq -r '.title, .body' <folder>/pr.json; cat <folder>/commits.txt; } > <folder>/id-text.txt
+    tr -s '[:space:]()<>\133\135' '\n' < <folder>/id-text.txt > <folder>/id-words.txt
+    # GitHub issues
+    grep -vE '/' <folder>/id-words.txt | grep -oE '(^|[^A-Za-z0-9])#[0-9]+' | tr -dc '0-9\n' | sort -u
+    # Linear or Jira
+    { cat <folder>/id-branch.txt
+      grep -vE '/' <folder>/id-words.txt
+      grep -E '^<tracker URL prefix>' <folder>/id-words.txt
+    } | grep -oiE '(^|[^A-Za-z0-9])(KEY1|KEY2)-[0-9]+' | sed -E 's/^[^A-Za-z0-9]//' \
+      | tr '[:lower:]' '[:upper:]' | sort -u
+    ```
+
+    The alternation is built from the checked keys. Words split on spaces
+    and on `( ) < > [ ]`, so a Markdown link's text and URL are separate.
+    The head branch always counts for Linear or Jira. The tracker URL
+    prefix is the pack's "Tracker URL prefix" bullet, as a fixed string; if
+    it cannot be found, leave that line out and record
+    `ticket_keys: unreachable (tracker URL prefix not found; tracker URLs not matched)`
+    (so it reaches "Not checked"). Look each ID up:
+    any failure, Jira's 404 for "not found" or "no permission" included,
+    keeps the ID and records `ticket: unreachable (<error>)`; a key-matched
+    ID is never dropped. Reading is safe because drafts never restate
+    ticket text (SKILL.md's quote rule).
   - Branch names: only a name that matches `^[A-Za-z0-9._/-]+$`; any other
     makes that source `unreachable (unsafe branch name)`.
 - **Names.** Every `git log` here prints raw `%an` and `%ae` (why: "Find
@@ -330,16 +357,13 @@ Any other value with no pack: `ticket: unreachable (no pack for <value>)`.
 A pack with no "Reading a ticket" section, or whose tool is not connected:
 the ticket is unreachable.
 
-**Ticket IDs.** Collect them from "Find issues a PR closes", and from the
-title, body, head branch and commit messages in the pack's ID form
-(narrowed to the keys Untrusted strings allows), with `grep -oiE` over
-`pr.json` and `<folder>/commits.txt`
-(`git -C <clone> log --format=%B <base_commit>..<ref> > <folder>/commits.txt`),
-keeping only the IDs Untrusted strings allows. This applies when
-`ticket-system` is unset too. Match case-insensitively (`eng-12` is
-`ENG-12`). An ID inside a file path, or in a URL that is not a tracker link,
-does not count. Drop a `#n` that the host resolves to a PR. Write `id` in
-the pack's ID form.
+**Ticket IDs.** Collect them from "Find issues a PR closes", and with the
+Ticket IDs bullet of Untrusted strings over the title, body, head branch
+and commit messages
+(`git -C <clone> log --format=%B <base_commit>..<ref> > <folder>/commits.txt`).
+This applies when `ticket-system` is unset too. The main ticket is the one
+in the head branch, else the first one found. Drop a `#n` that the host
+resolves to a PR.
 
 **Linked PRs.** Follow the pack's "Linked PRs" bullet, and always add the
 results of "Find PRs that mention an issue", without duplicates. Run the
@@ -366,17 +390,14 @@ with "Fetch a PR's diff" as `linked/<n>.diff`. Write
 }
 ```
 
-- `ticket` is the main ticket, chosen from the IDs Untrusted strings keeps
-  (not-found IDs dropped; a failed lookup keeps its ID as unreachable): the
-  one in the head branch, else the first one found.
+- `ticket` is the main ticket (Ticket IDs above).
   `referenced_tickets` holds the tickets the main ticket's
   relations name. `other_tickets` holds every other ticket the PR names; a
   ticket that is also a relation appears once, in `referenced_tickets`.
 - `relations` keeps the shape the pack returns (for example, an object of
   lists by relation type), and includes `parentId` when the pack returns it.
-- `closing` copies the pack's closing behavior: which words or links move
-  the ticket on merge, which do not, which base branch counts, and what
-  happens with several linked PRs. Copy "unknown" where the pack says so.
+- `closing` copies the pack's closing behavior as written, "unknown"
+  included; the review prompt's Closure rule says how it is used.
 - **No ticket:** the file is only `{"ticket": null}`; `sources.md` has
   `ticket: empty (no ticket reference)` and
   `linked_prs: empty (no ticket reference)`.

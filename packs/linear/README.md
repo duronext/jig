@@ -124,8 +124,9 @@ git branch -m {current-branch} {gitBranchName}
 
 ## Reading a ticket
 
-For skills that need a ticket's context, such as `pr-brief`. Two calls (tool
-names are examples; the prefix depends on how the harness mounts the server):
+How `pr-brief` and other callers load a Linear issue and its comments. Two
+calls (tool names are examples; the prefix depends on how the harness mounts
+the server):
 
 ```
 mcp__linear__get_issue with:
@@ -138,6 +139,11 @@ mcp__linear__list_comments with:
   cursor:  {previous cursor, while hasNextPage is true}
 ```
 
+- **Ticket keys** — each team's `key` from `mcp__linear__list_teams`, paged
+  with `cursor` while `hasNextPage` is true.
+- **Tracker URL prefix** — `<workspace url>/issue/`, e.g.
+  `https://linear.app/<workspace>/issue/ENG-123/<slug>`; the workspace URL is
+  `url` from `mcp__linear__get_workspace`.
 - **Relations** — `relations` holds `blocks`, `blockedBy`, `relatedTo` and
   `duplicateOf`; `parentId` is the parent issue. Each entry has only an ID and
   title: call `get_issue` on it for its status and creator.

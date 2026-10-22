@@ -263,9 +263,9 @@ its target path:
 |------|---------|
 | github | `gh pr view {number} -R {owner}/{repo} --json closingIssuesReferences` (GitHub issues only) |
 | gitlab | `glab api projects/{id}/merge_requests/{iid}/closes_issues` (GitLab issues only) |
-| bitbucket | No API. Read ticket keys from the PR title, description, source branch and commits (`GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/commits`) |
+| bitbucket | No API. Read ticket IDs from the PR title, description, source branch and commits (`GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/commits`) |
 
-On every host, keys for a ticket in another tracker (Linear, Jira) come from
+On every host, IDs of tickets in another tracker (Linear, Jira) come from
 the PR title, description, branch and commits, as in the Bitbucket row. Read
 each one with the tracker pack's `## Reading a ticket`.
 
