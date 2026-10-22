@@ -209,7 +209,7 @@ or per-PR alert list on its own also holds alerts the PR did not add.
 
 | Host | Command |
 |------|---------|
-| github | `gh pr diff {number} -R {owner}/{repo}` (GitHub refuses a diff over 20,000 lines with HTTP 406; then fetch the head and base and run `git diff <base-sha>...<head-sha>`) |
+| github | `gh pr diff {number} -R {owner}/{repo}` (GitHub refuses a diff over 20,000 lines with HTTP 406; then fetch the head and base and build it locally in the host's format, whatever the user's git config: `git -c core.hooksPath=/dev/null diff --no-ext-diff --no-color --src-prefix=a/ --dst-prefix=b/ -U3 -M <base-sha>...<head-sha>`) |
 | gitlab | `glab mr diff {iid} -R {group}/{project} --raw` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diff` (answers with a redirect; follow it, e.g. `curl -L`) |
 
@@ -222,13 +222,15 @@ before you use it. If the row's fetch fails or gives another commit (e.g. a
 merged or closed PR whose branch is gone), fetch the head SHA itself where
 the host allows it: `git fetch --no-tags <remote> <head-sha>:<local-ref>`
 (the full SHA). The same command fetches any other commit by SHA, such as
-the base SHA from "View a PR by number".
+the base SHA from "View a PR by number". Run `worktree add` with
+`-c core.hooksPath=/dev/null`: it runs the post-checkout hook from the new
+worktree, so a hook manager could run the PR's own config.
 
 | Host | Command |
 |------|---------|
-| github | `git fetch --no-tags <remote> +pull/{number}/head:<local-ref>`, then `git worktree add --detach <dir> <local-ref>` (works for fork PRs; the ref lives in the base repo). Fetch by SHA: allowed |
-| gitlab | `git fetch --no-tags <remote> +merge-requests/{iid}/head:<local-ref>`, then `git worktree add --detach <dir> <local-ref>` (works for fork MRs; GitLab deletes this ref 14 days after the MR closes or merges). Fetch by SHA: allowed |
-| bitbucket | No PR ref. `git fetch --no-tags <remote> +refs/heads/<source.branch.name>:<local-ref>`; for a fork PR, fetch from the clone URL in `source.repository` in place of `<remote>`, without adding a remote. `source.commit.hash` is short: compare it as a prefix. Then `git worktree add --detach <dir> <local-ref>`. Fetch by SHA: unknown (not documented; Atlassian closed the request to enable it, BCLOUD-15423, as Won't Fix); try it once and record a failure as unreachable |
+| github | `git fetch --no-tags <remote> +pull/{number}/head:<local-ref>`, then `git -c core.hooksPath=/dev/null worktree add --detach <dir> <local-ref>` (works for fork PRs; the ref lives in the base repo). Fetch by SHA: allowed |
+| gitlab | `git fetch --no-tags <remote> +merge-requests/{iid}/head:<local-ref>`, then `git -c core.hooksPath=/dev/null worktree add --detach <dir> <local-ref>` (works for fork MRs; GitLab deletes this ref 14 days after the MR closes or merges). Fetch by SHA: allowed |
+| bitbucket | No PR ref. `git fetch --no-tags <remote> +refs/heads/<source.branch.name>:<local-ref>`; for a fork PR, fetch from the clone URL in `source.repository` in place of `<remote>`, without adding a remote. `source.commit.hash` is short: compare it as a prefix. Then `git -c core.hooksPath=/dev/null worktree add --detach <dir> <local-ref>`. Fetch by SHA: unknown (not documented; Atlassian closed the request to enable it, BCLOUD-15423, as Won't Fix); try it once and record a failure as unreachable |
 
 ### Fetch review threads with resolution state
 

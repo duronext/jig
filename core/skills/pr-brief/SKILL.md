@@ -215,7 +215,7 @@ Which option?
 |--------|------------|----|
 | Draft review comments | The brief has at least one defect | Write each comment in the chat with its place: a file, the side (`new` or `old` code) and the line number on that side, inside a `diff.patch` hunk; or "review body" when no hunk line fits. Then ask the go-ahead question below. For a merged or closed PR, draft follow-up notes, never inline review comments: show them and say the user files them, with no offer to post; ask the go-ahead question only if the user also wants one PR comment placed as "review body". |
 | Draft a question | A decision is `escalate` or `send back` (at most two such options); for a merged PR, `escalate` or `follow up`; for a closed one, `escalate` or `drop` | Write the draft in the chat. Address a `send back` to the PR author, and an `escalate` to the role it names. For a merged or closed PR, draft a follow-up note (the action and who owns it), not a send-back. Name a person from `owners.json` only when the decision is about code ownership, as an addressee the user can change. The user sends it. |
-| Check further | An item is "(not verified)" or under "Not checked", and reading `tree/`, the inputs or the clone's git history can settle it without install, build or run (at most two). Leave the option out when none qualify | Settle it yourself when read-only git history in the clone answers it (`git log`, `git show`, `git blame`): the subagent has no shell. Otherwise dispatch one subagent of the Step 2 agent type with the item, the inputs and the review prompt's Evidence discipline (which forbids running PR code). Add the result to `brief.md` under `## Follow-up`, show it, then ask again. |
+| Check further | An item is "(not verified)" or under "Not checked", and reading `tree/`, the inputs or the clone's git history can settle it without install, build or run (at most two). Leave the option out when none qualify | Settle it yourself when read-only git history in the clone answers it (`git log`, `git show`, `git blame`, each with `-c core.hooksPath=/dev/null` per `reference/inputs.md` Rules): the subagent has no shell. Otherwise dispatch one subagent of the Step 2 agent type with the item, the inputs and the review prompt's Evidence discipline (which forbids running PR code). Add the result to `brief.md` under `## Follow-up`, show it, then ask again. |
 | Approve or comment myself (merged or closed PR: follow up myself) | Always | Nothing to do. |
 | Stop | Always | Nothing to do. |
 
@@ -248,7 +248,7 @@ fetch of Step 1 (Step 4 of `reference/inputs.md`): remove the worktree if
 `<folder>/tree` exists, and always delete the named refs.
 
 ```bash
-[ -e <folder>/tree ] && git -C <clone> worktree remove <folder>/tree
+[ -e <folder>/tree ] && git -C <clone> -c core.hooksPath=/dev/null worktree remove <folder>/tree
 for r in "" -base -main; do git -C <clone> update-ref -d "refs/jig-pr-brief/<n>-<head-sha-7>$r"; done
 ```
 

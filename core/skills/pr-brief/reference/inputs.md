@@ -36,6 +36,10 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
   label, dismiss or change the PR or the ticket.
 - **Never run code from the PR.** Do not install, build, test or run scripts
   in `tree/`.
+- **No hooks.** A git command that checks out, diffs or reads PR content
+  (`worktree add`, `diff`, `log`, `show`, `blame`) can start a hook from the
+  PR's own config, e.g. post-checkout through a hook manager. Run every such
+  command with `-c core.hooksPath=/dev/null`, as the commands below do.
 - **Names.** Every `git log` here uses `%aN` and `%aE`, so `.mailmap` merges
   aliases. Bots: names ending in `[bot]`; on GitHub also no-reply logins
   ending in `[bot]`, and `Copilot`.
@@ -82,8 +86,8 @@ Which option?
 
 "Collect again":
 1. If `<folder>/tree` exists, remove it through the clone that made it:
-   `git -C "$(git -C <folder>/tree rev-parse --git-common-dir)/.." worktree
-   remove --force <folder>/tree`.
+   `git -C "$(git -C <folder>/tree rev-parse --git-common-dir)/.." -c
+   core.hooksPath=/dev/null worktree remove --force <folder>/tree`.
 2. Move every other entry of the folder, except earlier `old-*` folders, to
    `<folder>/old-<YYYYmmdd-HHMMSS>/`.
 
@@ -136,7 +140,7 @@ git -C <clone> fetch --no-tags <remote> +refs/heads/<base-branch>:<ref>-base   #
 git -C <clone> fetch --no-tags <remote> +<base_sha>:<ref>-base                 # merged or closed PR
 git -C <clone> fetch --no-tags <remote> +refs/heads/<main>:<ref>-main
 git -C <clone> rev-parse <ref>   # must match the PR's head SHA (as the row says)
-git -C <clone> worktree add --detach <folder>/tree <ref>
+git -C <clone> -c core.hooksPath=/dev/null worktree add --detach <folder>/tree <ref>
 ```
 
 For an open PR whose base branch is `<main>`, fetch it once: in place of the
@@ -173,7 +177,7 @@ year before the earlier of the PR's `createdAt` and the commit date of
 git -C <clone> merge-base <ref>-base <ref>                     # base_commit
 git -C <clone> rev-list --count <base_commit>..<ref>-main      # main_commits_since_base
 git -C <clone> rev-list --count <ref>..<ref>-base              # base_commits_since_head
-git -C <clone> diff --name-only <base_commit> <ref>-base       # base_files_since_head
+git -C <clone> -c core.hooksPath=/dev/null diff --no-ext-diff --name-only <base_commit> <ref>-base   # base_files_since_head
 ```
 
 Write `base_commit` as a SHA, both counts as numbers and the file list as
@@ -181,10 +185,13 @@ an array; for a merged PR, run only the first command. If the base fetch or
 `merge-base` fails (after the shallow step), stop. If only the main fetch
 fails, `main_commits_since_base` is unreachable.
 
-**Check the base, every PR**, after Step 6: the first field of
-`git -C <clone> diff <base_commit> <ref> | git patch-id --stable` must equal
-that of `git patch-id --stable < diff.patch`. If it does not, record
-`base_commit: unreachable (local diff differs from the host's)` and stop.
+**Check the base, every PR**, after Step 6: the set of paths from
+`git -C <clone> -c core.hooksPath=/dev/null diff --no-ext-diff --no-color -M --name-only <base_commit> <ref>`
+must equal the set of `b/<new>` paths in `diff.patch`'s
+`diff --git a/<old> b/<new>` headers. The check does not depend on diff
+settings or the host's diff format. If the sets differ, record
+`base_commit: unreachable (changed paths differ from the host's diff)` and
+stop.
 
 ### 6. `diff.patch` — "Fetch a PR's diff"
 
@@ -324,7 +331,8 @@ most the 5 most recently merged), save its diff with "Fetch a PR's diff" as
   row's `<rev>`. For each changed path, the owners of the last matching
   pattern.
 - `author_git_names`: the `%aN` of the PR's commits
-  (`git log --format='%aN%x09%aE' <base_commit>..<head>`), plus the `%aN` of
+  (`git -C <clone> -c core.hooksPath=/dev/null log --format='%aN%x09%aE'
+  <base_commit>..<head>`), plus the `%aN` of
   every commit at `<rev>` by one of those emails or by the author's host
   no-reply address.
 - `areas`: group the changed files by area: the nearest folder with its own
@@ -350,7 +358,7 @@ folder: `docs_authors: empty (<dir> absent)`. For each file, count commits
 per `%aN` (the `%aE` matches the PR author, as in `author_git_names`):
 
 ```bash
-git -C <folder>/tree log --format='%aN%x09%aE' -- <file>
+git -C <folder>/tree -c core.hooksPath=/dev/null log --format='%aN%x09%aE' -- <file>
 ```
 
 ```json
