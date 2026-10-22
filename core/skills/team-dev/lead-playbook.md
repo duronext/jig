@@ -49,7 +49,7 @@ Rules:
 - If unsure about overlap → err on the side of sequential
 
 ### Send Inventories to Research Subagents
-If the analysis needs an inventory ("which files use X", "what does this flag control"), dispatch read-only research subagents (e.g. Claude Code's Explore agent). They write nothing, so several can run at once, alongside implementers.
+If the analysis needs an inventory ("which files use X", "what does this flag control"), dispatch read-only research subagents (`framework/HARNESS.md` says which agent is read-only on each harness). They write nothing, so several can run at once, alongside implementers.
 
 ## Phase 2: Team Setup
 

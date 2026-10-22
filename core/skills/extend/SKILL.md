@@ -409,7 +409,7 @@ These framework documents define the schemas and systems this skill works with:
 - Direct invocation via `/extend`
 
 **Related skills:**
-- `review` -- specialists created here are discovered by the review swarm; it also runs the fit review (`framework-fit`)
+- `review` -- specialists created here are discovered by the review swarm; it also runs the fit review (`framework-fit`, and, for an artifact that handles untrusted input, `security`)
 - `spec` -- concerns added to the checklist are surfaced during spec authoring
 - `postmortem` -- identifies gaps that lead to new artifacts
 - `pr-create` -- ships a pack or core artifact as a learning PR

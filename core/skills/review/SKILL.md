@@ -21,7 +21,7 @@ alwaysApply: false
 ### Mode: code (default)
 - `code-review` agent invokes this with `mode: code, tier: all` (pre-PR, full swarm)
 - `team-dev` quality gate invokes this with `mode: code, tier: fast-pass` (per-task, blocking checks only)
-- `postmortem` and `extend` invoke this with `mode: code, specialists: [framework-fit]` and the paths they changed, for the fit review (`framework/LEARNING_LOOP.md`)
+- `postmortem` and `extend` invoke this with `mode: code, specialists: [framework-fit]`, and also `[security]` for an artifact that handles untrusted input, and the paths they changed, for the fit review (`framework/LEARNING_LOOP.md`)
 - Direct invocation via `/review` for manual code reviews
 
 ### Mode: prd
@@ -156,7 +156,7 @@ Agent tool:
     {filtered diff}             <- matching files only; every changed file for a named specialist
 ```
 
-A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: in Claude Code, the read-only `Explore` agent for `[Read, Grep, Glob]`; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
+A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: the harness's read-only agent, or one defined with exactly that tool list (`framework/HARNESS.md` says which each harness has). If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
 
 #### Mode: prd or spec
 
@@ -391,4 +391,4 @@ The `spec` skill invokes this with `mode: spec` after drafting a spec. Specialis
 The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialists whose `stage` includes `plan` are dispatched, followed by the plan logic reviewer (Opus). Automatic for medium-to-large work.
 
 ### With `postmortem`
-When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer.
+When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer, and also `specialists: [security]` for an artifact that handles untrusted input (Fit Review in `framework/LEARNING_LOOP.md`).

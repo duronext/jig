@@ -207,7 +207,7 @@ Every implementer subagent needs:
 
 ### Shared Rules and Long Tasks
 
-- **Shared rules:** when several subagents need the same constraints and deliverable format, write them once in a doc in `plans-directory`, named by `filename-format` with kind `context`, and point the implementer and spec-reviewer prompts at it. Implementers never commit it (Dispatch Implementer Subagent says how to tell them); the Finish step deletes it. Send inventories to read-only research subagents (e.g. Claude Code's Explore agent), as `team-dev`'s `lead-playbook.md` describes.
+- **Shared rules:** when several subagents need the same constraints and deliverable format, write them once in a doc in `plans-directory`, named by `filename-format` with kind `context`, and point the implementer and spec-reviewer prompts at it. Implementers never commit it (Dispatch Implementer Subagent says how to tell them); the Finish step deletes it. Send inventories to read-only research subagents, as `team-dev`'s `lead-playbook.md` describes.
 - **Long tasks:** if a task may outlive the session, tell the implementer in its prompt to keep a resume file as `team-dev`'s `lead-playbook.md` ("Pausing and Resuming") describes. Point a re-dispatched subagent at it.
 
 ### The Controller's Role

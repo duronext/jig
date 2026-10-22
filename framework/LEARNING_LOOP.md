@@ -43,11 +43,11 @@ Fit-review findings route to the Fit Checklist itself. A divergence `framework-f
 
 ## 4. Draft
 
-Plan each change against the Fit Checklist in `core/specialists/framework-fit.md` before editing, then check the draft against it again.
+Plan each change against the Fit Checklist in `core/specialists/framework-fit.md` before editing, then check the draft against it again. A new procedure first says which inputs it supports, and stops with a message on the rest (e.g. a merged PR, when it reads only open ones). Check each assumption it makes about host or git data on two or more real samples that differ in the way that matters (e.g. a PR merged before its base moved, and one merged after).
 
 ## 5. Fit Review
 
-Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review. A fit review reads; it does not execute: before the PR, also run each new or changed command block or procedure once on a real input, and once on the input most likely to break it (a fork PR, a binary file, a name that looks like a number, an empty result, a repo with existing alerts or bot comments, a consumer repo, the shell an agent actually uses, e.g. zsh). PR, below, says where the findings and the runs are recorded.
+In Jig's repo, run `npm run check` first: it finds the missed registrations, frontmatter, host rows and cited headings it can, and the fit review reads for the rest. Run `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. The fit review is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review. `framework-fit` checks fit, not safety: a change to an artifact that handles untrusted input (someone else's PR, its comments, a ticket, fork code) also gets `review` with `mode: code, specialists: [security]` before the PR, done on the same terms as `framework-fit`; a skipped pass is not clean. A fit review reads; it does not execute: before the PR, also run each new or changed command block or procedure once on a real input, and once on the input most likely to break it (a fork PR, a merged or closed PR, a binary file, a non-ASCII or spaced path, a rename, a name that looks like a number, an empty result, a repo with existing alerts or bot comments, the user's or repo's git config (`diff.*`, `core.quotePath`, hooks, ignored submodules), a consumer repo, a second harness, the shell an agent actually uses, e.g. zsh). PR, below, says where the findings and the runs are recorded.
 
 ## 6. PR
 
@@ -55,7 +55,7 @@ Ship through `pr-create`. A learning PR's body opens with these sections, before
 
 - **Benefits**: what goes wrong today, and what each change prevents.
 - **How this follows Jig**: the Fit Checklist items the change touches, and how each holds.
-- **Fit review**: every `framework-fit` finding, fixed or left standing with its reason, one line each. This is the record a later postmortem counts.
+- **Fit review**: every `framework-fit` finding, and every `security` finding when the artifact handles untrusted input (a skipped pass is listed as open), fixed or left standing with its reason, one line each. This is the record a later postmortem counts.
 - **Copies**: each copy of the lesson at another level (Release and Propagate, below), added to the body when it is made.
 
 Its test plan lists each procedure run from the Fit Review, one item each with the input and the result, where an unticked item is an open finding; "No testing required" does not apply.

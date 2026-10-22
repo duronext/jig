@@ -112,7 +112,7 @@ When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/
 
 ```
 jig/
-├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, stacked PRs)
+├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, harness capabilities, stacked PRs)
 ├── core/
 │   ├── skills/          Pipeline skills (one dir per skill)
 │   ├── agents/          Core agents
@@ -143,6 +143,7 @@ jig/
 | Check for stale refs | `grep -rn 'superpowers:' core/` (should return nothing) |
 | Count lines | `find . -not -path './.git/*' -name '*.md' \| xargs wc -l \| tail -1` |
 | Test the PRD page scripts | `bash core/skills/prd/reference/test/run.sh` (needs Chrome) |
+| Check artifacts | `npm run check` (registrations, frontmatter, host rows, cited headings; before Fit Review) |
 
 ## Code Style
 
@@ -163,7 +164,7 @@ Commit conventions (format, types, scopes, co-author rules) are defined in `jig.
 
 ### Modifying an existing skill
 1. Edit the source at `core/skills/{name}/SKILL.md`
-2. Validate: frontmatter has `name`, `description` (starts with "Use when..."), `tier`, `alwaysApply`
+2. Validate: frontmatter has `name`, `description` (starts with "Use when..."), `tier`; `alwaysApply` is optional, default false (`framework/SKILL_SCHEMA.md`)
 3. Check cross-references: `grep -rn '{skill-name}' core/` — update any references if you renamed or split
 4. Verify no language-specific content leaked into core skills
 5. Run Fit Review in `framework/LEARNING_LOOP.md` on the paths you changed
@@ -219,6 +220,7 @@ Core and pack changes reach installed copies only after a release.
 
 ### Key documents to read first
 - `framework/GIT_HOST.md` — git host adapter (GitHub/GitLab/Bitbucket command mapping)
+- `framework/HARNESS.md` — what each agent harness can do (subagents, tool limits, read-only agent)
 - `framework/STACKED_PRS.md` — building, retargeting and merging chains of dependent PRs (read by `pr-create`, `finish`, `pr-respond`)
 - `framework/PIPELINE.md` — the development pipeline
 - `framework/LEARNING_LOOP.md` — how Jig improves itself, from lesson to release

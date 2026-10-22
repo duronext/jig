@@ -181,7 +181,7 @@ esac
 - `not checked` (no check on the head yet, one still running, code scanning not enabled, or the token lacks the scope) is not "no alerts". Say so, and re-run once the checks finish. Above the bottom of a stack the check may never run: check the PR below, and re-run after this PR retargets `{main-branch}`.
 - Review summaries and top-level comments have no thread to resolve. One counts as answered only when one of the user's replies quotes or links it (its `url`); who posted last proves nothing. Answer the unanswered ones (not the user's own) with one `gh pr comment` that quotes or links each point.
 - Bot status or report posts (deploy previews, coverage, changesets, license or preview-environment notices) need no answer. Comments from humans, and bot comments that carry review findings, do.
-- Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts").
+- Code-scanning alerts are not replied to. Fix the ones the PR introduces, or dismiss them with a reason (`framework/GIT_HOST.md`, "Code-scanning alerts on a PR/MR").
 - Track by reviewer: every human reviewer who left feedback gets a reply.
 
 **On a stack**, list its PRs and run the sweep for each. On GitHub, a PR in a native stack reports it; otherwise walk the bases (`framework/STACKED_PRS.md`, "Finding the Chain"):

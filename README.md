@@ -233,6 +233,7 @@ Teams using GitLab or Bitbucket are supported via the [git host adapter](framewo
 | [TIER_SYSTEM.md](framework/TIER_SYSTEM.md) | How tiers control activation |
 | [CONCERNS_CHECKLIST.md](framework/CONCERNS_CHECKLIST.md) | Configurable concerns checklist for specs |
 | [GIT_HOST.md](framework/GIT_HOST.md) | GitHub/GitLab/Bitbucket command mapping |
+| [HARNESS.md](framework/HARNESS.md) | What each agent harness can do: subagents, tool limits, read-only agent |
 | [STACKED_PRS.md](framework/STACKED_PRS.md) | Building, retargeting and merging stacked PRs |
 | [Init Experience](docs/init-experience.md) | Interactive setup flow |
 | [Jig 2.0](docs/releases/2.0.md) | What changed in 2.0, upgrading, and the concessions made |

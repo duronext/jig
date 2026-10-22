@@ -293,6 +293,7 @@ Present a structured summary:
 
 ### Fit Review
 - framework-fit: rounds run, findings fixed, and any left standing with why
+- security (if the artifact handles untrusted input): findings fixed, and any left standing with why
 
 ### Items Needing Human Judgment
 - [Anything ambiguous or subjective]
@@ -343,7 +344,7 @@ When deciding where a pattern belongs, use the narrowest applicable scope. This 
 - Direct invocation for a lesson from any other input
 
 **Related skills:**
-- `review` -- the review swarm whose specialists this skill improves, and whose `framework-fit` runs the fit review
+- `review` -- the review swarm whose specialists this skill improves, and whose `framework-fit` runs the fit review, and, for an artifact that handles untrusted input, `security`
 - `pr-create` -- the PR whose comments this skill analyzes, and the skill that ships the learning PR
 - `pr-respond` -- for addressing feedback before the postmortem
 - `extend` -- if the postmortem reveals the need for an entirely new skill or specialist
