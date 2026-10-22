@@ -177,7 +177,7 @@ year before the earlier of the PR's `createdAt` and the commit date of
 git -C <clone> merge-base <ref>-base <ref>                     # base_commit
 git -C <clone> rev-list --count <base_commit>..<ref>-main      # main_commits_since_base
 git -C <clone> rev-list --count <ref>..<ref>-base              # base_commits_since_head
-git -C <clone> -c core.hooksPath=/dev/null diff --no-ext-diff --name-only <base_commit> <ref>-base   # base_files_since_head
+git -C <clone> -c core.hooksPath=/dev/null diff --no-ext-diff --ignore-submodules=none --name-only <base_commit> <ref>-base   # base_files_since_head
 ```
 
 Write `base_commit` as a SHA, both counts as numbers and the file list as
@@ -187,7 +187,7 @@ fails, `main_commits_since_base` is unreachable.
 
 **Check the base, every PR**, after Step 6. Two path sets must be equal:
 - Local: the NUL-separated raw paths from
-  `git -C <clone> -c core.hooksPath=/dev/null -c core.quotePath=false diff --no-ext-diff --no-renames --name-only -z <base_commit> <ref>`.
+  `git -C <clone> -c core.hooksPath=/dev/null -c core.quotePath=false diff --no-ext-diff --no-renames --ignore-submodules=none --name-only -z <base_commit> <ref>`.
 - Host: the union of the `a/<old>` and `b/<new>` paths of every
   `diff --git` header in `diff.patch`, so a rename counts both paths
   however the host pairs it; for an entry with `copy from`, only the new

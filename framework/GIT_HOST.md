@@ -209,7 +209,7 @@ or per-PR alert list on its own also holds alerts the PR did not add.
 
 | Host | Command |
 |------|---------|
-| github | `gh pr diff {number} -R {owner}/{repo}` (GitHub refuses a diff over 20,000 lines with HTTP 406; then fetch the head and base and build it locally in the host's format, whatever the user's git config: `git -c core.hooksPath=/dev/null diff --no-ext-diff --no-color --src-prefix=a/ --dst-prefix=b/ -U3 -M <base-sha>...<head-sha>`) |
+| github | `gh pr diff {number} -R {owner}/{repo}` (GitHub refuses a diff over 20,000 lines with HTTP 406; then fetch the head and base and build it locally in the host's format, whatever the user's git config: `git -c core.hooksPath=/dev/null diff --no-ext-diff --no-color --ignore-submodules=none --src-prefix=a/ --dst-prefix=b/ -U3 -M <base-sha>...<head-sha>`) |
 | gitlab | `glab mr diff {iid} -R {group}/{project} --raw` |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/diff` (answers with a redirect; follow it, e.g. `curl -L`) |
 
