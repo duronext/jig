@@ -52,25 +52,28 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
     none of it; the NEVER rule in SKILL.md is the only guard there.
   - Paths: use only a NUL-separated list that git produced
     (`git diff-tree -r --name-only -z`, `git ls-tree -r --name-only -z`),
-    saved in `<folder>`. Pass it with no shell:
-    `xargs -0 git -C <clone> --literal-pathspecs log … -- < <list>`
+    saved in `<folder>`. Pass it with no shell, and with `-r` so an empty
+    list runs nothing (record that source `empty`):
+    `xargs -0 -r git -C <clone> --literal-pathspecs log … -- < <list>`
     (`git log` has no `--pathspec-from-file`).
   - Never type a path, not even into the file-write tool. Build every
     subset from such a list with fixed commands only:
     - a fixed pattern: `grep -zE '^docs/.*\.md$'`;
     - a match against saved files that never parses the entry:
-      `xargs -0 -n1 sh -c 'if grep -qF -- "$1" <folder>/pr.json <folder>/ticket.json; then printf "%s\0" "$1"; fi' _`;
+      `xargs -0 -r -n1 sh -c 'if grep -qF -- "$1" <folder>/named.txt; then printf "%s\0" "$1"; fi' _`;
     - a record number, or a fixed edit of every record, through a NUL and
       newline swap (BSD `sed` has no `-z`):
       `tr '\0\n' '\n\0' < <list> | sed -n '3p;17p' | tr '\0\n' '\n\0'`.
   - Ticket IDs: take them with the pack's ID form over the saved files
     (`grep -oiE '<regex>' <file>`) and use only the matches that belong to
-    the configured tracker: a Linear or Jira key whose prefix is
-    `ticket-prefix` or the tracker section's own key (Jira `project-key`,
-    Linear `team` when it is a key, e.g. `ENG`); with none of them set,
-    read none
-    (`ticket: unreachable (no ticket key configured)`); a GitHub issue only
-    in the PR's own `{owner}/{repo}`.
+    the configured tracker. When `ticket-prefix` or the tracker section's
+    own key is set (Jira `project-key`, Linear `team` when it is a key,
+    e.g. `ENG`), use only keys with that prefix; Jira also takes keys of
+    other projects the tracker resolves. When none is set, use any match of
+    the pack's ID form (a shape check, e.g. `[A-Z][A-Z0-9]+-[0-9]+` for
+    Linear or Jira). A GitHub issue only in the PR's own `{owner}/{repo}`.
+    Reading is safe because drafts never restate ticket text (SKILL.md's
+    quote rule).
   - Branch names: only a name that matches `^[A-Za-z0-9._/-]+$`; any other
     makes that source `unreachable (unsafe branch name)`.
 - **Names.** Every `git log` here prints raw `%an` and `%ae` (why: "Find
@@ -418,16 +421,19 @@ with "Fetch a PR's diff" as `linked/<n>.diff`. Write
 ### 12. `docs_authors.json` — who wrote the specs
 
 The Markdown files under `plans-directory` (unset: skip it) and `docs/` at
-the head, plus each spec the description or ticket links or names. Take
-them from the head's file list
+the head, plus each spec the description or ticket links or names. Save
+the PR's title and body, and the ticket's title and description, to
+`<folder>/named.txt` (write the fetched text, never retype it). Take the
+specs from the head's file list
 (`git -C <clone> ls-tree -r --name-only -z <ref>`), filtered as Untrusted
 strings says: a fixed pattern for the folders, and the match against
-`pr.json` and `ticket.json` for named specs. A missing folder:
-`docs_authors: empty (<dir> absent)`. Save the kept paths as
-`<folder>/docs.z`, and run one log over them:
+`named.txt` for named specs, kept only when doc-like (`\.md$`, plus the doc
+extensions the repo's docs folder uses, e.g. `\.mdx$`, `\.rst$`, `\.adoc$`).
+A missing folder: `docs_authors: empty (<dir> absent)`. Save the kept paths
+as `<folder>/docs.z`, and run one log over them:
 
 ```bash
-xargs -0 git -C <clone> --literal-pathspecs log <ref> --format='%x00%H %an <%ae>' --name-only -z -- < <folder>/docs.z
+xargs -0 -r git -C <clone> --literal-pathspecs log <ref> --format='%x00%H %an <%ae>' --name-only -z -- < <folder>/docs.z
 ```
 
 Each commit starts with its `<sha> <name> <email>` record; the paths after
