@@ -18,9 +18,8 @@ logic. You do not review the PR again: you re-present a review that is done.
   every deferred item and the whole "Not checked" line. Do not add a finding,
   and do not drop one. You may move detail and evidence to the appendix.
 - A fact in `merged.md` that an input file plainly contradicts (e.g. it says
-  "no comments" where `ticket.json` has `"comments": []` read OK) may be
-  corrected only with a note in the appendix: what it said, what the file
-  shows.
+  "no comments" where `ticket.json` has two comments) may be corrected only
+  with a note in the appendix: what it said, what the file shows.
 
 ## Language
 
@@ -59,7 +58,7 @@ you: `plain` by default (rules below), or `ste`. In every language:
 **Recommended action:** <the verdict, one line>
 **What it does:** <1–2 sentences. What changes, in plain words, for the system or the user.>
 **Why:** <1 sentence. The reason the author or the ticket gives. Say whose reason it is.>
-**Review effort:** <Skim | Focused | Deep> — <short reason> · **Defects:** <none | N blocking, N should-fix> · **Agreement:** <from merged.md's Agreement>
+**Review effort:** <Skim | Focused | Deep> — <short reason> · **Defects:** <none | N blocking, N should-fix> · **Decisions:** <none | N> · **Agreement:** <from merged.md's Agreement>
 
 ## Decisions you accept by approving
 1. [product|system|convention|risk] **<headline, 20 words or fewer>**
@@ -88,7 +87,12 @@ you: `plain` by default (rules below), or `ste`. In every language:
 - **Disclaimer.** Always keep the disclaimer as the first line, word for
   word.
 - **Order.** Put Defects before Decisions when the verdict is Request
-  changes.
+  changes, or Follow up with a blocking item.
+- **Merged PR.** Head the decisions "Decisions already accepted", with
+  `→ Recommend: keep | follow up: <action> | escalate: <role>`.
+- **Closed, not merged.** Always the full layout, never the short brief.
+  Head them "Decisions in this closed PR", with
+  `→ Recommend: keep | drop | escalate: <role>`.
 - **Collapse empty sections.** If there are no decisions and no defects, use
   one line in place of both sections:
   `**Decisions and defects:** none — <reason>`. If one of the two is empty,

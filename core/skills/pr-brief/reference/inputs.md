@@ -100,7 +100,7 @@ Then write `pr.json`:
   "number": 0, "url": "", "title": "", "body": "", "author": "",
   "state": "", "isDraft": false, "labels": [""],
   "isCrossRepository": false, "createdAt": "", "updatedAt": "",
-  "mergedAt": null,
+  "mergedAt": null, "merge_commit": null,
   "base_branch": "", "head_branch": "", "head": "<headRefOid>",
   "main_branch": "",
   "base_commit": "<sha>",
@@ -138,6 +138,22 @@ git -C <clone> worktree add --detach <folder>/tree <ref>
 When the base branch is `<main>`, fetch it once: in place of the second
 fetch, run `git -C <clone> update-ref <ref>-main <ref>-base`.
 
+**Merged PR.** "View a PR by number" gives the merge commit (`merge_commit`
+in `pr.json`; for a squash, the squash commit). Fetch it:
+`git -C <clone> fetch --no-tags <remote> +<merge-sha>:<ref>-merge`. Where
+the host gives a short hash, resolve it from `<ref>-base` or `<ref>-main`
+with `git rev-parse` and `update-ref` it instead. A failure here stops. A
+merged PR with no merge commit (fast-forward): record
+`base_commit: unreachable (fast-forward merge, no merge commit)` and stop.
+A base branch deleted after the merge is not a stop: `base_commit` comes
+from the merge commit, and `sources.md` gets
+`base_commit: fetched (from merge commit; base branch <name> deleted)`.
+When the merge commit has one parent, check after Step 6 that the first
+field of `git -C <clone> diff <ref>-merge^1 <ref>-merge | git patch-id
+--stable` equals that of `git patch-id --stable < diff.patch`. If it does
+not (a rebase merge), record `base_commit: unreachable (rebase merge)` and
+stop.
+
 On hosts with a PR ref (GitHub, GitLab), the head of a fork PR is in the
 base repository: fetch it from `<remote>`. On Bitbucket, fetch from the
 fork's URL as the row says, without adding a remote.
@@ -146,20 +162,27 @@ fork's URL as the row says, without adding a remote.
 run `git fetch --no-tags --unshallow <remote>`. If that fails, run
 `git fetch --no-tags --shallow-since=<date> <remote>`, where `<date>` is one
 year before the earlier of the PR's `createdAt` and the commit date of
-`<ref>-base`. If the clone is still shallow, record `areas` and
-`docs_authors` as `fetched (history since <date>)`.
+`<ref>-base` (`<ref>-merge` for a merged PR). If the clone is still shallow,
+record `areas` and `docs_authors` as `fetched (history since <date>)`.
 
 ### 5. Base facts (plain `git`)
 
+`base_commit` is where the PR's history starts: for a merged PR, the merge
+commit's first parent; otherwise the merge-base. `<landing>` is the code the
+merge lands on: `base_commit` for a merged PR, else `<ref>-base`.
+
 ```bash
-git -C <clone> merge-base <ref>-base <ref>                     # base_commit
-git -C <clone> rev-list --count <base_commit>..<ref>-main      # main_commits_since_base
-git -C <clone> rev-list --count <ref>..<ref>-base              # base_commits_since_head
-git -C <clone> diff --name-only <base_commit> <ref>-base       # base_files_since_head
+git -C <clone> rev-parse <ref>-merge^1                         # base_commit, merged PR
+git -C <clone> merge-base <ref>-base <ref>                     # base_commit, otherwise
+git -C <clone> rev-list --count <base_commit>..<ref>-main      # main_commits_since_base (merged: add ^<ref>-merge)
+git -C <clone> rev-list --count <ref>..<landing>               # base_commits_since_head
+git -C <clone> diff --name-only "$(git -C <clone> merge-base <ref> <landing>)" <landing>   # base_files_since_head
 ```
 
-Write `base_commit` as a SHA, both counts as numbers and the file list as
-an array. If the base fetch or `merge-base` fails (after the shallow step),
+On a merged PR, `^<ref>-merge` keeps the PR's own merge and commits out of
+`main_commits_since_base`. Write `base_commit` as a SHA, both counts as
+numbers and the file list as an array. If the merge fetch, the base fetch
+(unless the PR is merged), or `merge-base` fails (after the shallow step),
 stop. If only the main fetch fails, `main_commits_since_base` is
 unreachable.
 
@@ -181,14 +204,16 @@ long-lived branch, not a stack).
 ### 8. Approvals and checks
 
 **`required_approvals`** — "Find required approvals for a branch", for the
-base branch. Write the count the row gives. Missing rules are not zero:
+base branch. Write the count the row gives; when the row adds a note, put it
+on the `required_approvals` line in `sources.md`. Missing rules are not zero:
 where the row says the count is unknown, write
 `{"unreachable": "<error>"}`, never `0` or `null`. For a stacked PR
 (`base_pr` set), do the same for `<main>` into `required_approvals_main`.
 
 **`checks`** — "List CI checks for a PR/MR":
 - `required`: the base branch's required checks, from its rules or
-  protection as the row says, never from what reported.
+  protection as the row says, never from what reported. Where the row says
+  it is unknown, write `{"unreachable": "<error>"}`, never `[]`.
 - `runs`: every check that ran on the head, with its state.
 - `required_not_passed`: required checks that are missing, pending or failed.
 - `missing_reason`: the runs that wait for approval (`action_required`, e.g.
@@ -236,9 +261,11 @@ set, and write `alerts: fetched (scope unknown: <report>)`.
 | `linear` | `packs/linear/` |
 | `jira` | `packs/jira/` |
 | unset | The host's issue pack (`github` → `packs/github-issues/`) |
+| `none` | No tracker: the no-ticket path below, unless the host returns an issue the PR closes; read that one with the host's issue pack |
 
-No pack, no "Reading a ticket" section, or its tool is not connected: the
-ticket is unreachable.
+Any other value with no pack: `ticket: unreachable (no pack for <value>)`.
+A pack with no "Reading a ticket" section, or whose tool is not connected:
+the ticket is unreachable.
 
 **Ticket IDs.** Collect them from "Find issues a PR closes", and from the
 title, body, head branch and commit messages in the pack's ID form
@@ -325,9 +352,12 @@ git -C <folder>/tree log --format='%aN%x09%aE' -- <file>
 {"files": {"<path>": {"<author>": 0}}}
 ```
 
-Over 300 files: rank them by how many distinct terms of this list they
-contain, break ties by path, keep the top 300, and write
-`docs_authors: fetched (top 300 of <N> files by term rank)`:
+Over 300 files: first keep every file the description or ticket links or
+names, and every file under `plans-directory` whose path contains a ticket
+ID. Rank the rest by how many distinct terms of this list they contain,
+break ties by path, and fill up to 300; never keep a file that matches no
+term. Write `docs_authors: fetched (<k> of <N> files: <p> named or
+ticket-ID, rest by term rank; zero-term files dropped)`. The terms:
 - changed paths, except manifests and lockfiles;
 - ticket IDs;
 - code identifiers of 4 characters or more from the diff's added lines that
@@ -346,4 +376,4 @@ contain, break ties by path, keep the top 300, and write
 | Stacked PR | `base_pr` set; history, approvals and required checks also from `<main>`. |
 | Binary files | Listed in `sources.md`; never decoded. |
 | Diff too large for the host | Local `git diff` (step 6), recorded. |
-| Merged or closed PR | Ask before continuing (step 1). |
+| Merged or closed PR | Ask before continuing (step 1); merged: base from the merge commit (steps 4, 5). |

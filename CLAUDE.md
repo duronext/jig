@@ -79,6 +79,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `commit` | Conventional commits with hook awareness |
 | `code-review` | Dispatches review swarm, delivers scored report |
 | `pr-review` | Posts inline PR comments with suggestion blocks |
+| `reader` | Read-only subagent (read, search, list) for skills that need one, e.g. review specialists that declare `tools`, or untrusted input |
 
 ### Core Specialists
 

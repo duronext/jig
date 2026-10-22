@@ -132,6 +132,7 @@ Jig ships as a plugin with core skills, agents, and review specialists. Your tea
 | `commit` | "commit the work" | Conventional commits with hook awareness. Reads commitlint config, respects existing hooks, stages specific files. |
 | `code-review` | "review my code" | Dispatches the full review swarm (`tier: all`) and delivers the confidence-scored report. |
 | `pr-review` | "post review comments" | Posts inline PR comments with suggestion blocks. Validates every path and line number against the diff before posting. |
+| `reader` | dispatched by skills | A subagent that can only read, search and list files. `review` uses it for specialists that declare `tools`, and `pr-brief` for someone else's PR, which is untrusted input. |
 
 ### Core Specialists
 

@@ -38,6 +38,7 @@
   "agents": [
     "./core/agents/commit.md",
     "./core/agents/code-reviewer.md",
-    "./core/agents/pr-reviewer.md"
+    "./core/agents/pr-reviewer.md",
+    "./core/agents/reader.md"
   ]
 }

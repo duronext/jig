@@ -156,7 +156,7 @@ Agent tool:
     {filtered diff}             <- matching files only; every changed file for a named specialist
 ```
 
-A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: in Claude Code, the read-only `Explore` agent for `[Read, Grep, Glob]`; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
+A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access. This is Jig's rule for a read-only subagent: an agent type whose tools are exactly read, search and list, in Claude Code Jig's `reader` agent (`core/agents/reader.md`), not `Explore`, which keeps Bash; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
 
 #### Mode: prd or spec
 
@@ -394,4 +394,4 @@ The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialis
 When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer.
 
 ### With `pr-brief`
-This skill reviews your own changes. To brief yourself on someone else's PR, use `pr-brief`.
+This skill reviews your own changes. To brief yourself on someone else's PR, use `pr-brief`. pr-brief (and team-dev's lead-playbook, for untrusted input) use Stage 3's rule for a read-only subagent, the `reader` agent in Claude Code; a change to that rule changes pr-brief's untrusted-input gate.

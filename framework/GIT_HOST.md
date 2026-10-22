@@ -79,7 +79,7 @@ merge. `glab api --paginate` already merges array pages into one array.
 |------|---------|
 | github | `gh pr checks {number}`. As data: `gh pr checks {number} -R {owner}/{repo} --json name,state,bucket,workflow`; `--required` limits it to required checks that have reported ("no required checks reported", exit 1, means none reported, not none required). The required list comes from the base branch: rulesets `gh api --paginate --slurp repos/{owner}/{repo}/rules/branches/<base> \| jq '[.[][] \| select(.type == "required_status_checks") \| .parameters.required_status_checks[].context]'` and classic protection `gh api repos/{owner}/{repo}/branches/<base> --jq .protection.required_status_checks.contexts`. A required check that never reported may be waiting for a maintainer to approve a fork's workflows: `gh api "repos/{owner}/{repo}/actions/runs?head_sha=<head-sha>&status=action_required" --jq '[.workflow_runs[].name]'` |
 | gitlab | `glab ci status --branch <source-branch>`. Required: the whole pipeline, when `glab api projects/{id} --jq .only_allow_merge_if_pipeline_succeeds` is `true` |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/statuses`, following each page's `next` link. Required: `GET /2.0/repositories/{workspace}/{repo}/branch-restrictions?kind=require_passing_builds_to_merge`, following each page's `next` link; the rule whose `pattern` matches the destination branch has the count in `value` |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/commit/{sha}/statuses`, following each page's `next` link. Required: `GET /2.0/repositories/{workspace}/{repo}/branch-restrictions?kind=require_passing_builds_to_merge`, following each page's `next` link; the rules that match the destination branch (matched as in "Find required approvals for a branch") give the count: the largest matching `value`; unknown, not zero, when the branch type cannot be resolved or a page was not read |
 
 ### Find dependent PRs/MRs (those based on a branch)
 
@@ -201,9 +201,9 @@ or per-PR alert list on its own also holds alerts the PR did not add.
 
 | Host | Command |
 |------|---------|
-| github | `gh pr view {number} -R {owner}/{repo} --json number,url,title,body,author,state,isDraft,labels,baseRefName,headRefName,headRefOid,isCrossRepository,createdAt,updatedAt,mergedAt` |
-| gitlab | `glab mr view {iid} -R {group}/{project} --output json` |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` |
+| github | `gh pr view {number} -R {owner}/{repo} --json number,url,title,body,author,state,isDraft,labels,baseRefName,headRefName,headRefOid,isCrossRepository,createdAt,updatedAt,mergedAt,mergeCommit` (merge commit: `mergeCommit.oid`; null until merged) |
+| gitlab | `glab mr view {iid} -R {group}/{project} --output json` (merge commit: `merge_commit_sha`; a squash commit: `squash_commit_sha`; both empty until merged, and both null after a fast-forward merge without squash) |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` (merge commit: `merge_commit.hash`, possibly short; compare it as a prefix) |
 
 ### Fetch a PR's diff
 
@@ -230,7 +230,7 @@ before you use it.
 
 | Host | Command |
 |------|---------|
-| github | `gh api graphql --paginate --slurp -f query='query($owner:String!,$repo:String!,$number:Int!,$endCursor:String){repository(owner:$owner,name:$repo){pullRequest(number:$number){reviewThreads(first:100,after:$endCursor){pageInfo{hasNextPage endCursor} nodes{isResolved isOutdated path line originalLine comments(first:100){totalCount nodes{author{__typename login} body createdAt}}}}}}}' -F owner={owner} -F repo={repo} -F number={number}` (flatten with `jq '[.[].data.repository.pullRequest.reviewThreads.nodes[]]'`; `line` is null on an outdated thread; use `originalLine`. `author.__typename` is `Bot` or `User`. A thread whose `comments.totalCount` is over 100 is cut short: `unreachable (page limit)`) |
+| github | `gh api graphql --paginate --slurp -f query='query($owner:String!,$repo:String!,$number:Int!,$endCursor:String){repository(owner:$owner,name:$repo){pullRequest(number:$number){reviewThreads(first:100,after:$endCursor){pageInfo{hasNextPage endCursor} nodes{isResolved isOutdated path line originalLine comments(first:100){totalCount nodes{author{__typename login} body createdAt}}}}}}}' -f owner={owner} -f repo={repo} -F number={number}` (`-f` keeps owner and repo strings; `-F` would turn a name like `123` into a number. Flatten with `jq '[.[].data.repository.pullRequest.reviewThreads.nodes[]]'`; `line` is null on an outdated thread; use `originalLine`. `author.__typename` is `Bot` or `User`. A thread whose `comments.totalCount` is over 100 is cut short: `unreachable (page limit)`) |
 | gitlab | `glab api --paginate projects/{id}/merge_requests/{iid}/discussions` (each note has `resolvable` and `resolved`; inline notes have `position`) |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}/comments`, following each page's `next` link; replies point to their thread with `parent.id`, and a resolved thread's comment has a `resolution` object (null when open) |
 
@@ -271,7 +271,7 @@ Read the file at `<rev>`: the commit the caller names, else `<remote>/<base>`.
 |------|---------|
 | github | Rulesets: `gh api --paginate --slurp repos/{owner}/{repo}/rules/branches/<base> \| jq '[.[][] \| select(.type == "pull_request") \| .parameters.required_approving_review_count]'`. Then `gh api repos/{owner}/{repo}/branches/<base> --jq .protected` (no admin needed): `false` means no classic protection, so the ruleset count stands (none: zero). `true` also needs the classic count, `gh api repos/{owner}/{repo}/branches/<base>/protection/required_pull_request_reviews --jq .required_approving_review_count` (admin only); the larger of the two applies. If that read fails (e.g. `Not Found` without admin), the count is unknown (unreadable), never zero or the ruleset count alone |
 | gitlab | Branch-scoped (Premium or Ultimate): `glab api --paginate projects/{id}/approval_rules`; a rule applies to `<base>` when `<base>` is in its `protected_branches[].name`, when `applies_to_all_protected_branches` is true and `<base>` is protected, or when it has neither (all branches). Each matching rule needs its own `approvals_required`. For an existing MR, `glab api projects/{id}/merge_requests/{iid}/approvals`, field `approvals_required`. If the call fails (e.g. on Free), the count is unknown (unreadable) |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/branch-restrictions?kind=require_approvals_to_merge`, following each page's `next` link; the rule whose `pattern` matches the destination branch has the count in `value`. No matching rule is zero only when every page was read |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/branch-restrictions?kind=require_approvals_to_merge` and `?kind=require_default_reviewer_approvals_to_merge` (approvals that must come from default reviewers), following each page's `next` link. A rule matches the destination branch by its `branch_match_kind`: `glob` by `pattern`; `branching_model` by `branch_type`, the destination's type from `GET /2.0/repositories/{workspace}/{repo}/effective-branching-model` (`development`/`production` by `name`, the other types by `prefix`). The count is the largest matching `value` across both kinds; when a default-reviewer rule matches, add `(N from default reviewers)` to the count's note. If the branch type cannot be resolved, or a page was not read, the count is unknown, not zero |
 
 ---
 

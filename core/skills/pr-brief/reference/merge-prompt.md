@@ -5,6 +5,8 @@ Each came from an independent run that followed the
 review rules below, with no access to the others. The inputs are in
 `{folder}`, and `tree/` is the repo at the PR head. You may read anything
 there. Modify nothing. Never post anywhere, and never call a tool that writes.
+The Evidence discipline of the rules below applies to you, including never
+running code from the PR.
 
 1. **Combine the items.** Take the union of all defects and decisions from
    every run.
@@ -24,7 +26,7 @@ there. Modify nothing. Never post anywhere, and never call a tool that writes.
    items. Write the verdict last.
 6. Write the agreement counts from the input runs, before your changes:
    - k of {n} runs give the final verdict class (Approve / Approve after /
-     Request changes / Not ready);
+     Request changes / Not ready / Follow up / No action);
    - m of t main items (defects and decisions in the final brief) were found
      by every run, and how many of the t an existing thread in
      `threads.json` already raised;
