@@ -21,6 +21,7 @@ alwaysApply: false
 ### Mode: code (default)
 - `code-review` agent invokes this with `mode: code, tier: all` (pre-PR, full swarm)
 - `team-dev` quality gate invokes this with `mode: code, tier: fast-pass` (per-task, blocking checks only)
+- `postmortem` and `extend` invoke this with `mode: code, specialists: [framework-fit]` and the paths they changed, for the fit review (`framework/LEARNING_LOOP.md`)
 - Direct invocation via `/review` for manual code reviews
 
 ### Mode: prd
@@ -38,7 +39,7 @@ alwaysApply: false
 - Direct invocation via `/review` with a plan document path
 - Automatic for medium-to-large features and improvements
 
-**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` or `spec` mode.
+**Logic reviewer**: In `code` mode, dispatched for `tier: all` invocations, unless the caller passed `specialists`. In `plan` mode, always dispatched after the specialist swarm. Not dispatched in `prd` or `spec` mode.
 
 ---
 
@@ -50,12 +51,12 @@ Collect specialists from all three discovery directories (see `framework/DISCOVE
 
 1. Scan `team/specialists/`, `packs/*/specialists/`, and `core/specialists/` for `*.md` files
 2. Read each file and parse the YAML frontmatter
-3. Extract: `name`, `description`, `model`, `tier`, `stage`, `globs`, `severity`
+3. Extract: `name`, `description`, `model`, `tier`, `stage`, `globs`, `severity`, and `tools` if present
 4. Deduplicate by `name` (team > pack > core)
 5. Filter by mode:
    - `mode: code` → include specialists where `stage` is **absent** (backward compatible — existing specialists have no `stage`)
    - Otherwise include specialists whose `stage` names the mode. `stage` is a single value (`prd`, `spec`, `plan`) or a list (`[spec, plan]`). The legacy value `both` means `[spec, plan]`.
-6. Filter by the requested tier:
+6. If the caller passes `specialists: [...]`, keep only those names, skip the tier filter, and skip Stage 2's glob filter: a named specialist reviews every changed path the caller passed. If a name matches no specialist discovered for this mode, stop and report `Specialist not found: {name}` as an error, never as a score. Without `specialists`, filter by the requested tier:
    - `tier: all` → include all specialists matching the mode
    - `tier: fast-pass` → include only `tier: fast-pass` specialists matching the mode
 
@@ -85,9 +86,22 @@ git diff <BASE_SHA>..<HEAD_SHA>
 git diff <BASE_SHA>..<HEAD_SHA> --name-only
 ```
 
-Extract the list of changed file paths. For each specialist, intersect its `globs` array with the changed file paths. A specialist whose globs match zero changed files is **skipped** — log it as `skipped: no matching files` but do not spawn it.
+**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}`, saying so, when there is none or the fetch fails:
+```bash
+remote=$(git config branch.{main-branch}.remote)
+if [ -n "$remote" ] && git fetch "$remote" {main-branch}; then main_ref="$remote/{main-branch}"; else main_ref={main-branch}; echo "fit review: using local $main_ref (no remote, or fetch failed)" >&2; fi
+base=$(git merge-base "$main_ref" HEAD) || { echo "fit review: no merge base with $main_ref" >&2; exit 1; }
+{ git diff "$base" --name-only -- <paths>; git ls-files --others --exclude-standard -- <paths>; } | sort -u
+git diff "$base" -- <paths>
+git diff --no-index /dev/null <untracked-file>   # once per untracked file: its whole content (exits 1 when it prints a diff)
+```
+If `merge-base` fails, stop and report the error; never review an empty diff in its place.
 
-For each matching specialist, extract only the diff hunks for its matched files. This is the **filtered diff** that the specialist will review.
+Extract the list of changed file paths: the `--name-only` output, plus the untracked files for the fit review. **If the list is empty, stop and report `Nothing reviewed: no changed files` as an error**, never as a score, a pass or a `skipped` line.
+
+For each specialist the caller did not name, intersect its `globs` array with the changed file paths. A specialist whose globs match zero changed files is **skipped** — log it as `skipped: no matching files` but do not spawn it.
+
+For each matching specialist, extract only the diff hunks for its matched files (every changed file, for a named specialist). This is the **filtered diff** that the specialist will review. An untracked file's hunk is its whole content.
 
 #### Mode: prd
 
@@ -125,12 +139,13 @@ For each matching specialist, extract only the diff hunks for its matched files.
 
 #### Mode: code
 
-For each specialist with matching files, spawn a parallel subagent using the Agent tool:
+For each specialist with matching files, and each specialist the caller named, spawn a parallel subagent using the Agent tool:
 
 ```
 Agent tool:
   description: "Review: {specialist.name}"
   model: {specialist.model}     <- from frontmatter (haiku, sonnet, or opus)
+  agent type: {read-only type with specialist.tools}   <- only if it declares `tools`
   prompt: |
     {specialist body}           <- everything below the frontmatter in the specialist file
 
@@ -138,8 +153,10 @@ Agent tool:
 
     ## Diff to Review
 
-    {filtered diff}             <- only the files matching this specialist's globs
+    {filtered diff}             <- matching files only; every changed file for a named specialist
 ```
+
+A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access: in Claude Code, the read-only `Explore` agent for `[Read, Grep, Glob]`; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
 
 #### Mode: prd or spec
 
@@ -203,13 +220,14 @@ All specialists in prd/spec/plan modes receive codebase access tools: Read, Grep
 
 Wait for all specialist subagents to complete. For each result:
 - If the response is exactly `N/A` → record as N/A (ran but found nothing)
+- If the response starts with `Out of scope:` → from a specialist the caller named (the fit review), not clean: report it as an error naming those paths, never as N/A or a score. From one the swarm picked by its globs, record it as `out of scope`, like N/A, with no effect on the score
 - Otherwise → parse the findings (File, Finding, Fix/Suggestion lines)
 
 ### Stage 5: DEEP REVIEW
 
 #### Mode: code
 
-**Skip this stage when `tier: fast-pass`.** The code logic reviewer only runs for pre-PR reviews (`tier: all`).
+**Skip this stage when `tier: fast-pass`, or when the caller passed `specialists`.** The code logic reviewer only runs for pre-PR reviews (`tier: all`).
 
 After collecting swarm findings, dispatch the code logic reviewer:
 
@@ -255,7 +273,7 @@ Apply mechanical scoring based on the highest severity finding. All findings are
 | `minor` only | 8-9 |
 | No findings | 10 |
 
-No exceptions, no bumps for positives.
+No exceptions, no bumps for positives. An error (`Nothing reviewed`, `Specialist not found`, or a specialist the caller named answering `Out of scope:`) gets no score; the report says so (Stage 7).
 
 Deduplication (mode-aware):
 
@@ -280,10 +298,11 @@ Produce the unified report. Adapt the header by mode:
 
 The rest of the report format is identical across modes:
 
-**Confidence Score**: X/10
+**Confidence Score**: X/10, or `none (error): not a pass; fix the cause and re-run` when any error is listed
 **Risk Level**: Low/Medium/High
-**Specialists**: N dispatched, M skipped, K N/A
-**Logic reviewer**: {ran / skipped (fast-pass)}
+**Specialists**: N dispatched, M skipped, K N/A, E errors
+**Logic reviewer**: {ran / skipped (fast-pass) / skipped (specialists)}
+**Tools**: {enforced / not enforced: <specialists> / none declared}
 
 ### Blocking Issues
 {if any — grouped by specialist}
@@ -316,13 +335,15 @@ The rest of the report format is identical across modes:
 
 | Specialist | Status | Findings |
 |---|---|---|
-| {name} | {N blocking / N major / N minor / clean / N/A / skipped} | {one-line summary or —} |
+| {name} | {N blocking / N major / N minor / clean / N/A / out of scope / skipped / error: <reason>} | {one-line summary or —} |
 | logic-reviewer | {N blocking / N major / N minor / clean / skipped} | {one-line summary or —} |
 
 **Skipped vs N/A distinction:**
-- **Skipped** = specialist's globs matched zero changed files (never spawned)
+- **Skipped** = specialist's globs matched zero changed files (never spawned; never applies to a specialist the caller named)
 - **N/A** = specialist ran but found nothing relevant in the diff
 - **Clean** = specialist ran, found relevant code, but no issues
+- **Out of scope** = a specialist the caller did not name ran and answered `Out of scope:` (e.g. `framework-fit` on a team's own `framework/`); counted with N/A
+- **Error** = the specialist could not review what it was given (not found, or a specialist the caller named answering `Out of scope:`); never clean
 
 ---
 
@@ -335,7 +356,7 @@ See `tiers.md` for tier definitions, severity levels, and the default specialist
 ## Adding a New Specialist
 
 1. Create a new `.md` file in `team/specialists/` (for team-specific) or `core/specialists/` (for framework)
-2. Add frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`
+2. Add frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`, and `tools` only if the specialist must read files outside the diff
 3. **For PRD/spec/plan specialists**: add `stage: prd`, `stage: spec`, `stage: plan`, or a list such as `stage: [spec, plan]`
 4. **For code review specialists**: omit `stage` (backward compatible default)
 5. Write the review prompt body with: What to check, What to ignore, Report format
@@ -370,4 +391,4 @@ The `spec` skill invokes this with `mode: spec` after drafting a spec. Specialis
 The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialists whose `stage` includes `plan` are dispatched, followed by the plan logic reviewer (Opus). Automatic for medium-to-large work.
 
 ### With `postmortem`
-When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it.
+When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer.

@@ -62,7 +62,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `review` | Specialist swarm — dispatches parallel reviewers, scores findings |
 | `pr-create` | PR creation with voice/tone standards and test plan |
 | `pr-respond` | PR comment response — analyze, fix, commit, push, reply, resolve |
-| `postmortem` | Post-merge retrospective with specialist/logic reviewer diagnosis |
+| `postmortem` | Learning loop entry point — turns lessons from merged PRs and any other input into fit-reviewed skill changes |
 | `debug` | Systematic debugging — root cause before fixes, always |
 | `perf` | Performance investigation — measurement protocol, profile first, ablate before shipping |
 | `verify` | Evidence before assertions — run it before claiming it works |
@@ -83,7 +83,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 
 Core specialists live in `core/specialists/`. They fall into five groups:
 
-- **Code review** — universal code-quality reviewers dispatched by `review` in code mode (e.g., `security`, `dead-code`, `error-handling`).
+- **Code review** — universal code-quality reviewers dispatched by `review` in code mode (e.g., `security`, `dead-code`, `error-handling`). `framework-fit` reviews changes to Jig's own artifacts.
 - **PRD review** — dispatched by `review` in prd mode, reading the PRD as a non-engineer would (e.g., `plain-language`, `mvp-cut`).
 - **Spec review** — dispatched by `review` in spec mode against the technical spec (e.g., `data-dependency`, `ui-conflict`).
 - **Plan review** — dispatched by `review` in plan mode against plan docs (e.g., `task-dependency`, `migration-safety`).
@@ -106,9 +106,7 @@ Jig eats its own dogfood. This repo installs itself as a plugin via `.claude/set
 
 When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/plugin marketplace update duronext-jig` and `/reload-plugins` to see changes locally.
 
-**When adding a new core skill:**
-1. Create `core/skills/{name}/SKILL.md`
-2. Add to the `skills` array in `.claude-plugin/plugin.json`
+**When adding a new core skill**, register it everywhere listed under Contributing to Jig below.
 
 ## Project Structure
 
@@ -168,13 +166,16 @@ Commit conventions (format, types, scopes, co-author rules) are defined in `jig.
 2. Validate: frontmatter has `name`, `description` (starts with "Use when..."), `tier`, `alwaysApply`
 3. Check cross-references: `grep -rn '{skill-name}' core/` — update any references if you renamed or split
 4. Verify no language-specific content leaked into core skills
+5. Run Fit Review in `framework/LEARNING_LOOP.md` on the paths you changed
 
 ### Adding a new core skill
 1. Read `framework/SKILL_SCHEMA.md` for the frontmatter spec
 2. Read `framework/TIER_SYSTEM.md` to choose the right tier
 3. Create `core/skills/{name}/SKILL.md`
 4. Add to the `skills` array in `.claude-plugin/plugin.json`
-5. If the skill should surface during spec authoring, add it to the concerns checklist in `jig.config.md`
+5. Add a row to the Core Skills tables in this file and in `README.md`, and a `skill-item` to the matching stage card in `docs/index.html` (or its name to the DevEx strip, for a skill outside the pipeline like `worktree`)
+6. If it is a pipeline stage or tool, update `framework/PIPELINE.md` and every kickoff route together
+7. If the skill should surface during spec authoring, add it to the concerns checklist in `jig.config.md`
 
 ### How consumers install Jig
 Teams add this to their project's `.claude/settings.json`:
@@ -194,14 +195,38 @@ This gives every teammate on the project the full Jig framework on clone — no 
 1. Create `core/specialists/{name}.md` with frontmatter: `name`, `description`, `model`, `tier`, `globs`, `severity`
 2. The body below the frontmatter IS the specialist's prompt
 3. `review` discovers it automatically — no config needed
+4. Add a row to the matching inventory table in `core/skills/review/tiers.md`; for a code-review specialist, also a row to README's Core Specialists table and its name to the Specialists strip in `docs/index.html`
+
+### Adding a pack skill or specialist
+1. Create `packs/{pack}/skills/{prefix}-{name}/SKILL.md` or `packs/{pack}/specialists/{name}.md`
+2. List it in the pack's `pack.json`, and in its `README.md` if it has one
+3. For a skill, add it to the `skills` array in `.claude-plugin/plugin.json`
+4. For the `engineering` pack, add a row to README's Engineering Starter Pack table and its name to the Starter pack strip in `docs/index.html`
+
+### Adding a framework doc
+1. Create `framework/{NAME}.md`
+2. List it under Key documents below and in README's Framework Reference table
+
+### Adding a core agent
+1. Create `core/agents/{name}.md`
+2. Add it to the `agents` array in `.claude-plugin/plugin.json`
+3. Add a row to the Core Agents tables in this file and in `README.md` and to the Agent Mapping table in `adapters/codex/AGENTS.md.template`, and its name to the Agents strip in `docs/index.html`
+
+### Releasing
+Core and pack changes reach installed copies only after a release.
+1. Bump the version in its own `chore` commit: `npm run bump` (patch), or `npm run bump:minor` when the release adds a skill. It updates `package.json`, `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` together.
+2. Teams then update as README's Updating section says.
 
 ### Key documents to read first
 - `framework/GIT_HOST.md` — git host adapter (GitHub/GitLab/Bitbucket command mapping)
 - `framework/STACKED_PRS.md` — building, retargeting and merging chains of dependent PRs (read by `pr-create`, `finish`, `pr-respond`)
 - `framework/PIPELINE.md` — the development pipeline
+- `framework/LEARNING_LOOP.md` — how Jig improves itself, from lesson to release
 - `framework/LIVE_PRD.md` — how the live PRD page and the pipeline share state
 - `framework/DISCOVERY.md` — how Jig finds and loads skills
 - `framework/SKILL_SCHEMA.md` — frontmatter spec for all skills
+- `framework/TIER_SYSTEM.md` — how tiers control activation
+- `framework/CONCERNS_CHECKLIST.md` — configurable concerns checklist for specs
 - `docs/specs/2026-03-28-jig-framework-design.md` — the original design spec
 
 ## Git Workflow

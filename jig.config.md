@@ -57,6 +57,7 @@ filename-format: "{date}-{topic}-{kind}.md"  # kind = prd | spec | plan | perf |
 
 ```yaml
 - skill-schema: team/specialists/skill-quality
+- framework-fit: core/specialists/framework-fit
 - error-handling: core/specialists/error-handling
 - security: core/specialists/security
 - test-strategy: manual

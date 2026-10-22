@@ -10,9 +10,9 @@
 
 ### full-only
 
-**Runs**: Pre-PR in `code-review` agent only
+**Runs**: Pre-PR in `code-review` agent only. A caller can also name specialists directly (the fit review runs `framework-fit` alone).
 **Purpose**: Deep analysis requiring broader context (cross-file data flow, contract alignment)
-**Default specialists**: async-safety, performance
+**Default specialists**: async-safety, performance, framework-fit
 
 Teams configure which specialists belong to which tier in `jig.config.md`:
 
@@ -56,6 +56,7 @@ These ship with Jig. Teams add their own in `team/specialists/`.
 | cli-invocation | haiku | major | fast-pass | External CLI flag semantics, path quoting, silent failures |
 | async-safety | sonnet | major | full-only | Race conditions, premature state, resource leaks |
 | performance | haiku | minor | full-only | Algorithmic issues, unbounded operations |
+| framework-fit | opus | major | full-only | Changes to Jig's own artifacts against Jig as a whole (has codebase access) |
 
 ### Document review specialists
 
@@ -93,7 +94,7 @@ The logic reviewer is NOT a specialist — it's a reasoning agent that runs afte
 |---|---|---|
 | Input | Filtered diff (only matching files) | Full diff + codebase access |
 | Approach | Pattern matching against checklist | Reasoning about correctness |
-| Model | Haiku/Sonnet (cheap, fast) | Opus (expensive, deep) |
-| Tools | None (prompt + diff only) | Read, Grep, Glob, Agent |
+| Model | Haiku/Sonnet (cheap, fast); opus where noted | Opus (expensive, deep) |
+| Tools | None (prompt + diff only), unless the specialist declares `tools` | Read, Grep, Glob, Agent |
 | Parallelism | All run in parallel | Single sequential agent |
 | Swarm-aware | No (independent) | Yes (sees swarm findings, skips duplicates) |

@@ -52,7 +52,7 @@ These questions drive the decision tree below. Do not ask all four if the first 
 
 ## Step 2: Determine Artifact Type
 
-Based on the interview, route to the correct artifact type:
+First check the level with Classify in `framework/LEARNING_LOOP.md`: a personal preference, or a harness lesson not tied to this project, is not a Jig artifact, and a pack or core artifact goes to Jig (see Pack or Core Artifacts below). Then, based on the interview, route to the correct artifact type:
 
 ```
 "I want to enforce a rule"
@@ -95,6 +95,16 @@ Based on the interview, route to the correct artifact type:
 | Pipeline config | Config change | `jig.config.md` | Edit existing file |
 | Brainstorm concern | Concerns checklist entry | `jig.config.md` | `framework/CONCERNS_CHECKLIST.md` |
 
+Locations above are for a team artifact.
+
+### Pack or Core Artifacts
+
+When Classify says pack or core, never scaffold into `team/`. Work in a Jig checkout:
+
+1. Create the artifact at the matching path, `core/...` or `packs/<pack>/...`, in place of `team/...` in Steps 4 to 6.
+2. Register it everywhere Contributing to Jig in Jig's CLAUDE.md lists for its kind (for a skill, that includes `.claude-plugin/plugin.json`).
+3. Ship it as a learning PR: PR in `framework/LEARNING_LOOP.md`.
+
 ---
 
 ## Step 3: Check for Overlap
@@ -118,6 +128,8 @@ Based on the interview, route to the correct artifact type:
 ---
 
 ## Step 4: Scaffold the Artifact
+
+Draft it against the Fit Checklist in `core/specialists/framework-fit.md`. Paths below are for a team artifact; a pack or core artifact uses its path from Pack or Core Artifacts.
 
 ### For Skills
 
@@ -215,6 +227,7 @@ tier: {fast-pass | full-only}
 globs:
   - "{glob-pattern}"
 severity: {blocking | major | minor}
+tools: [Read, Grep, Glob]       # Only if it must read files outside the diff
 ---
 ```
 
@@ -310,6 +323,7 @@ If the new artifact represents a concern that should be surfaced during spec aut
    ```
    - {concern-name}: team/specialists/{specialist-name}
    ```
+   (with the artifact's `core/` or `packs/<pack>/` path, for a pack or core artifact)
 3. Confirm with the user: "Added {concern} to the Concerns Checklist. It will be surfaced during spec authoring for features and improvements."
 
 Not every artifact belongs in the checklist. Only add it if it represents a cross-cutting concern that should be explicitly considered during design.
@@ -331,6 +345,7 @@ After creating the artifact, verify it will be discovered and loaded correctly:
    - Skill: `team/skills/{name}/SKILL.md` exists
    - Specialist: `team/specialists/{name}.md` exists
    - Agent: `team/agents/{name}.md` exists
+   - Pack or core artifact: exists at its `core/` or `packs/<pack>/` path, and is registered as Pack or Core Artifacts says
 
 3. **Overlap recheck:**
    - No other artifact in the discovery chain has the same `name`
@@ -345,6 +360,8 @@ After creating the artifact, verify it will be discovered and loaded correctly:
    - SKILL.md is under 500 lines (heavy content belongs in `reference/` subdirectory)
    - No placeholders (TBD, TODO) in the final artifact
    - Cross-references use the format: `**REQUIRED**: Use {skill-name} for {reason}`
+
+6. **Fit review:** run Fit Review in `framework/LEARNING_LOOP.md` on the artifact's paths.
 
 Report the verification results to the user.
 
@@ -361,6 +378,7 @@ These framework documents define the schemas and systems this skill works with:
 | `framework/DISCOVERY.md` | How skills/specialists/agents are found and loaded |
 | `framework/CONCERNS_CHECKLIST.md` | How concerns are wired into spec authoring |
 | `framework/PIPELINE.md` | Pipeline stages and gate checks |
+| `framework/LEARNING_LOOP.md` | Which level an artifact belongs at, and the fit review before it ships |
 | `scaffold/SKILL_TEMPLATE.md` | Quick-start template with checklist |
 
 ---
@@ -391,9 +409,10 @@ These framework documents define the schemas and systems this skill works with:
 - Direct invocation via `/extend`
 
 **Related skills:**
-- `review` -- specialists created here are discovered by the review swarm
+- `review` -- specialists created here are discovered by the review swarm; it also runs the fit review (`framework-fit`)
 - `spec` -- concerns added to the checklist are surfaced during spec authoring
 - `postmortem` -- identifies gaps that lead to new artifacts
+- `pr-create` -- ships a pack or core artifact as a learning PR
 
 ---
 
@@ -426,3 +445,5 @@ Before committing the new artifact:
 - [ ] Added to Concerns Checklist in `jig.config.md` (if applicable)
 - [ ] No duplicate `name` in the discovery chain (or override is intentional)
 - [ ] Verification step passed (frontmatter valid, location correct, globs tested)
+- [ ] Pack or core artifact: in a Jig checkout, registered, shipped as a learning PR (Pack or Core Artifacts)
+- [ ] Fit Review in `framework/LEARNING_LOOP.md` done

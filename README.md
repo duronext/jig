@@ -32,6 +32,8 @@ DISCOVER → PRD → SPEC → PLAN → BUILD → REVIEW → PRD CHECK → SHIP �
 
 **Review Swarm** — `/jig:review` dispatches specialist reviewers in parallel (security, dead code, error handling, async safety, performance). Teams add their own domain-specific specialists.
 
+**Learns from every run** — LEARN is how Jig improves itself. `/jig:postmortem` takes a lesson from a merged PR's review, a working session, a retrospective or a plain "Jig should do X", routes it to one home (your team's skills, a pack, or Jig itself), and checks the change fits Jig before it ships. See [the learning loop](framework/LEARNING_LOOP.md).
+
 **Configurable, Not Rigid** — `jig.config.md` lets you tune the pipeline per work type, define your concerns checklist, choose your ticket system, and set review policies. Override only what you need.
 
 **Extensible** — Add domain skills (`be-database`, `fe-react`), custom specialists (`typeorm.md`, `i18n.md`), and team agents. They wire into the framework's discovery system automatically.
@@ -112,7 +114,7 @@ Jig ships as a plugin with core skills, agents, and review specialists. Your tea
 | `review` | Code review swarm | Dispatches parallel specialist reviewers (security, dead code, error handling, async safety, performance + your team's specialists). Filters by glob match, scores mechanically, produces unified report. |
 | `pr-create` | PR creation | Runs the review swarm first, then analyzes all commits, groups by theme, writes a clear description with test plan. No corporate speak. |
 | `pr-respond` | PR feedback | Fetches unresolved comments, analyzes each (valid fix vs false positive), implements fixes, commits, pushes, replies, and resolves threads. The full loop. |
-| `postmortem` | Retrospective | After merge, analyzes what reviewers caught to find gaps in skills and specialists. Diagnoses whether the swarm or logic reviewer should have caught it, then fixes the gap. |
+| `postmortem` | Learning loop | How Jig improves itself. Takes lessons from merged-PR reviews, working sessions, retrospectives and direct requests, routes each to one home, applies it, and runs a fit review against Jig as a whole before it ships. |
 | `debug` | Systematic debugging | Iron law: no fixes without root cause investigation. Four phases — investigate, analyze patterns, test hypothesis, implement. Escalates to "question the architecture" after 3 failed fixes. |
 | `perf` | Performance investigation | Fixes the measurement protocol before the first run: CPU time, interleaved A/B pairs, an idle gate. Profiles before choosing levers, proves each knob took effect, and ablates the combination before shipping. |
 | `verify` | Verification gate | Evidence before assertions. Run the command, read the output, THEN claim it works. Prevents "should pass now" claims without proof. |
@@ -141,6 +143,8 @@ Dispatched by `/review` as parallel subagents. Language-agnostic:
 | `error-handling` | major | Swallowed errors, missing handling, inconsistent patterns, context loss |
 | `async-safety` | major | Race conditions, premature state flags, resource leaks, error path divergence |
 | `performance` | minor | N+1 patterns, unbounded operations, unnecessary computation, over-fetching |
+| `cli-invocation` | major | External CLI calls: flag semantics, path quoting, swallowed exit codes, command composition |
+| `framework-fit` | major | A change to Jig artifacts that doesn't fit Jig as a whole: a rule in two places, a missed registration, one team's habit in core. One opus run with read access. In a team's repo it reviews only the Team homes in Classify ([LEARNING_LOOP.md](framework/LEARNING_LOOP.md)), never the team's own `core/` or `framework/` |
 
 Teams add their own specialists in `.claude/specialists/` (e.g., `typeorm.md`, `i18n.md`, `graphql-contracts.md`). The swarm discovers them automatically.
 
@@ -202,6 +206,8 @@ Jig is distributed as a Claude Code plugin. To get the latest version:
 /plugin install jig@duronext-jig --scope project
 ```
 
+After updating, delete any bridging copy of a Jig lesson you made in your own config while waiting for this release (the Copies line of its learning PR; see Close the Loop in `framework/LEARNING_LOOP.md`).
+
 ### Upgrading from 1.x
 
 Jig 2.0 renames the technical requirements document from **PRD** to **spec** and adds a new, plain-language **PRD**. Run `/jig:init` in a 1.x project and choose **Upgrade to 2.0**: it moves your config keys, renames old technical `*-prd.md` files to `*-spec.md`, and updates plan headers. `/jig:spec` is what `/jig:prd` used to be.
@@ -220,6 +226,7 @@ Teams using GitLab or Bitbucket are supported via the [git host adapter](framewo
 | Document | What It Covers |
 |----------|---------------|
 | [PIPELINE.md](framework/PIPELINE.md) | The development pipeline |
+| [LEARNING_LOOP.md](framework/LEARNING_LOOP.md) | How Jig improves itself, from lesson to release |
 | [LIVE_PRD.md](framework/LIVE_PRD.md) | How the live PRD page and the pipeline share state |
 | [DISCOVERY.md](framework/DISCOVERY.md) | How Jig finds and loads skills |
 | [SKILL_SCHEMA.md](framework/SKILL_SCHEMA.md) | Frontmatter spec for all skills |

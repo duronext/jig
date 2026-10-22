@@ -29,14 +29,14 @@ Read and follow the `review` skill (`core/skills/review/SKILL.md`) for the compl
 - Stage 1: DISCOVER specialists (scan `team/specialists/`, `packs/*/specialists/`, `core/specialists/` for `*.md`, parse frontmatter, filter by tier)
 - Stage 2: PREPARE the diff (extract changed files, intersect with specialist globs)
 - Stage 3: DISPATCH matching specialists in parallel (Agent tool, one per specialist)
-- Stage 4: COLLECT results (findings or N/A)
+- Stage 4: COLLECT results (findings, N/A, or `Out of scope:`, which the swarm records like N/A)
 - Stage 5: DEEP REVIEW with logic reviewer (Opus, full codebase access, Skeptic's Method)
-- Stage 6: SCORE mechanically (blocking=4, major=7, minor=8-9, clean=10)
+- Stage 6: SCORE mechanically (blocking=4, major=7, minor=8-9, clean=10; an error gets no score)
 - Stage 7: REPORT in the unified format
 
 ## Important
 
 - Dispatch ALL matching specialists -- never skip one to save time
-- Use each specialist's declared `model` from frontmatter (haiku, sonnet, or opus)
+- Use each specialist's declared `model` (haiku, sonnet, or opus) and, if present, `tools` from frontmatter
 - Score caps are HARD -- no exceptions
-- The Specialist Summary table must distinguish: dispatched / skipped / N/A / clean
+- The Specialist Summary table must distinguish: dispatched / skipped / N/A / out of scope / clean / error
