@@ -72,8 +72,8 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
     are the union of `ticket-prefix`, the tracker section's own key (Jira
     `project-key`, Linear `team` when it is a key, e.g. `ENG`) and the
     tracker's key list from the pack's "Ticket keys" bullet; keep only keys
-    matching `^[A-Z][A-Z0-9]+$`. If the list cannot be read, use the
-    configured keys and write
+    matching `^[A-Z][A-Z0-9_]+$` (Jira keys may hold `_`, e.g. `MY_APP`).
+    If the list cannot be read, use the configured keys and write
     `ticket_keys: unreachable (<error>; matched <KEYS> only)`. No key at all:
     `ticket: unreachable (no ticket keys)`.
 
@@ -86,16 +86,17 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
     { jq -r '.title, .body' <folder>/pr.json; cat <folder>/commits.txt; } > <folder>/id-text.txt
     tr -s '[:space:]()<>\133\135' '\n' < <folder>/id-text.txt > <folder>/id-words.txt
     # GitHub issues
-    grep -vE '/' <folder>/id-words.txt | grep -oE '(^|[^A-Za-z0-9])#[0-9]+' | tr -dc '0-9\n' | sort -u
+    grep -vE '/' <folder>/id-words.txt | grep -oE '(^|[^A-Za-z0-9_])#[0-9]+' | tr -dc '0-9\n' | sort -u
     # Linear or Jira
     { cat <folder>/id-branch.txt
       grep -vE '/' <folder>/id-words.txt
       grep -E '^<tracker URL prefix>' <folder>/id-words.txt
-    } | grep -oiE '(^|[^A-Za-z0-9])(KEY1|KEY2)-[0-9]+' | sed -E 's/^[^A-Za-z0-9]//' \
+    } | grep -oiE '(^|[^A-Za-z0-9_])(KEY1|KEY2)-[0-9]+' | sed -E 's/^[^A-Za-z0-9_]//' \
       | tr '[:lower:]' '[:upper:]' | sort -u
     ```
 
-    The alternation is built from the checked keys. Words split on spaces
+    The alternation is built from the checked keys. The boundary before a
+    key excludes `_`, so `MY_APP-12` never also matches a key `APP`. Words split on spaces
     and on `( ) < > [ ]`, so a Markdown link's text and URL are separate.
     The head branch always counts for Linear or Jira. The tracker URL
     prefix is the pack's "Tracker URL prefix" bullet, as a fixed string; if
