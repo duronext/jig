@@ -185,11 +185,20 @@ an array; for a merged PR, run only the first command. If the base fetch or
 `merge-base` fails (after the shallow step), stop. If only the main fetch
 fails, `main_commits_since_base` is unreachable.
 
-**Check the base, every PR**, after Step 6: the set of paths from
-`git -C <clone> -c core.hooksPath=/dev/null diff --no-ext-diff --no-color -M --name-only <base_commit> <ref>`
-must equal the set of `b/<new>` paths in `diff.patch`'s
-`diff --git a/<old> b/<new>` headers. The check does not depend on diff
-settings or the host's diff format. If the sets differ, record
+**Check the base, every PR**, after Step 6. Two path sets must be equal:
+- Local: the NUL-separated raw paths from
+  `git -C <clone> -c core.hooksPath=/dev/null -c core.quotePath=false diff --no-ext-diff --no-renames --name-only -z <base_commit> <ref>`.
+- Host: the union of the `a/<old>` and `b/<new>` paths of every
+  `diff --git` header in `diff.patch`, so a rename counts both paths
+  however the host pairs it; for an entry with `copy from`, only the new
+  path (the source did not change). A path in double quotes is C-quoted: unquote
+  it to raw bytes (`\ooo` octal, `\t`, `\"`, `\\`). An unquoted header with
+  more than one ` b/` is ambiguous: take that file's paths from its
+  `--- a/` and `+++ b/` lines (drop a trailing tab; skip `/dev/null`). If
+  neither resolves, record
+  `base_commit: unreachable (diff header not parseable: <header>)` and stop.
+
+If the sets differ, record
 `base_commit: unreachable (changed paths differ from the host's diff)` and
 stop.
 
