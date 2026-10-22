@@ -3,7 +3,8 @@
 /**
  * Checks Jig's artifacts for the mechanical faults a fit review should not
  * have to find: registration, frontmatter, git-host rows, cited headings,
- * reference links, passages repeated across files and known shell traps.
+ * reference links, repeated or drifted passages, known shell traps and repo
+ * paths in tool-less specialists.
  * Prints file:line and a reason for each, exits 1 on any.
  *
  * Usage:
@@ -288,6 +289,7 @@ const COPIES = [
   ["sub agent spawning for deep dives that would bloat your context", "logic reviewer skeleton"],
   ["wrong and why it breaks be specific about the failure scenario", "logic reviewer skeleton"],
   ["it reads this pack for 1 tool mapping which mcp tool to call and how to structure the payload", "ticket pack README template"],
+  ["these words invariant backbone load bearing first class seamless robust leverage utilize synergy north star single source of truth best in class holistic paradigm ecosystem unless it is literally one", "each actor reads only its own file (the PRD writer voice.md, the tool-less reviewer plain-language.md)"],
   // On main before this check: give each one home, then drop it here.
   ["all findings are always reported regardless of score", "on main: review SKILL.md and tiers.md"],
   ["automatic dispatch run the swarm for all medium to large features and improvements skip only for clearly trivial work", "on main: plan and spec"],
@@ -319,18 +321,21 @@ for (const file of artifactFiles) {
   const local = new Set();
   let last = null;
   for (let i = 0; i + RUN_WORDS <= ws.length; i++) {
-    if (covered.subarray(i, i + RUN_WORDS).some(Boolean)) continue;
+    // A window inside a known copy still counts, so a copy that drifts from
+    // the listed phrase in one file is caught against the file that kept it.
+    const inCopy = covered.subarray(i, i + RUN_WORDS).some(Boolean);
     const key = ws.slice(i, i + RUN_WORDS).map((x) => x.w).join(" ");
     if (local.has(key)) continue;
     local.add(key);
     const seen = firstSeen.get(key);
     if (!seen) {
-      firstSeen.set(key, { file, pos: i, line: ws[i].line });
-    } else if (seen.file !== file) {
+      firstSeen.set(key, { file, pos: i, line: ws[i].line, inCopy });
+    } else if (seen.file !== file && !(inCopy && seen.inCopy)) {
       const continues = last && last.file === seen.file && last.pos + 1 === seen.pos && last.at + 1 === i;
       if (!continues) {
         const where = `${path.relative(root, seen.file)}:${seen.line}`;
-        fail(file, ws[i].line, `repeats ${RUN_WORDS}+ words of ${where} ("${key.split(" ").slice(0, 8).join(" ")} …"); give the rule one home and point to it`);
+        const why = inCopy || seen.inCopy ? "differs from a known copy (COPIES); keep the copies identical" : "give the rule one home and point to it";
+        fail(file, ws[i].line, `repeats ${RUN_WORDS}+ words of ${where} ("${key.split(" ").slice(0, 8).join(" ")} …"); ${why}`);
       }
       last = { file: seen.file, pos: seen.pos, at: i };
     }
@@ -382,6 +387,24 @@ for (const file of textFiles) {
     if (/(?:^|[\s|;&(])git(?:\s+(?:-[Cc]\s+\S+|--?[\w-]+(?:=\S+)?))*\s+log\b[^|;&]*--pathspec-from-file/.test(line)) {
       fail(file, start + 1, "shell: git log has no --pathspec-from-file");
     }
+  }
+}
+
+// 8. A specialist runs in the consumer's repo (or none, in prd mode), where
+// Jig's core/framework paths do not exist; one without `tools` cannot open
+// files at all.
+const TOOLLESS_POINTERS = []; // pure attributions, each "<file>|<path>"
+const specialistFiles = [
+  ...walk(path.join(root, "core", "specialists")),
+  ...dirs(path.join(root, "packs")).flatMap((p) => walk(path.join(root, "packs", p, "specialists"))),
+].filter((f) => f.endsWith(".md"));
+for (const file of specialistFiles) {
+  const text = read(file);
+  const fm = frontmatter(text);
+  if (!fm || "tools" in fm.fields) continue;
+  for (const m of text.matchAll(/`\.?\/?((?:core|framework|packs|adapters)\/[^`\s]+)`/g)) {
+    if (TOOLLESS_POINTERS.includes(`${path.relative(root, file)}|${m[1]}`)) continue;
+    fail(file, lineOf(text, m.index), `tool-less specialist points to ${m[1]}; it cannot read it in a consumer install — inline the rule`);
   }
 }
 

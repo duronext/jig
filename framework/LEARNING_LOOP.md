@@ -51,7 +51,7 @@ When one check or rule has drawn findings in three review rounds (count them in 
 
 Before each push, run these in order, and push only when all are clean. Bot reviews after the push then confirm rather than discover.
 
-1. `npm run check`, in Jig's repo. It finds what it can mechanically (registrations, frontmatter, host rows, cited headings, repeated passages, known shell traps); the reviews read for the rest.
+1. `npm run check`, in Jig's repo. It finds what it can mechanically (registrations, frontmatter, host rows, cited headings, repeated or drifted passages, known shell traps, repo paths in tool-less specialists); the reviews read for the rest.
 2. The case list, below: every case against the current text, not only the one the last fix answers.
 3. `review` with `mode: code, specialists: [framework-fit]` on the paths you changed. That dispatches `framework-fit` alone, with no other specialist and no logic reviewer, as a reviewer that did not write the change. Fix each finding, or record why it does not apply, and re-run. It is done when `framework-fit` has no findings left except those recorded that way; a `framework-fit` that was skipped or reviewed no files is not a clean review.
 4. For an artifact that handles untrusted input (someone else's PR, its comments, a ticket, fork code), `review` with `mode: code, specialists: [security]`: `framework-fit` checks fit, not safety. It is done on the same terms as `framework-fit`; a skipped pass is not clean.
