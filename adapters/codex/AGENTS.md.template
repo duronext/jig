@@ -92,7 +92,7 @@ Jig's core agents map to Codex as instruction files to be read and followed:
 | `jig-commit` | `core/agents/commit.md` | Conventional commit workflow |
 | `jig-code-review` | `core/agents/code-reviewer.md` | Review swarm dispatch |
 | `jig-pr-review` | `core/agents/pr-reviewer.md` | Inline PR comment generation |
-| `jig-reader` | `core/agents/reader.md` | Read-only subagent (read, search, list) |
+| `jig-reader` | `core/agents/reader.md` | Read-only subagent (read, search, list). Here it runs in the main agent's process and its tool list is not enforced, so `pr-brief`'s read-only gate asks the user first |
 
 When a skill references an agent, read the agent's markdown file and execute
 its instructions sequentially.

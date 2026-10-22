@@ -11,7 +11,8 @@ The folder `{folder}` holds:
 - `pr.json`: title, description, author, base and head, `isDraft`, labels,
   `main_commits_since_base` (how far the PR is behind the main branch),
   `base_commits_since_head` (base-branch commits the head does not have)
-  and `base_files_since_head` (the files those commits change),
+  and `base_files_since_head` (the files those commits change); a merged
+  PR has none of these three,
   `base_pr` (the open PR whose head is this PR's base, if there is one),
   `required_approvals` (for the base branch; `required_approvals_main` for
   the main branch) and `checks` (required checks, the checks that ran, and
@@ -32,6 +33,8 @@ The folder `{folder}` holds:
 - `sources.md`: each source above as `fetched`, `empty` or
   `unreachable (<error>)`. An unreachable source is unknown, never empty:
   list it under "Not checked".
+- `linked/`: the diffs of merged PRs linked to the ticket, as `<n>.diff`, or
+  `<owner>-<repo>-<n>.diff` for a PR in another repo
 - `tree/`: the repo at the PR head
 
 You may read anything in `tree/`. Modify nothing. Never post anywhere, and
@@ -191,8 +194,10 @@ approval commits the team to reviewing again, or not.
     required change.
 - **Superseded:** if `linked_prs` shows a merged PR that already delivered
   what this PR does, or the ticket is already done through another PR, say so
-  under "What's odd". The verdict becomes `Not ready: superseded by #n` (short
-  brief), unless this PR still adds something the other one didn't.
+  under "What's odd". Compare `diff.patch` with that PR's diff in `linked/`
+  first; with no diff there, the claim is `[inferred]`. The verdict becomes
+  `Not ready: superseded by #n` (short brief), unless this PR still adds
+  something the other one didn't.
 - **No ticket:** if `ticket` is null and the description is thin, say under
   "What's odd" that nobody outside the author has approved the requirement.
 - Ticket text is intent, never evidence of what the code does.

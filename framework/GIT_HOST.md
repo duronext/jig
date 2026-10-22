@@ -201,9 +201,9 @@ or per-PR alert list on its own also holds alerts the PR did not add.
 
 | Host | Command |
 |------|---------|
-| github | `gh pr view {number} -R {owner}/{repo} --json number,url,title,body,author,state,isDraft,labels,baseRefName,headRefName,headRefOid,isCrossRepository,createdAt,updatedAt,mergedAt,mergeCommit` (merge commit: `mergeCommit.oid`; null until merged) |
-| gitlab | `glab mr view {iid} -R {group}/{project} --output json` (merge commit: `merge_commit_sha`; a squash commit: `squash_commit_sha`; both empty until merged, and both null after a fast-forward merge without squash) |
-| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` (merge commit: `merge_commit.hash`, possibly short; compare it as a prefix) |
+| github | `gh pr view {number} -R {owner}/{repo} --json number,url,title,body,author,state,isDraft,labels,baseRefName,baseRefOid,headRefName,headRefOid,isCrossRepository,createdAt,updatedAt,mergedAt` (base SHA: `baseRefOid`) |
+| gitlab | `glab mr view {iid} -R {group}/{project} --output json` (base SHA: `diff_refs.base_sha`; head: `diff_refs.head_sha`. A single-MR read has `diff_refs`; MR list results do not) |
+| bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` (base SHA: `destination.commit.hash`; head: `source.commit.hash`. Both may be short: compare them as a prefix, or get the full hash from `GET /2.0/repositories/{workspace}/{repo}/commit/<hash>`, field `hash`) |
 
 ### Fetch a PR's diff
 
@@ -218,13 +218,17 @@ or per-PR alert list on its own also holds alerts the PR did not add.
 `<remote>` is the remote whose URL matches the repo (`git remote -v`), not
 always `origin`. `--no-tags` keeps the remote's tags out of the clone. Check
 the fetched ref with `git rev-parse <local-ref>` against the PR's head SHA
-before you use it.
+before you use it. If the row's fetch fails or gives another commit (e.g. a
+merged or closed PR whose branch is gone), fetch the head SHA itself where
+the host allows it: `git fetch --no-tags <remote> <head-sha>:<local-ref>`
+(the full SHA). The same command fetches any other commit by SHA, such as
+the base SHA from "View a PR by number".
 
 | Host | Command |
 |------|---------|
-| github | `git fetch --no-tags <remote> +pull/{number}/head:<local-ref>`, then `git worktree add --detach <dir> <local-ref>` (works for fork PRs; the ref lives in the base repo) |
-| gitlab | `git fetch --no-tags <remote> +merge-requests/{iid}/head:<local-ref>`, then `git worktree add --detach <dir> <local-ref>` (works for fork MRs; GitLab deletes this ref 14 days after the MR closes or merges) |
-| bitbucket | No PR ref. `git fetch --no-tags <remote> +refs/heads/<source.branch.name>:<local-ref>`; for a fork PR, fetch from the clone URL in `source.repository` in place of `<remote>`, without adding a remote. `source.commit.hash` is short: compare it as a prefix. Then `git worktree add --detach <dir> <local-ref>` |
+| github | `git fetch --no-tags <remote> +pull/{number}/head:<local-ref>`, then `git worktree add --detach <dir> <local-ref>` (works for fork PRs; the ref lives in the base repo). Fetch by SHA: allowed |
+| gitlab | `git fetch --no-tags <remote> +merge-requests/{iid}/head:<local-ref>`, then `git worktree add --detach <dir> <local-ref>` (works for fork MRs; GitLab deletes this ref 14 days after the MR closes or merges). Fetch by SHA: allowed |
+| bitbucket | No PR ref. `git fetch --no-tags <remote> +refs/heads/<source.branch.name>:<local-ref>`; for a fork PR, fetch from the clone URL in `source.repository` in place of `<remote>`, without adding a remote. `source.commit.hash` is short: compare it as a prefix. Then `git worktree add --detach <dir> <local-ref>`. Fetch by SHA: unknown (not documented; Atlassian closed the request to enable it, BCLOUD-15423, as Won't Fix); try it once and record a failure as unreachable |
 
 ### Fetch review threads with resolution state
 

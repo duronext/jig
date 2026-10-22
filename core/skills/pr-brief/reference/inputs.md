@@ -15,9 +15,10 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
 
   `pr, tree, base_commit, main_commits_since_base, diff, base_pr,
   required_approvals, checks, inline, reviews, conversation, alerts, ticket,
-  linked_prs, codeowners, areas, docs_authors`
+  linked_prs, linked_diffs, codeowners, areas, docs_authors`
 
   Fixed `empty` forms: `base_pr: empty (base is main)`,
+  `main_commits_since_base: empty (merged)`,
   `ticket: empty (no ticket reference)` and
   `linked_prs: empty (no ticket reference)`. Add a line per binary file
   (`binary: <path> (content not reviewed)`), and the lines SKILL.md adds for
@@ -100,7 +101,7 @@ Then write `pr.json`:
   "number": 0, "url": "", "title": "", "body": "", "author": "",
   "state": "", "isDraft": false, "labels": [""],
   "isCrossRepository": false, "createdAt": "", "updatedAt": "",
-  "mergedAt": null, "merge_commit": null,
+  "mergedAt": null, "base_sha": "<host's base SHA; merged or closed PR>",
   "base_branch": "", "head_branch": "", "head": "<headRefOid>",
   "main_branch": "",
   "base_commit": "<sha>",
@@ -118,41 +119,40 @@ Then write `pr.json`:
 
 Steps 4 to 8 fill the keys after `main_branch`. `required_approvals_main`,
 `checks.required_main` and `checks.required_main_not_run` exist only for a
-stacked PR (`base_pr` set); leave them out otherwise.
+stacked PR (`base_pr` set); leave them out otherwise. For a merged PR, leave
+out `main_commits_since_base`, `base_commits_since_head` and
+`base_files_since_head`: they do not apply once the PR landed.
 
 ### 4. `tree/` — "Fetch a PR's head commit locally"
 
 `<ref>` is `refs/jig-pr-brief/<n>-<head-sha-7>`, so two briefs of one PR at
 different heads never share refs. Fetch the head as the row says, with
-`<ref>` as its `<local-ref>`. Fetch the base and main branches into named
-refs too, so a narrow refspec or a single-branch clone still works. Record
-each failure:
+`<ref>` as its `<local-ref>`. Fetch the base into `<ref>-base` and the main
+branch into `<ref>-main`, so a narrow refspec or a single-branch clone still
+works. Record each failure:
 
 ```bash
-git -C <clone> fetch --no-tags <remote> +refs/heads/<base-branch>:<ref>-base
+git -C <clone> fetch --no-tags <remote> +refs/heads/<base-branch>:<ref>-base   # open PR
+git -C <clone> fetch --no-tags <remote> +<base_sha>:<ref>-base                 # merged or closed PR
 git -C <clone> fetch --no-tags <remote> +refs/heads/<main>:<ref>-main
-git -C <clone> rev-parse <ref>   # must match the PR's head SHA (as the row says); else stop
+git -C <clone> rev-parse <ref>   # must match the PR's head SHA (as the row says)
 git -C <clone> worktree add --detach <folder>/tree <ref>
 ```
 
-When the base branch is `<main>`, fetch it once: in place of the second
-fetch, run `git -C <clone> update-ref <ref>-main <ref>-base`.
+For an open PR whose base branch is `<main>`, fetch it once: in place of the
+main fetch, run `git -C <clone> update-ref <ref>-main <ref>-base`.
 
-**Merged PR.** "View a PR by number" gives the merge commit (`merge_commit`
-in `pr.json`; for a squash, the squash commit). Fetch it:
-`git -C <clone> fetch --no-tags <remote> +<merge-sha>:<ref>-merge`. Where
-the host gives a short hash, resolve it from `<ref>-base` or `<ref>-main`
-with `git rev-parse` and `update-ref` it instead. A failure here stops. A
-merged PR with no merge commit (fast-forward): record
-`base_commit: unreachable (fast-forward merge, no merge commit)` and stop.
-A base branch deleted after the merge is not a stop: `base_commit` comes
-from the merge commit, and `sources.md` gets
-`base_commit: fetched (from merge commit; base branch <name> deleted)`.
-When the merge commit has one parent, check after Step 6 that the first
-field of `git -C <clone> diff <ref>-merge^1 <ref>-merge | git patch-id
---stable` equals that of `git patch-id --stable < diff.patch`. If it does
-not (a rebase merge), record `base_commit: unreachable (rebase merge)` and
-stop.
+**Merged or closed PR.** The base branch may have moved or gone, so
+`<ref>-base` is the host's base SHA (`base_sha` in `pr.json`, from "View a
+PR by number"). Where the host gives a short hash, or fetching the SHA
+fails, fetch the base branch (or `<main>`, if the base branch is gone),
+resolve the SHA with `git rev-parse` and `update-ref` `<ref>-base` to it;
+unresolved stops. The head ref may be gone too: if the row's head fetch
+fails or does not match, fetch the head SHA directly, as the row's fallback
+says (e.g.
+`git -C <clone> fetch --no-tags <remote> +<head-sha>:<ref>`). If that fails
+too, or the host has no such fallback, record
+`tree: unreachable (head commit no longer on the host)` and stop.
 
 On hosts with a PR ref (GitHub, GitLab), the head of a fork PR is in the
 base repository: fetch it from `<remote>`. On Bitbucket, fetch from the
@@ -162,29 +162,29 @@ fork's URL as the row says, without adding a remote.
 run `git fetch --no-tags --unshallow <remote>`. If that fails, run
 `git fetch --no-tags --shallow-since=<date> <remote>`, where `<date>` is one
 year before the earlier of the PR's `createdAt` and the commit date of
-`<ref>-base` (`<ref>-merge` for a merged PR). If the clone is still shallow,
-record `areas` and `docs_authors` as `fetched (history since <date>)`.
+`<ref>-base`. If the clone is still shallow, record `areas` and
+`docs_authors` as `fetched (history since <date>)`.
 
 ### 5. Base facts (plain `git`)
 
-`base_commit` is where the PR's history starts: for a merged PR, the merge
-commit's first parent; otherwise the merge-base. `<landing>` is the code the
-merge lands on: `base_commit` for a merged PR, else `<ref>-base`.
+`base_commit` is where the PR's history starts, for every PR:
 
 ```bash
-git -C <clone> rev-parse <ref>-merge^1                         # base_commit, merged PR
-git -C <clone> merge-base <ref>-base <ref>                     # base_commit, otherwise
-git -C <clone> rev-list --count <base_commit>..<ref>-main      # main_commits_since_base (merged: add ^<ref>-merge)
-git -C <clone> rev-list --count <ref>..<landing>               # base_commits_since_head
-git -C <clone> diff --name-only "$(git -C <clone> merge-base <ref> <landing>)" <landing>   # base_files_since_head
+git -C <clone> merge-base <ref>-base <ref>                     # base_commit
+git -C <clone> rev-list --count <base_commit>..<ref>-main      # main_commits_since_base
+git -C <clone> rev-list --count <ref>..<ref>-base              # base_commits_since_head
+git -C <clone> diff --name-only <base_commit> <ref>-base       # base_files_since_head
 ```
 
-On a merged PR, `^<ref>-merge` keeps the PR's own merge and commits out of
-`main_commits_since_base`. Write `base_commit` as a SHA, both counts as
-numbers and the file list as an array. If the merge fetch, the base fetch
-(unless the PR is merged), or `merge-base` fails (after the shallow step),
-stop. If only the main fetch fails, `main_commits_since_base` is
-unreachable.
+Write `base_commit` as a SHA, both counts as numbers and the file list as
+an array; for a merged PR, run only the first command. If the base fetch or
+`merge-base` fails (after the shallow step), stop. If only the main fetch
+fails, `main_commits_since_base` is unreachable.
+
+**Check the base, every PR**, after Step 6: the first field of
+`git -C <clone> diff <base_commit> <ref> | git patch-id --stable` must equal
+that of `git patch-id --stable < diff.patch`. If it does not, record
+`base_commit: unreachable (local diff differs from the host's)` and stop.
 
 ### 6. `diff.patch` — "Fetch a PR's diff"
 
@@ -278,6 +278,11 @@ the pack's ID form.
 **Linked PRs.** Follow the pack's "Linked PRs" bullet, and always add the
 results of "Find PRs that mention an issue", without duplicates. Run the
 search even when the ticket is unreachable.
+
+**Linked diffs.** For each merged PR in `linked_prs` other than this one (at
+most the 5 most recently merged), save its diff with "Fetch a PR's diff" as
+`linked/<n>.diff` (`linked/<owner>-<repo>-<n>.diff` for another repo). Write
+`linked_diffs: fetched (<k> of <m>)`, or `empty (no merged linked PR)`.
 
 ```json
 {
@@ -376,4 +381,4 @@ ticket-ID, rest by term rank; zero-term files dropped)`. The terms:
 | Stacked PR | `base_pr` set; history, approvals and required checks also from `<main>`. |
 | Binary files | Listed in `sources.md`; never decoded. |
 | Diff too large for the host | Local `git diff` (step 6), recorded. |
-| Merged or closed PR | Ask before continuing (step 1); merged: base from the merge commit (steps 4, 5). |
+| Merged or closed PR | Ask before continuing (step 1); base and head from the host's SHAs (step 4). |

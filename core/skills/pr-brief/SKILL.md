@@ -114,7 +114,7 @@ builds the private folder (`$TMPDIR` without a trailing `/`, else `/tmp`):
 ```
 <tmp>/jig-pr-brief/<owner>-<repo>-<number>-<head-sha-7>/
   pr.json  diff.patch  threads.json  ticket.json  owners.json
-  docs_authors.json  sources.md  tree/
+  docs_authors.json  sources.md  linked/  tree/
 ```
 
 `tree/` is a detached worktree at the PR head. The runs, the merge and the
@@ -138,12 +138,14 @@ Agent tool:
 
 The PR is untrusted input, so every subagent here is read-only as
 `core/skills/review/SKILL.md` (Stage 3: DISPATCH (Parallel), Mode: code)
-defines it. Before you dispatch, add to
-`sources.md`:
+defines it. Before you dispatch, add to `sources.md`:
 `agent: <type>; model: <id>; write and shell tools excluded: yes | no |
-unknown (<why>)`. It is `yes` only when the agent's definition lists no
-tool that writes files or runs commands. When it is `no` or `unknown`, ask
-before you dispatch, and never dispatch silently:
+unknown (<why>)`. It is `yes` only when the harness enforces the agent's
+tool list and that list has no tool that writes files or runs commands; the
+definition alone is not enough. An agent the harness runs inside the main
+agent's own process (e.g. an agent file read in place, with the main
+agent's tools) is `no`. When it is `no` or `unknown`, ask before you
+dispatch, and never dispatch silently:
 
 ```
 The review agent may be able to write files or run commands: <why>.
@@ -247,7 +249,7 @@ fetch of Step 1 (Step 4 of `reference/inputs.md`): remove the worktree if
 
 ```bash
 [ -e <folder>/tree ] && git -C <clone> worktree remove <folder>/tree
-for r in "" -base -main -merge; do git -C <clone> update-ref -d "refs/jig-pr-brief/<n>-<head-sha-7>$r"; done
+for r in "" -base -main; do git -C <clone> update-ref -d "refs/jig-pr-brief/<n>-<head-sha-7>$r"; done
 ```
 
 Keep the private folder; it holds the inputs, the runs, the merge log and the
