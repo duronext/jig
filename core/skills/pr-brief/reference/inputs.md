@@ -69,9 +69,12 @@ local clone, as `git -C <clone> …`. `<n>` is the PR number.
     the configured tracker. When `ticket-prefix` or the tracker section's
     own key is set (Jira `project-key`, Linear `team` when it is a key,
     e.g. `ENG`), use only keys with that prefix; Jira also takes keys of
-    other projects the tracker resolves. When none is set, use any match of
-    the pack's ID form (a shape check, e.g. `[A-Z][A-Z0-9]+-[0-9]+` for
-    Linear or Jira). A GitHub issue only in the PR's own `{owner}/{repo}`.
+    other projects the tracker resolves. When none is set, match the pack's
+    ID form case-sensitively (`grep -oE`, e.g. `[A-Z][A-Z0-9]+-[0-9]+` for
+    Linear or Jira) and keep only IDs the tracker resolves: text such as
+    `UTF-8` or `SHA-256` matches the shape, so drop an unresolved match
+    (count it in `sources.md`), never record it as the ticket. A GitHub
+    issue only in the PR's own `{owner}/{repo}`.
     Reading is safe because drafts never restate ticket text (SKILL.md's
     quote rule).
   - Branch names: only a name that matches `^[A-Za-z0-9._/-]+$`; any other
@@ -327,12 +330,12 @@ the ticket is unreachable.
 
 **Ticket IDs.** Collect them from "Find issues a PR closes", and from the
 title, body, head branch and commit messages in the pack's ID form
-(narrowed to the keys Untrusted strings allows), with `grep -oiE` over
+(narrowed to the keys Untrusted strings allows), with `grep -oE` (`-oiE` when a key is set) over
 `pr.json` and `<folder>/commits.txt`
 (`git -C <clone> log --format=%B <base_commit>..<ref> > <folder>/commits.txt`),
 keeping only the IDs Untrusted strings allows. This applies when
-`ticket-system` is unset too. Match case-insensitively (`eng-12` is
-`ENG-12`). An ID inside a file path, or in a URL that is not a tracker link,
+`ticket-system` is unset too. With a key set, match case-insensitively
+(`eng-12` is `ENG-12`); with none, case-sensitively, as Untrusted strings says. An ID inside a file path, or in a URL that is not a tracker link,
 does not count. Drop a `#n` that the host resolves to a PR. Write `id` in
 the pack's ID form.
 
@@ -361,8 +364,9 @@ with "Fetch a PR's diff" as `linked/<n>.diff`. Write
 }
 ```
 
-- `ticket` is the main ticket: the one in the head branch, else the first
-  one found. `referenced_tickets` holds the tickets the main ticket's
+- `ticket` is the main ticket, chosen only from resolved IDs (Untrusted
+  strings): the one in the head branch, else the first one found.
+  `referenced_tickets` holds the tickets the main ticket's
   relations name. `other_tickets` holds every other ticket the PR names; a
   ticket that is also a relation appears once, in `referenced_tickets`.
 - `relations` keeps the shape the pack returns (for example, an object of
