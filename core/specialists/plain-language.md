@@ -34,9 +34,8 @@ You receive:
   seeing something
 
 ### Claude-speak and filler
-- These words: invariant, backbone, load-bearing, first-class, seamless,
-  robust, leverage, utilize, synergy, north star, single source of truth,
-  best-in-class, holistic, paradigm
+- The words in the banned-word list in `core/skills/prd/reference/voice.md`
+  (Never write)
 - "X is not Y, it's Z" or "not just X, but Y" framing, unless it separates two
   things a reader would genuinely confuse
 - Three-item rhythms that add no information

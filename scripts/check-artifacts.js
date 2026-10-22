@@ -2,8 +2,9 @@
 
 /**
  * Checks Jig's artifacts for the mechanical faults a fit review should not
- * have to find: registration, frontmatter, git-host rows, cited headings and
- * reference links. Prints file:line and a reason for each, exits 1 on any.
+ * have to find: registration, frontmatter, git-host rows, cited headings,
+ * reference links, passages repeated across files and known shell traps.
+ * Prints file:line and a reason for each, exits 1 on any.
  *
  * Usage:
  *   node scripts/check-artifacts.js          # this repo
@@ -265,6 +266,121 @@ for (const file of refFiles) {
       (path.basename(path.dirname(local)) === "reference" && local !== file);
     if (isRef) {
       fail(file, lineOf(text, m.index), `links ${target}; reference/ files stay one level deep`);
+    }
+  }
+}
+
+// 6. One home per rule: the same run of RUN_WORDS words (lowercased, markdown
+// and punctuation stripped) in two artifacts.
+const RUN_WORDS = 15;
+// Known copies, each skipped by a phrase it contains. Intentional ones say
+// so; "on main" ones predate this check: give each one home, then drop it.
+const COPIES = [
+  // Intentional: each file carries it because its actor reads only that file.
+  ["github gh as the default if git host in jig config md is not github read framework git host md for", "GIT HOST banner (Fit Checklist item 6)"],
+  ["this review is language agnostic apply these principles regardless of the programming language or framework", "specialist preamble; each specialist runs alone"],
+  ["you have full codebase access via read grep and glob tools use them proactively do not limit yourself to the document input you receive", "specialist preamble"],
+  ["the full implementation plan tasks with files dependencies and steps", "plan specialists' input list"],
+  ["section hints which sections are most relevant to your concern", "design specialists' input list"],
+  ["reviewer your job is not to check patterns or style the swarm specialists already did", "code and plan logic reviewers share a prompt skeleton"],
+  ["do not fabricate findings to appear thorough", "logic reviewer skeleton"],
+  ["do not use sub agents for things you can check with a single grep or read", "logic reviewer skeleton"],
+  ["sub agent spawning for deep dives that would bloat your context", "logic reviewer skeleton"],
+  ["wrong and why it breaks be specific about the failure scenario", "logic reviewer skeleton"],
+  ["it reads this pack for 1 tool mapping which mcp tool to call and how to structure the payload", "ticket pack README template"],
+  // On main before this check: give each one home, then drop it here.
+  ["all findings are always reported regardless of score", "on main: review SKILL.md and tiers.md"],
+  ["automatic dispatch run the swarm for all medium to large features and improvements skip only for clearly trivial work", "on main: plan and spec"],
+  ["git fetch origin git diff origin main branch head git diff origin main branch head name only read main branch from jig config md", "on main: code-review agent and review SKILL.md"],
+  ["the spec reviewer already asked did we build what the spec says", "on main: kickoff and prd"],
+];
+const normWords = (text) =>
+  text.split("\n").flatMap((l, i) =>
+    l
+      .toLowerCase()
+      .replace(/\]\([^)]*\)/g, " ")
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean)
+      .map((w) => ({ w, line: i + 1 })),
+  );
+const copyPhrases = COPIES.map(([p]) => normWords(p).map((x) => x.w));
+const artifactFiles = ["core", "framework", "packs"]
+  .flatMap((d) => walk(path.join(root, d)))
+  .filter((f) => f.endsWith(".md"));
+const firstSeen = new Map();
+for (const file of artifactFiles) {
+  const ws = normWords(read(file));
+  const covered = new Uint8Array(ws.length);
+  for (const phrase of copyPhrases) {
+    for (let i = 0; i + phrase.length <= ws.length; i++) {
+      if (phrase.every((w, j) => ws[i + j].w === w)) covered.fill(1, i, i + phrase.length);
+    }
+  }
+  const local = new Set();
+  let last = null;
+  for (let i = 0; i + RUN_WORDS <= ws.length; i++) {
+    if (covered.subarray(i, i + RUN_WORDS).some(Boolean)) continue;
+    const key = ws.slice(i, i + RUN_WORDS).map((x) => x.w).join(" ");
+    if (local.has(key)) continue;
+    local.add(key);
+    const seen = firstSeen.get(key);
+    if (!seen) {
+      firstSeen.set(key, { file, pos: i, line: ws[i].line });
+    } else if (seen.file !== file) {
+      const continues = last && last.file === seen.file && last.pos + 1 === seen.pos && last.at + 1 === i;
+      if (!continues) {
+        const where = `${path.relative(root, seen.file)}:${seen.line}`;
+        fail(file, ws[i].line, `repeats ${RUN_WORDS}+ words of ${where} ("${key.split(" ").slice(0, 8).join(" ")} …"); give the rule one home and point to it`);
+      }
+      last = { file: seen.file, pos: seen.pos, at: i };
+    }
+  }
+}
+
+// 7. Shell traps in fenced bash/sh blocks.
+function flags(tokens, takesArg) {
+  const out = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.startsWith("--")) out.push(t.split("=")[0]);
+    else if (/^-[A-Za-z0-9]+$/.test(t)) {
+      out.push(...t.slice(1).split("").map((c) => `-${c}`));
+      if (t.length === 2 && takesArg.includes(t[1])) i++;
+    } else break;
+  }
+  return out;
+}
+const afterWord = (line, word) =>
+  [...line.matchAll(new RegExp(`(?:^|[\\s|;&(])${word}\\s+([^|;&)]*)`, "g"))].map((m) =>
+    m[1].trim().split(/\s+/),
+  );
+for (const file of textFiles) {
+  const lines = read(file).split("\n");
+  let inShell = false;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*```/.test(lines[i])) {
+      inShell = !inShell && /^\s*```(bash|sh|shell|zsh)\b/.test(lines[i]);
+      continue;
+    }
+    if (!inShell) continue;
+    const start = i;
+    let line = lines[i];
+    while (line.endsWith("\\") && i + 1 < lines.length) line = line.slice(0, -1) + " " + lines[++i];
+    for (const toks of afterWord(line, "xargs")) {
+      const f = flags(toks, "EILPdns");
+      const nul = f.includes("-0") || f.includes("--null");
+      if (nul && !f.includes("-r") && !f.includes("--no-run-if-empty")) {
+        fail(file, start + 1, "shell: xargs -0 without -r runs its command once on empty input");
+      }
+    }
+    for (const toks of afterWord(line, "sed")) {
+      const f = flags(toks, "efl");
+      if (f.includes("-z") || f.includes("--null-data")) {
+        fail(file, start + 1, "shell: sed -z is not in macOS sed");
+      }
+    }
+    if (/(?:^|[\s|;&(])git(?:\s+(?:-[Cc]\s+\S+|--?[\w-]+(?:=\S+)?))*\s+log\b[^|;&]*--pathspec-from-file/.test(line)) {
+      fail(file, start + 1, "shell: git log has no --pathspec-from-file");
     }
   }
 }

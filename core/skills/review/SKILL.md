@@ -86,7 +86,7 @@ git diff <BASE_SHA>..<HEAD_SHA>
 git diff <BASE_SHA>..<HEAD_SHA> --name-only
 ```
 
-**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}`, saying so, when there is none or the fetch fails:
+**From the fit review (`postmortem`, `extend`), before each push (Fit Review in `framework/LEARNING_LOOP.md`)**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}`, saying so, when there is none or the fetch fails:
 ```bash
 remote=$(git config branch.{main-branch}.remote)
 if [ -n "$remote" ] && git fetch "$remote" {main-branch}; then main_ref="$remote/{main-branch}"; else main_ref={main-branch}; echo "fit review: using local $main_ref (no remote, or fetch failed)" >&2; fi

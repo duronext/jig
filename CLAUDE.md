@@ -143,7 +143,7 @@ jig/
 | Check for stale refs | `grep -rn 'superpowers:' core/` (should return nothing) |
 | Count lines | `find . -not -path './.git/*' -name '*.md' \| xargs wc -l \| tail -1` |
 | Test the PRD page scripts | `bash core/skills/prd/reference/test/run.sh` (needs Chrome) |
-| Check artifacts | `npm run check` (registrations, frontmatter, host rows, cited headings; before Fit Review) |
+| Check artifacts | `npm run check` (first step of Fit Review in `framework/LEARNING_LOOP.md`) |
 
 ## Code Style
 

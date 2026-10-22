@@ -306,6 +306,8 @@ For each valid fix:
 
 **Do both. Always.** A local commit without a push means the reply will reference a commit the reviewer cannot see.
 
+On a learning PR (`framework/LEARNING_LOOP.md`), run its Fit Review before the push.
+
 ```bash
 # Commit the fixes (use commit agent)
 # Then push immediately
