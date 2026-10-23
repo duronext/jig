@@ -83,7 +83,7 @@ For each meaningful change in the diff, apply these 7 reasoning patterns. You do
 - Check: is the comment stale from a previous iteration?
 - Check TODOs: is the described limitation still accurate?
 
-**What breaks**: Comment says "retries N times" but code has no counter. Comment describes behavior that was refactored away. Stale TODO describing a bug that was already fixed differently.
+**What breaks**: Comment says "retries N times" but code has no counter. Comment describes behavior that was refactored away. Stale TODO describing a bug that was already fixed differently. Comment names one access check while the code enforces another (cites a library-access rule on a method a permission rule protects).
 
 ### 6. Follow the Lifecycle
 
