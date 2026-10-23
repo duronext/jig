@@ -176,6 +176,42 @@ mcp__atlassian__search_issues with:
   project: "PROJ"
 ```
 
+## Reading a ticket
+
+How `pr-brief` and other callers fetch a Jira issue, its comments and its links.
+Use the server's get-issue tool (e.g. `getJiraIssue` on Atlassian's server,
+`jira_get_issue` on sooperset), or the REST API (`/rest/api/2` on Data Center):
+
+```
+GET /rest/api/3/issue/{key}?fields=summary,description,status,creator,reporter,assignee,parent,issuelinks
+GET /rest/api/3/issue/{key}/comment?startAt={n}   # page until startAt + maxResults >= total
+GET /rest/api/3/issue/{key}/remotelink            # web links, sometimes PRs
+```
+
+- **Ticket keys** — the `key` of each project the reviewer can see:
+  `GET /rest/api/3/project/search`, paged with `startAt` until `isLast`, or the
+  server's tool (e.g. `listJiraProjects` on Atlassian's, `jira_get_all_projects`
+  on sooperset).
+- **Tracker URL prefix** — the site's base URL followed by `browse/` (Cloud
+  `https://<site>.atlassian.net/`, Data Center its own base). Take the base
+  from the server's accessible resources (e.g. `getAccessibleAtlassianResources`),
+  `GET /rest/api/3/serverInfo` field `baseUrl`, or the part of an issue's
+  `self` link before `/rest/` (keeps a Data Center context path such as
+  `/jira`). Make sure the base ends with `/` before adding `browse/`.
+- **Relations** — `issuelinks` (each with its link type) and `parent`.
+- **Linked PRs** — Jira's development panel has no public API. Run "Find PRs
+  that mention an issue" in `framework/GIT_HOST.md` with the issue key, and
+  add any PR in `remotelink`.
+- A call that fails means the ticket is unread, not empty.
+
+### Closing behavior
+
+Unknown by default. Transitions on PR merge come from the site's automation
+rules and its Git integration (for example smart commits such as
+`PROJ-123 #done`), which this pack cannot see. Say the result is unknown
+unless the team has told you how its rules work. The same applies when
+several PRs link to one issue.
+
 ## Status
 
 Core functionality documented. Tested against Atlassian Cloud. Data Center support depends on which MCP server is used. Contributions welcome for edge cases.

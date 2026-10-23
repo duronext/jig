@@ -146,7 +146,7 @@ Bias toward 3. Scale up when tasks are truly independent. Scale down when overla
 The lead groups tasks by file surface area before spawning. Tasks touching the same files never run in parallel — they use `blockedBy` dependencies instead.
 
 ### Shared Context, Shared Machine
-Teammates start blank and share the lead's working tree and machine. The lead writes one shared context doc that the implementer and spec-reviewer prompts point at, sends inventories to read-only research subagents, gates heavy runs, and pauses teammates with a resume file. See `./lead-playbook.md`.
+Teammates start blank and share the lead's working tree and machine. The lead writes one shared context doc that the implementer and spec-reviewer prompts point at, sends inventories to research subagents that write nothing, gates heavy runs, and pauses teammates with a resume file. See `./lead-playbook.md`.
 
 ## Red Flags
 

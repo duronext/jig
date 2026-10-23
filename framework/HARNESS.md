@@ -4,7 +4,7 @@ What each agent harness Jig supports can do, for skills that dispatch subagents 
 
 | Harness | Subagents | Enforces an agent's tool list | Read-only agent |
 |---------|-----------|-------------------------------|-----------------|
-| Claude Code | Yes (`Task`) | Yes, from the agent's `tools` frontmatter | None ships with Jig: define one with tools `Read, Grep, Glob`. The built-in `Explore` agent keeps `Bash`, so it is not read-only |
+| Claude Code | Yes (`Task`) | Yes, from the agent's `tools` frontmatter | Jig's `reader` agent (`core/agents/reader.md`), tools `Read, Grep, Glob`. The built-in `Explore` agent keeps `Bash`, so it is not read-only |
 | Codex | No: tasks run one at a time (`adapters/codex/AGENTS.md.template`) | No subagents to limit; whether a sandbox limits the main agent's tools: Unknown | None |
 | Gemini CLI | No: tasks run one at a time (`adapters/gemini/GEMINI.md.template`) | No subagents to limit; whether a sandbox limits the main agent's tools: Unknown | None |
 
