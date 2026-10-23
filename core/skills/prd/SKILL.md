@@ -201,9 +201,12 @@ Called by `kickoff` at PRD CHECK, or directly. The spec reviewer already asked
 promised".
 
 1. Load the PRD and its trace. List the in-scope outcomes (the phase being shipped).
-2. For each outcome, check its "you'll know it works when" line **from the
-   user's side**: run the app, use staging, read the test that exercises the
-   whole path, or watch the behaviour in a preview. Write down what you saw.
+2. For each in-scope outcome, whatever its trace status (a `verified` this check
+   did not write gets checked like any other), check its "you'll know it works
+   when" line **from the user's side**: run the app, use staging, read the test
+   that exercises the whole path, or watch the behaviour in a preview. The proof
+   must show the case the line promises, exercised now: a test that covers other
+   inputs is not proof, so record `built`. Write down what you saw.
 3. Record each one in the trace (see `framework/LIVE_PRD.md`):
    - `verified` with the proof ("Paid 22 s after saving a card on staging")
    - `built` if the code exists but you could not watch it work, with why
