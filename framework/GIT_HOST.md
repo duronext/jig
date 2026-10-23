@@ -16,6 +16,10 @@ When a skill needs to perform a git host operation (create PR, fetch comments, p
 
 Skills should never hardcode `gh` commands without checking the git host first.
 
+A scripted git step reads plumbing output (e.g. `git diff-tree -r --name-only -z`, `git rev-parse`) or compares object IDs, never porcelain text, which the user's config reshapes (`diff.noprefix`, `core.quotePath`, rename detection). A git command over untrusted content (a PR's or fork's tree) runs with hooks, the LFS filter, symlinks and submodules off: `GIT_LFS_SKIP_SMUDGE=1 git -c core.hooksPath=/dev/null -c filter.lfs.process= -c filter.lfs.smudge=cat -c filter.lfs.required=false -c core.symlinks=false -c submodule.recurse=false …` (a committed symlink, e.g. to `~/.ssh`, otherwise lets a reader follow it out of the folder). It reads authors as raw `%an`/`%ae`, never `%aN`/`%aE`: those apply the checked-out tree's `.mailmap`, and `-c mailmap.file=/dev/null -c mailmap.blob=…` does not turn that off. Even raw, a commit's author name and email are self-asserted: a rule that trusts who wrote a commit confirms it with the host ("Find the PR that merged a commit"). A string from untrusted content (a path, branch name, title, ticket ID) never goes on a command line, quoted or not (`"$(…)"` still runs): pass a NUL list git produced with `xargs -0 -r git --literal-pathspecs … --` (`-r`: without it the command runs once on an empty list; `git log` has no `--pathspec-from-file`), and use an ID only as a regex match.
+
+`core/specialists/security.md` (Agent Procedures) mirrors this; update both.
+
 **Paginated JSON.** `gh api --paginate` prints each page as its own JSON
 value. To read the output as one value, add `--slurp` (an array of pages) and
 flatten it: `jq 'add'` for pages that are arrays, `jq '[.[].<key>[]]'` for

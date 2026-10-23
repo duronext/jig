@@ -21,7 +21,7 @@ alwaysApply: false
 ### Mode: code (default)
 - `code-review` agent invokes this with `mode: code, tier: all` (pre-PR, full swarm)
 - `team-dev` quality gate invokes this with `mode: code, tier: fast-pass` (per-task, blocking checks only)
-- `postmortem` and `extend` invoke this with `mode: code, specialists: [framework-fit]` and the paths they changed, for the fit review (`framework/LEARNING_LOOP.md`)
+- `postmortem` and `extend` invoke this with `mode: code, specialists: [framework-fit]`, and also `[security]` for an artifact that handles untrusted input, and the paths they changed, for the fit review (`framework/LEARNING_LOOP.md`)
 - Direct invocation via `/review` for manual code reviews
 
 ### Mode: prd
@@ -86,7 +86,7 @@ git diff <BASE_SHA>..<HEAD_SHA>
 git diff <BASE_SHA>..<HEAD_SHA> --name-only
 ```
 
-**From the fit review (`postmortem`, `extend`), before anything is committed**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}`, saying so, when there is none or the fetch fails:
+**From the fit review (`postmortem`, `extend`), before each push (Fit Review in `framework/LEARNING_LOOP.md`)**, limited to the paths the caller changed. Fetch the remote the main branch tracks, if it has one, and fall back to the local `{main-branch}`, saying so, when there is none or the fetch fails:
 ```bash
 remote=$(git config branch.{main-branch}.remote)
 if [ -n "$remote" ] && git fetch "$remote" {main-branch}; then main_ref="$remote/{main-branch}"; else main_ref={main-branch}; echo "fit review: using local $main_ref (no remote, or fetch failed)" >&2; fi
@@ -156,7 +156,7 @@ Agent tool:
     {filtered diff}             <- matching files only; every changed file for a named specialist
 ```
 
-A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access. This is Jig's rule for a read-only subagent: an agent type whose tools are exactly read, search and list, in Claude Code Jig's `reader` agent (`core/agents/reader.md`), not `Explore`, which keeps Bash; elsewhere, the harness's read-only subagent or one defined with exactly that tool list. If the harness cannot limit a subagent's tools, say so on the report's **Tools** line. A specialist without `tools` works from the diff in its prompt.
+A specialist that declares `tools` (e.g. `framework-fit`) is dispatched as an agent type that has those tools and no write access. This is Jig's rule for a read-only subagent: an agent type whose tools are exactly read, search and list (`framework/HARNESS.md` says which each harness has, e.g. Jig's `reader` agent in Claude Code, not `Explore`, which keeps Bash). If the session has no such agent, or the harness cannot limit a subagent's tools, say so on the report's **Tools** line; never fall back silently to an agent that can write. A specialist without `tools` works from the diff in its prompt.
 
 #### Mode: prd or spec
 
@@ -391,7 +391,7 @@ The `spec` skill invokes this with `mode: spec` after drafting a spec. Specialis
 The `plan` skill invokes this with `mode: plan` after drafting a plan. Specialists whose `stage` includes `plan` are dispatched, followed by the plan logic reviewer (Opus). Automatic for medium-to-large work.
 
 ### With `postmortem`
-When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer.
+When a finding is missed, the postmortem uses the Specialist Summary table to diagnose which specialist should have caught it. Postmortem and `extend` also run this skill as the fit review: `specialists: [framework-fit]` on the paths they changed, with no logic reviewer, and also `specialists: [security]` for an artifact that handles untrusted input (Fit Review in `framework/LEARNING_LOOP.md`).
 
 ### With `pr-brief`
 This skill reviews your own changes. To brief yourself on someone else's PR, use `pr-brief`. pr-brief (and team-dev's lead-playbook, for untrusted input) use Stage 3's rule for a read-only subagent, the `reader` agent in Claude Code; a change to that rule changes pr-brief's untrusted-input gate.

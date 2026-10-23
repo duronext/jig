@@ -36,7 +36,7 @@ You receive:
 ### Claude-speak and filler
 - These words: invariant, backbone, load-bearing, first-class, seamless,
   robust, leverage, utilize, synergy, north star, single source of truth,
-  best-in-class, holistic, paradigm
+  best-in-class, holistic, paradigm, ecosystem (unless it is literally one)
 - "X is not Y, it's Z" or "not just X, but Y" framing, unless it separates two
   things a reader would genuinely confuse
 - Three-item rhythms that add no information
