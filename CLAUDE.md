@@ -69,6 +69,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `tdd` | Red-green-refactor discipline |
 | `finish` | Branch completion — merge, PR, keep, or discard |
 | `worktree` | Create/remove provisioned worktrees for parallel dev |
+| `pr-brief` | Private reviewer brief for someone else's PR — independent review runs, merged and re-verified; never posts |
 | `extend` | Framework extension assistant — scaffolds new skills, specialists, packs |
 
 ### Core Agents
@@ -78,6 +79,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `commit` | Conventional commits with hook awareness |
 | `code-review` | Dispatches review swarm, delivers scored report |
 | `pr-review` | Posts inline PR comments with suggestion blocks |
+| `reader` | Read-only subagent (read, search, list) for skills that need one, e.g. review specialists that declare `tools`, or untrusted input |
 
 ### Core Specialists
 

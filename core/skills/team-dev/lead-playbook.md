@@ -49,7 +49,7 @@ Rules:
 - If unsure about overlap → err on the side of sequential
 
 ### Send Inventories to Research Subagents
-If the analysis needs an inventory ("which files use X", "what does this flag control"), dispatch read-only research subagents (e.g. Claude Code's Explore agent). They write nothing, so several can run at once, alongside implementers.
+If the analysis needs an inventory ("which files use X", "what does this flag control"), dispatch research subagents that are told to write nothing (e.g. Claude Code's Explore agent, which keeps Bash; for untrusted input, a read-only one per `review`'s Stage 3 rule). They write nothing, so several can run at once, alongside implementers.
 
 ## Phase 2: Team Setup
 

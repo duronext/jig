@@ -122,6 +122,68 @@ git checkout -b {gitBranchName}
 git branch -m {current-branch} {gitBranchName}
 ```
 
+## Reading a ticket
+
+How `pr-brief` and other callers load a Linear issue and its comments. Two
+calls (tool names are examples; the prefix depends on how the harness mounts
+the server):
+
+```
+mcp__linear__get_issue with:
+  id:     {identifier, e.g. ENG-123}
+  fields: [title, description, status, createdBy, assignee, labels, parentId,
+           relations, attachments, url]
+
+mcp__linear__list_comments with:
+  issueId: {identifier}
+  cursor:  {previous cursor, while hasNextPage is true}
+```
+
+- **Ticket keys** — each team's `key` from `mcp__linear__list_teams`, paged
+  with `cursor` while `hasNextPage` is true.
+- **Tracker URL prefix** — `<workspace url>/issue/`, e.g.
+  `https://linear.app/<workspace>/issue/ENG-123/<slug>`; the workspace URL is
+  `url` from `mcp__linear__get_workspace`.
+- **Relations** — `relations` holds `blocks`, `blockedBy`, `relatedTo` and
+  `duplicateOf`; `parentId` is the parent issue. Each entry has only an ID and
+  title: call `get_issue` on it for its status and creator.
+- **Linked PRs** — the `attachments` whose `url` is a pull request. Also run
+  "Find PRs that mention an issue" in `framework/GIT_HOST.md` with the
+  identifier, for PRs Linear did not link.
+- A call that fails means the ticket is unread, not empty.
+
+### Closing behavior
+
+From [linear.app/docs/github](https://linear.app/docs/github). The word before
+the issue ID in the PR title or description decides what a merge does:
+
+- **Closing words** (close, fix, resolve, complete, implement and their other
+  forms) and **plain links** (the ID in the branch name or PR title, with no
+  non-closing word) apply the team's "On PR or commit merge" status on merge.
+- **Non-closing words** (part of, ref, refs, references, contributes to,
+  toward, towards) still move the issue through other workflow statuses, but
+  merging does not apply the "On PR or commit merge" status.
+- **Relation words** (relates to, related to) mark the PR as related; no
+  status changes. Magic words in PR comments do not link.
+- **Skip words** — `skip` or `ignore` before the ID in the PR description
+  unlink it, even when the branch name holds the ID.
+- **Several linked PRs** — the status changes only when the final linked PR
+  reaches that state.
+- **Target branch** — the team can set a different status per target branch
+  (the branch the PR merges into), or "no action"; source branches have no
+  rules. Commits linked with a magic word move the issue to Done when they
+  reach the default branch.
+
+Which status applies on merge comes from the team's Git automation settings.
+The Linear MCP does not expose them (`get_team` returns only id, key, names,
+visibility and dates), so record the on-merge status as unknown without
+trying. Linear's GraphQL API has them as `team.gitAutomationStates`: rules
+with `event: merge`, a `state` (null means no action) and an optional
+`targetBranch` (`branchPattern`, `isRegex`) that overrides the default rule.
+Read that only where the harness has GraphQL access. The docs do not say
+which wins when the title or branch carries a plain link and the description
+a non-closing word: record that case as unknown.
+
 ## Team Configuration
 
 Add to your project's `jig.config.md`:
