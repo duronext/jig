@@ -68,6 +68,8 @@ Check `jig.config.md` for the appropriate tier config:
 
 ### Stage 2: PREPARE the Input
 
+**Team memory.** In code and plan modes, when Stage 5 will run and this skill runs in the stage's own agent (not as a subagent, such as the `code-review` agent), search team memory once if it is on (`framework/MEMORY.md`): root causes and traps for the changed areas in code mode, decisions for the feature in plan mode. Write a short summary in your own words with note ids. It goes only to the logic reviewer; swarm specialists and fast-pass get none.
+
 #### Mode: code
 
 Obtain the diff based on the caller:
@@ -236,6 +238,7 @@ After collecting swarm findings, dispatch the code logic reviewer:
    - The logic reviewer's body (everything below frontmatter)
    - The full diff (all changed files — NOT filtered by globs)
    - The swarm findings collected in Stage 4 (so it knows what's already caught)
+   - The team notes summary from Stage 2, if any
 3. Dispatch a single Agent with:
    - `model: opus` (or `deep-review-model` from `jig.config.md`)
    - Full tool access: Read, Grep, Glob, Agent (the logic reviewer explores the codebase and can spawn sub-agents)
@@ -256,6 +259,7 @@ After collecting swarm findings, dispatch the code logic reviewer:
    - The full implementation plan
    - The spec (if exists)
    - The swarm findings from Stage 4 (so it knows what's already caught)
+   - The team notes summary from Stage 2, if any
 3. Dispatch a single Agent with:
    - `model: opus` (or `plan-deep-review-model` from `jig.config.md`)
    - Full tool access: Read, Grep, Glob, Agent

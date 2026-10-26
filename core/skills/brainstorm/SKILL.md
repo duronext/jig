@@ -71,6 +71,8 @@ flowchart TD
 ### Understanding the Idea
 
 - Check the current project state first (files, docs, recent commits)
+- With team memory on (`framework/MEMORY.md`), also Search for earlier
+  decisions and approaches already tried on this idea
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Do not spend questions refining details of a project that needs to be decomposed first.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec, plan, and implementation cycle.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
@@ -113,7 +115,10 @@ flowchart TD
 Brainstorm produces no required artifact. When the user has clarity, end the session by:
 
 1. **Summarizing the decisions** — 3-5 bullets in conversation capturing the chosen approach and key trade-offs
-2. **Asking what's next** — "Want to turn this into a PRD, go straight to a spec, or sit with it?"
+2. **Proposing a memory note** — only once the user calls it decided, and
+   only if team memory is on (`framework/MEMORY.md`): offer one `decision`
+   note with the chosen approach and the rejected ones. Save nothing unasked.
+3. **Asking what's next** — "Want to turn this into a PRD, go straight to a spec, or sit with it?"
 
 If the user wants a design doc for archival reasons, save to `{plans-directory}/YYYY-MM-DD-<topic>-brainstorm.md` (read `plans-directory` from `jig.config.md`, default `docs/plans`). This is opt-in, not default.
 

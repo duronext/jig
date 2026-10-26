@@ -96,6 +96,10 @@ Plus tests for every non-trivial file.
 
 This list becomes the `## File Structure` table in the plan document.
 
+If team memory is on (`framework/MEMORY.md`), Search for traps in the repo's
+toolchain and in these files' areas. Use what you checked to get the plan's
+commands right for self-review. Planning saves no notes.
+
 ### 1d. Sequence by Dependency
 
 Within layers, default order is **bottom-up**: DATA → LOGIC → API → UI. Across the build:

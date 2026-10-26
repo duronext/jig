@@ -32,9 +32,9 @@ names and permissions it touches); without it, those rows say "not checked".
 
 **CONFIGURATION**: Reads `jig.config.md` when present for `plans-directory`,
 `filename-format`, `prd-publish` (`artifact` | `file`), `prd-sync` and
-`prd-swarm-tiers`. With no config (a PM in Claude.ai), use the defaults:
-save to `docs/plans/` if a repo is open, publish as an artifact, review with
-the four PRD specialists.
+`prd-swarm-tiers` and `## Memory`. With no config (a PM in Claude.ai), use the
+defaults: save to `docs/plans/` if a repo is open, publish as an artifact,
+review with the four PRD specialists.
 
 **READ FIRST**: `reference/voice.md` before writing a single sentence.
 `reference/components.md` before building the page.
@@ -74,6 +74,9 @@ tell the user in a short list:
   know it worked, and who signs off)
 
 Do not restate their document back to them.
+
+When team memory is on (`framework/MEMORY.md`), Search decisions and customer
+notes for this product area, and fold what you checked into "What I found".
 
 ### Step 2: Look at the product (when the repo is open)
 
@@ -116,7 +119,9 @@ per round**. Cover, in roughly this order, only what the sources left open:
 
 When an answer needs a decision nobody can make now, do not block. Record it as
 an open decision with two options, a recommendation, an owner and a due date.
-Leave **no more than three** open decisions in a draft.
+Leave **no more than three** open decisions in a draft. Before you open one,
+check the team memory results from Step 1: if the team already decided it,
+cite that note's id and confirm it with the user instead.
 
 ### Step 5: Shape the phases
 
@@ -172,9 +177,13 @@ Skip to Step 9 if `prd-publish: file` or the platform cannot publish artifacts.
 1. Save `*-prd.md` to `{plans-directory}` (when a repo is open). Do not commit
    unless the user asks.
 2. If `prd-sync` is set, follow that pack's document sync.
-3. Give the user, in three lines or fewer: the page link, what it covers, and
+3. With team memory on (`framework/MEMORY.md`), and only once the user has
+   approved the scope in this session, propose one `decision` note: the
+   thesis, the MVP cut, and what is not being built and why. Key it
+   `<repo>-<PRD stem>`. Otherwise propose nothing.
+4. Give the user, in three lines or fewer: the page link, what it covers, and
    what still needs a decision or a sign-off.
-4. Offer the next step: "Ready for engineering? `/jig:spec <link>` turns the
+5. Offer the next step: "Ready for engineering? `/jig:spec <link>` turns the
    MVP into the technical contract."
 
 ---
@@ -191,6 +200,8 @@ Skip to Step 9 if `prd-publish: file` or the platform cannot publish artifacts.
 6. Republish to the **same** artifact link. Sign-offs for the old rev now show
    "asks again" on their own.
 7. Log a `rev` entry naming what changed and that sign-off is needed again.
+8. With team memory on, propose the Step 9 note again under the same key, so
+   the new rev replaces it.
 
 ---
 

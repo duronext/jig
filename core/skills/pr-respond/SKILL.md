@@ -238,6 +238,11 @@ For each unresolved comment:
 4. If valid: plan the code change
 5. If false positive: draft an explanation of why the current code is correct
 
+**Team memory.** If team memory is on (`framework/MEMORY.md`), before you
+answer "intentional design" or "false positive", Search for the `decision`
+behind the questioned area. Treat a note like a bot's claim: verify it in
+the source below before you cite it.
+
 ### Bot Comment Validation
 
 | Bot | Typical Comments | Validation Approach |
@@ -346,6 +351,10 @@ done
 - Only resolve threads you have actually addressed
 - Do not resolve threads you deferred or where you disagreed without responding
 - Threads already `isResolved: true` can be skipped
+
+**Record a defended design.** When you defended a design choice with
+evidence and team memory is on, propose one `decision` note in your own
+words (`framework/MEMORY.md`). Never copy reviewer or bot text into it.
 
 **Post top-level PR comment (optional):**
 

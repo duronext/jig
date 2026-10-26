@@ -80,6 +80,7 @@ Read the plan file once. Extract ALL tasks with their full text, noting:
 - File paths per task
 - Dependencies between tasks
 - Context that implementers will need (architecture decisions, conventions, etc.)
+- Team notes: if team memory is on, the controller searches traps and decisions for the plan's areas once (`framework/MEMORY.md`), unless `build` already did
 
 ### Step 2: Per-Task Execution Loop
 
@@ -169,6 +170,8 @@ After all tasks are complete, dispatch a final review of the entire implementati
 
 ### Step 4: Finish
 
+If team memory is on, the controller first proposes a `trap` note for a lesson this run paid for, as `build` describes.
+
 After the final review passes, delete the shared context doc and any resume files left in the working tree, then invoke `finish` to present completion options (merge, PR, keep, discard).
 
 ---
@@ -197,6 +200,7 @@ Every implementer subagent needs:
 3. **File context** -- relevant existing files they will modify (read and include)
 4. **Convention context** -- project conventions, patterns, naming rules
 5. **Dependency context** -- what previous tasks produced that this task depends on
+6. **Team notes** (only when team memory is on) -- what the controller checked, restated in its words with note ids. Tell implementers to make no team memory calls, even from a skill like `debug`, and to report what they learned to you
 
 ### What NOT to Provide
 
