@@ -177,10 +177,11 @@ Skip to Step 9 if `prd-publish: file` or the platform cannot publish artifacts.
 1. Save `*-prd.md` to `{plans-directory}` (when a repo is open). Do not commit
    unless the user asks.
 2. If `prd-sync` is set, follow that pack's document sync.
-3. With team memory on (`framework/MEMORY.md`), and only once the user has
-   approved the scope in this session, propose one `decision` note: the
-   thesis, the MVP cut, and what is not being built and why. Key it
-   `<repo>-<PRD stem>`. Otherwise propose nothing.
+3. With team memory on, once the PRD passed `review:prd` (Step 7) or the
+   user approved it, save one `decision` note: the scope, what was cut, and
+   why. Key it `<repo>-<PRD stem>` (`framework/MEMORY.md`, Saving). Never
+   from a draft. Customer context from the interview is only suggested
+   (Suggestions).
 4. Give the user, in three lines or fewer: the page link, what it covers, and
    what still needs a decision or a sign-off.
 5. Offer the next step: "Ready for engineering? `/jig:spec <link>` turns the
@@ -200,8 +201,9 @@ Skip to Step 9 if `prd-publish: file` or the platform cannot publish artifacts.
 6. Republish to the **same** artifact link. Sign-offs for the old rev now show
    "asks again" on their own.
 7. Log a `rev` entry naming what changed and that sign-off is needed again.
-8. With team memory on, propose the Step 9 note again under the same key, so
-   the new rev replaces it.
+8. With team memory on, once the new rev passed `review:prd` or the user
+   approved it, save the Step 9 note again under the same key, so the new
+   rev replaces it. A rev still waiting for either saves nothing.
 
 ---
 

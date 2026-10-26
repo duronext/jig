@@ -128,7 +128,7 @@ Reviewers are subagents (not teammates). They report to the lead, who decides ne
 Only the lead writes to the live PRD, never implementers or reviewers. When a task passes both reviews and it is the last task of a milestone in the plan's Milestone Map, the lead ticks the milestone and logs it. Product questions raised by implementers become PRD decisions. Batch writes and follow `framework/LIVE_PRD.md`; never block the team on a PRD write.
 
 ### Lead Owns Team Memory
-Like the PRD, team memory is the lead's alone: only the lead searches it in Phase 1 and proposes notes in Phase 5, per `framework/MEMORY.md`. Teammates and reviewers never call it.
+Like the PRD, team memory is the lead's alone: only the lead searches it in Phase 1 and saves notes in Phase 5, per `framework/MEMORY.md`. Teammates and reviewers never call it.
 
 ### Dynamic Implementer Count
 

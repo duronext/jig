@@ -194,7 +194,7 @@ You MUST complete each phase before proceeding to the next.
    - Do not pretend to know
    - Ask for help
    - Research more
-   - If team memory is on, one Ask is allowed before you ask the user
+   - If team memory is on, an Ask may come before you ask the user
 
 ---
 
@@ -221,10 +221,9 @@ You MUST complete each phase before proceeding to the next.
    - Issue actually resolved?
    - **REQUIRED**: Use `verify` skill before claiming the fix works
    - **Once verified**, if team memory is on, save a `root-cause` note
-     automatically: symptom, root cause, the fix commit if one exists (else
-     the branch), and the regression test path. Never commit just to get a
-     SHA. No logs or stack traces. Show the user the note, and that Forget
-     undoes it (`framework/MEMORY.md`)
+     (`framework/MEMORY.md`, Saving): symptom, root cause, the regression
+     test path, and the fix commit if one exists. Never
+     commit just to get a SHA. No logs or stack traces.
 
 4. **If Fix Does Not Work**
    - STOP
@@ -248,9 +247,6 @@ You MUST complete each phase before proceeding to the next.
    **Discuss with the user before attempting more fixes.**
 
    This is NOT a failed hypothesis -- this is a wrong architecture.
-
-   When the user agrees on a new direction and team memory is on, propose a
-   `decision` note recording it and why the fixes failed.
 
 ---
 

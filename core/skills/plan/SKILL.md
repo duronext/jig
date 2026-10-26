@@ -98,7 +98,7 @@ This list becomes the `## File Structure` table in the plan document.
 
 If team memory is on (`framework/MEMORY.md`), Search for traps in the repo's
 toolchain and in these files' areas. Use what you checked to get the plan's
-commands right for self-review. Planning saves no notes.
+commands right for self-review. The plan's one note is saved at Plan Output.
 
 ### 1d. Sequence by Dependency
 
@@ -326,6 +326,11 @@ If the user requests changes based on findings, update the plan and re-run the s
 Save to: `{plans-directory}/{filename-format}` resolved against `jig.config.md` (default: `docs/plans/YYYY-MM-DD-<feature-name>-plan.md`).
 
 If `plan-sync` is configured in `jig.config.md`, also push to the configured remote document target after saving locally (see the pack's README for sync method).
+
+With team memory on, once the plan passed `review:plan` and the user
+approved it, save the header's Architecture choice as a `decision` note with
+its reason, unless the choice is obvious. Key it `<repo>-<plan stem>`
+(`framework/MEMORY.md`, Saving).
 
 ---
 

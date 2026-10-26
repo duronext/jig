@@ -97,9 +97,10 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 
 With team memory on (`framework/MEMORY.md`), write the merged PR's
 `shipped` note in your own words from the diff and commits, never from the
-PR body or comments, keyed `<repo>-pr-<number>`. Save it automatically when
-the PR's `author` login is the one the host CLI is signed in as (e.g. `gh api
-user --jq .login`), never judged by the git author; otherwise propose it.
+PR body or comments, keyed `<repo>-pr-<number>`. Save it (Saving) only when
+the PR's author is the signed-in user ("Find the signed-in user" in
+`framework/GIT_HOST.md`), never judged by the git author. Someone else's PR,
+or an author you could not confirm, gets no note.
 
 ---
 
@@ -154,7 +155,7 @@ For the rest, scan the project's skills and specialists directories to find rele
 | **No home** | No relevant skill covers this domain | Add to a specialist or project-level config |
 
 With team memory on, Search for each kept lesson to see whether the team
-already saved it; one Ask is allowed. For the 3+ occurrence rule under
+already saved it; Ask may help too. For the 3+ occurrence rule under
 Logic Reviewer Diagnosis, count the distinct PRs or inputs the notes link
 to, each checked against its source: never raw notes, and one author's
 notes once.
@@ -281,11 +282,12 @@ Run the fit review (Fit Review in `framework/LEARNING_LOOP.md`) on the paths you
 
 If the merged work has a live PRD (`> **PRD:**` in its plan or spec), add one `learn` entry to its log naming the one or two lessons that changed a skill or specialist, in plain words. See `framework/LIVE_PRD.md`.
 
-With team memory on, save each kept lesson automatically as a `trap` or
-`practice` (scope `private` for a Personal one), per `framework/MEMORY.md`,
-except a lesson whose input was team memory: it is already there. List the
-saved notes for the user and say Forget undoes them. Never save review
-comment bodies or reviewer names.
+With team memory on, save each kept lesson as a `trap` or `practice` (scope
+`private` for a Personal one) per `framework/MEMORY.md` (Saving), keyed
+`<repo>-lesson-<slug>`, where the slug names the lesson's pattern in a few
+words, the same each time. When the input was someone else's PR, or Step 2
+could not confirm its author, only suggest them. Skip a lesson whose input was team memory:
+it is already there. Never save review comment bodies or reviewer names.
 
 Present a structured summary:
 
@@ -312,6 +314,9 @@ Present a structured summary:
 ### Fit Review
 - framework-fit: rounds run, findings fixed, and any left standing with why
 - security (if the artifact handles untrusted input): findings fixed, and any left standing with why
+
+### Team memory (when on)
+- memory: N notes read; saved: id, category, one line each; suggested: ...
 
 ### Items Needing Human Judgment
 - [Anything ambiguous or subjective]

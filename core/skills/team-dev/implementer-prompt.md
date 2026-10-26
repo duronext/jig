@@ -27,8 +27,7 @@ Task tool (general-purpose):
     ## Shared Rules
 
     Read {shared-context-doc} before you start. Its rules apply to every
-    teammate, including you. Make no team memory calls, even from a skill
-    such as `debug`; report what you learned to the lead instead.
+    teammate, including you.
 
     ## Before You Begin
 

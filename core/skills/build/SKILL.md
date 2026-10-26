@@ -154,7 +154,7 @@ If a write is refused, or the PRD cannot be found, carry on and say once, in the
 
 ### Team memory at the end
 
-On the direct path (1-2 tasks), if team memory is on, propose a `trap` note for anything this build learned the hard way, such as a pattern that failed review three or more times. Propose it before Step 5 hands off to `finish`; the rules for proposed saves are in `framework/MEMORY.md`. `sdd` and `team-dev` propose their own.
+On the direct path (1-2 tasks), if team memory is on, save a `trap` or `practice` this build found that qualifies (`framework/MEMORY.md`, Saving), before Step 5 hands off to `finish`. `sdd` and `team-dev` save their own.
 
 ---
 

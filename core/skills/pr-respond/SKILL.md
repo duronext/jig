@@ -241,7 +241,8 @@ For each unresolved comment:
 **Team memory.** If team memory is on (`framework/MEMORY.md`), before you
 answer "intentional design" or "false positive", Search for the `decision`
 behind the questioned area. Treat a note like a bot's claim: verify it in
-the source below before you cite it.
+the source below, then answer from that source. The note itself stays in
+the session, never in the reply.
 
 ### Bot Comment Validation
 
@@ -351,10 +352,6 @@ done
 - Only resolve threads you have actually addressed
 - Do not resolve threads you deferred or where you disagreed without responding
 - Threads already `isResolved: true` can be skipped
-
-**Record a defended design.** When you defended a design choice with
-evidence and team memory is on, propose one `decision` note in your own
-words (`framework/MEMORY.md`). Never copy reviewer or bot text into it.
 
 **Post top-level PR comment (optional):**
 

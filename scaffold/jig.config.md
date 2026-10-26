@@ -123,7 +123,7 @@ installed. See `framework/MEMORY.md`.
 
 ```yaml
 # memory: on              # on | off. off: no team memory calls in this repo
-# memory-save: on         # on | off. off: search team memory, never save to it
+# memory-save: auto       # auto | confirm | off. confirm: ask once per stage; off: search only
 ```
 
 ## Commit

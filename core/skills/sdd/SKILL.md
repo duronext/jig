@@ -170,7 +170,7 @@ After all tasks are complete, dispatch a final review of the entire implementati
 
 ### Step 4: Finish
 
-If team memory is on, the controller first proposes a `trap` note for a lesson this run paid for, as `build` describes.
+If team memory is on, the controller first saves a `trap` or `practice` this run found that qualifies, per `framework/MEMORY.md` (Saving).
 
 After the final review passes, delete the shared context doc and any resume files left in the working tree, then invoke `finish` to present completion options (merge, PR, keep, discard).
 

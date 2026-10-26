@@ -349,6 +349,8 @@ The rest of the report format is identical across modes:
 - **Out of scope** = a specialist the caller did not name ran and answered `Out of scope:` (e.g. `framework-fit` on a team's own `framework/`); counted with N/A
 - **Error** = the specialist could not review what it was given (not found, or a specialist the caller named answering `Out of scope:`); never clean
 
+**Team memory.** If it is on (`framework/MEMORY.md`) and this skill runs in the stage's own agent (never as a subagent, such as `code-review`), save a `trap` or `practice` that qualifies, per its Saving section. The report text never does.
+
 ---
 
 ## Tier Reference

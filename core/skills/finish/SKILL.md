@@ -220,13 +220,6 @@ If the plan or spec header names a PRD (`> **PRD:**`), follow `framework/LIVE_PR
 
 Skip quietly if there is no PRD or the write is refused, and say so once.
 
-**Team memory** (`framework/MEMORY.md`; skip quietly when it is off). After
-Option 1 merges into `main-branch`, propose one `shipped` note: what changed
-and why, naming the merged commit, which is local until someone pushes it.
-A merge into another branch (a stack) gets no
-note; say so. On Option 4, propose a `decision` note on why the work was
-dropped.
-
 ---
 
 ## Quick Reference

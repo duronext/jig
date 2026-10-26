@@ -126,7 +126,7 @@ section headings, same YAML-in-fenced-blocks format.
 5b. **PRD** — `prd-publish: artifact`
 5c. **PRD Review / Spec Review** — default `prd-swarm-tiers` and `spec-swarm-tiers`
 6. **Execution** — default parallel-threshold, strategy, mode
-6a. **Memory** — commented out (defaults: `memory: on`, `memory-save: on`)
+6a. **Memory** — commented out (defaults: `memory: on`, `memory-save: auto`)
 7. **Commit** — convention, format, types, scopes, ticket-ref, co-author
 8. **Estimates** — commented out (defaults)
 9. **Tracker** — based on Q2, commented template

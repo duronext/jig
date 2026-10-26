@@ -140,8 +140,9 @@ what is worth doing next.
   description once the levers ship.
 - Keep the harness and scripts in the repo, not in a temp directory, so the
   next person can rerun them.
-- If team memory is on, propose a `perf-result` note: the levers that won or
-  lost, with their numbers and a link to the results doc.
+- If team memory is on, save a `perf-result` note (`framework/MEMORY.md`,
+  Saving): the levers that won or lost, with their measured numbers and a
+  link to the results doc.
 
 ### Step 8: Return control
 

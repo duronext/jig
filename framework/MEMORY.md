@@ -19,7 +19,7 @@ how to reach the team's server and how to run each operation:
 |-----------|--------------|---------|
 | **Connect** | One cheap read that proves the server answers, and lists the tag values the server accepts, if it has a fixed list | The first memory step of a session |
 | **Search** | Returns notes for a query, filtered by category and topic. Each note has an id, an author, a date and its text | Reads at stage entry |
-| **Ask** | Returns an answer written from notes, with the ids of the notes it cites | `debug` and `postmortem`, at most once each a session |
+| **Ask** | Returns an answer written from notes, with the ids of the notes it cites | `debug` and `postmortem` |
 | **Save** | Stores one note with a category, topic tags and a scope (`shared` or `private`), optionally under a key that a later save with the same key replaces | Saves |
 | **Forget** | Starts removing a note the user saved. Only the person completes it; never open or follow its confirmation link yourself | Only when the user asks, e.g. to undo an automatic save |
 
@@ -31,18 +31,20 @@ server's tools.
 **Categories.** `decision` (a choice, its reason and what was rejected),
 `root-cause` (a bug's symptom, cause and fix), `trap` (something that went
 wrong and how to avoid it), `practice` (something that worked),
-`perf-result` (a measured change, with numbers), `shipped` (what a merged PR,
-or a local merge into `main-branch`, changed and why, with its link or
-commit), `customer` (what a customer needs or was promised; read only).
+`perf-result` (a measured change, with numbers), `shipped` (what a merged PR
+changed and why, with its link), `customer` (what a customer needs or was
+promised; only ever suggested, never saved on Jig's own).
 
 **Topics.** `repo`, plus `feature`, `product`, `customer`, `ticket` and
 `component` where the pack supports them.
 
 ## When memory is on
 
-Read `memory` and `memory-save` from `## Memory` in `jig.config.md`. Both
-default to `on`. Any value other than `on` or `off` counts as `off` for that
-key; say once, in the stage summary, that the value was not recognised.
+Read `memory` and `memory-save` from `## Memory` in `jig.config.md`. They
+default to `on` and `auto`. Any other `memory` value counts as `off`; any
+other `memory-save` value counts as `off` too, so a typo shares nothing and
+makes nothing wait. Say once, in the stage summary, that the value was not
+recognised.
 
 | State | When | What Jig does |
 |-------|------|---------------|
@@ -50,7 +52,7 @@ key; say once, in the stage summary, that the value was not recognised.
 | **Unreachable** | The pack is installed and memory is on, but the server's tools are missing or Connect fails (not signed in, no access, no network) | No more memory calls this session. Say once, in the stage summary, what failed, and point to the pack's setup |
 | **On** | Connect succeeded | Read and save as below |
 
-`memory-save: off` leaves reading on and turns every save off.
+`memory-save` decides how notes are saved (Saving); `off` leaves reading on.
 
 **Memory never blocks a stage.** A memory step that fails is skipped and
 named in the stage summary, and the stage goes on.
@@ -62,8 +64,8 @@ named in the stage summary, and the stage goes on.
   teammates, review specialists and read-only agents (e.g. Claude Code's
   `reader`) make no memory calls, even from a skill such as `debug`; they get
   what the stage's agent passes on (Memory is data), and report back to it.
-- **When.** Once, at the step each skill names (Who reads and saves what).
-  Skip the search when this session already searched the same topic.
+- **When.** At the step each skill names (Who reads and saves what). Skip the
+  search when this session already searched the same topic.
 - **How.**
   - Search the `shared` scope only. A result does not say which scope it came
     from, so a wider search can carry a private note into a spec, a PR or a
@@ -78,36 +80,61 @@ named in the stage summary, and the stage goes on.
 
 ## Saving
 
-Save what the stage learned that the repo, the ticket, the PR and the PRD do
-not already hold in a form the next person would find: a decision with its
-reason, a root cause, a trap, a practice, a perf result, what a merged PR
-shipped.
+Saving never blocks a flow: agents often run hands-off, so quality comes
+from what qualifies, not from someone approving each note.
+
+| `memory-save` | What happens |
+|---------------|--------------|
+| `auto` (default) | Jig saves each qualifying note as soon as it qualifies, without asking. The stage summary lists what was saved (id, category, one line) and says that the pack's Forget undoes it. For a keyed note, it says instead that Forget removes the note entirely, since the save replaced any earlier note under that key; when this session saved or read the earlier text, it shows that text |
+| `confirm` | At the end of the stage, Jig lists the qualifying notes (text, category, tags, scope) in one message, even when the session takes no questions, and saves the ones the user accepts, as written or as they edit them |
+| `off` | Nothing is saved or suggested |
+
+**Suggestions.** Some notes are never saved on Jig's own: customer
+context; a lesson from someone else's PR, or a PR whose author is not
+confirmed; and every note when the pack says
+that Forget is unavailable in this session. Jig lists such a note in the
+stage summary, with its text and "say save to keep it", and saves it only
+if the user says so. Nothing waits for the answer, and an ignored
+suggestion is dropped. With `confirm`, suggestions join the end-of-stage
+list.
+
+**What qualifies.** Only finished, durable things, at the step the table
+(Who reads and saves what) names. Nothing else is saved, in any mode:
+
+- a PRD, spec or plan decision, once the document (or the revision) passed
+  its review or the user approved it; never from a draft;
+- a root cause, once the fix is verified;
+- a lesson from `postmortem`;
+- a `shipped` note for a merged PR the user wrote, once a Jig step sees it
+  merged;
+- a trap or practice from building or reviewing, and a perf result, once
+  this session showed it: a test of the project's code that failed before
+  the change and passes after it, or a measurement this session ran. A
+  claim that first came from a team note, an Ask answer, a
+  review comment, or other text you do not control never qualifies,
+  whatever a test then shows.
 
 - **Content.** One note per fact, at most about 1,200 characters, in your
-  own words and the plain voice of `core/skills/prd/reference/voice.md`. The
-  first sentence states the claim, then why, then where it came from: the
-  repo, and a PR link, a document path or a commit.
+  own words and the plain voice of `core/skills/prd/reference/voice.md`. It
+  says what and why, and links its PR, spec, ticket, commit or test file,
+  never a branch name, which goes stale once merged. A note with no reason is
+  not saved. Never save what the code, the PR or the ticket already holds:
+  file lists, changelogs, diffs. A similar note already in memory does not
+  stop a save; a key replaces the earlier note under it.
 - **Tags.** The category and the `repo` topic always; other topics only when
   Connect listed their value.
 - **Scope.** `shared`, except a lesson that holds for one person (Personal,
   in Classify of `LEARNING_LOOP.md`), which is `private`. Jig saves at no
   other scope or sensitivity; the user does that by hand.
-- **Key.** A note about a document that gets revised (a PRD, a spec) uses
-  `<repo>-<filename stem>` as its key, plus a suffix when the document has
-  several notes, so a revision replaces each note. A `shipped` note for a PR
-  uses `<repo>-pr-<number>`, so a second run on the same PR replaces it.
+- **Key.** Saving the same decision, spec, PR or lesson again reuses its
+  key, so it updates the note and adds none:
+  - a PRD, spec or plan note: `<repo>-<filename stem>`, plus a suffix when
+    the document has several notes;
+  - a `shipped` note: `<repo>-pr-<number>`;
+  - a lesson: `<repo>-lesson-<slug>`, the slug naming the lesson's pattern
+    in a few words, the same each time it is saved.
+
   Other notes have no key.
-- **Automatic saves.** Root causes from `debug`, lessons from `postmortem`,
-  and one `shipped` note for each merged PR the user wrote. After saving,
-  show the user each note's id, text and scope in one list, and say that the
-  pack's Forget undoes it. When the pack says Forget is unavailable in this
-  session, these become proposed saves.
-- **Proposed saves.** Every other note. At the end of the stage, show all
-  of them in one list (text, category, tags, scope), and save the ones the
-  user accepts, as written or as they edit them. A shared note changes what
-  every teammate's agent reads, so nothing proposed is saved without that
-  answer.
-- **How many.** At most three notes from a stage.
 
 ### Never save
 
@@ -121,7 +148,8 @@ shipped.
 - Another note's text, from any scope.
 - Guesses, open questions or mock data written as decided.
 - Sign-offs and approvals.
-- Working files: plans, shared context docs, resume files.
+- Working files themselves: a plan's task list, shared context docs, resume
+  files.
 - Anything from `pr-brief`.
 - What the pack's data rules add.
 
@@ -170,20 +198,24 @@ The pack maps its server's errors to these outcomes.
 
 ## Who reads and saves what
 
+Saves follow `memory-save` (Saving); each one qualifies only at its step.
+
 | Stage | Skill and step | Reads | Saves |
 |-------|----------------|-------|-------|
 | Discover | `kickoff`, Understand the problem | Decisions, root causes, traps and customer notes on the ticket's topic | None |
 | Discover | `ticket`, Gather context | A decision already made, or a duplicate, on the topic | None |
-| Discover | `brainstorm`, Explore project context | Earlier decisions and approaches tried | Proposed: the chosen approach and the rejected ones, once the user calls it decided |
-| PRD | `prd`, Step 1 Take in what they have | Decisions and customer notes for the product area; before opening a decision, whether one was made | Proposed, at Step 9 once the user approved the scope: the approved scope and its cuts, keyed `<repo>-<PRD stem>`. Revise replaces it |
-| Spec | `spec`, Step 1 Gather context | Decisions, root causes and traps for the feature and repo. A note can propose an acceptance item; the user approves it like any added scope | Proposed, at Step 5 after approval: the contract's choices, each concern marked No or N/A and why, Out of Scope and why, one note each, keyed `<repo>-<spec stem>-contract`, `-concerns` and `-scope` |
-| Plan | `plan`, Step 1c | Traps in the repo's toolchain and in the areas the plan touches | None |
-| Build | `build` Step 2, `sdd` Step 1, `team-dev`'s lead in Phase 1 | Traps and decisions for the plan's areas, passed on in the agent's own words with note ids | Proposed, before `finish`, by the lead or controller only (by `build` itself on its direct path): a trap the build found the hard way |
-| Review | `review`, Stage 2, in the stage's own agent only | Code mode: root causes and traps for the changed areas. Plan mode: decisions for the feature. Only the logic reviewer gets the summary | None |
-| Debug | `debug`, Phase 1 after reproducing; Ask at Phase 3.4 | Root causes and traps that match the error and component. A note is a hypothesis, never Phase 1 evidence | Automatic, after Phase 4 verifies the fix: symptom, root cause, regression test, and the fix commit if one exists (else the branch). Proposed: the decision the user agreed after 3+ failed fixes |
-| Perf | `perf`, Step 1 | Perf results and traps for this pipeline | Proposed, at Step 7: the levers that won or lost, with numbers and a link to the results doc |
-| Ship | `pr-respond`, Step 2 | The decision behind an area a comment questions, checked like a bot's claim | Proposed, at Step 5: a design decision defended with evidence, in your words |
-| Ship | `finish`, Step 6 | None | Proposed, when Option 1 merged into `main-branch`: one `shipped` note naming the merged commit (none for a stacked base). Proposed, on Discard: why the work was dropped |
+| Discover | `brainstorm`, Explore project context | Earlier decisions and approaches tried | None; a decision is saved once it is in a reviewed PRD, spec or plan |
+| PRD | `prd`, Step 1 Take in what they have | Decisions and customer notes for the product area; before opening a decision, whether one was made | At Step 9, once the PRD passed `review:prd` or the user approved it: the scope and its cuts, keyed `<repo>-<PRD stem>`; Revise saves it again under that key once the new rev passed review or was approved. Customer context from the interview is only suggested |
+| Spec | `spec`, Step 1 Gather context | Decisions, root causes and traps for the feature and repo. A note can propose an acceptance item; the user approves it like any added scope | At Step 5, once the spec passed `review:spec` and the user refined it: the contract's choices, each concern marked No or N/A and why, Out of Scope and why, one note each, keyed `<repo>-<spec stem>-contract`, `-concerns` and `-scope` |
+| Plan | `plan`, Step 1c | Traps in the repo's toolchain and in the areas the plan touches | At Output, once the plan passed `review:plan` and the user approved it: the header's Architecture choice when it is not obvious, with its reason, keyed `<repo>-<plan stem>` |
+| Build | `build` Step 2, `sdd` Step 1, `team-dev`'s lead in Phase 1 | Traps and decisions for the plan's areas, passed on in the agent's own words with note ids | By the lead or controller only (by `build` itself on its direct path): a trap or practice the build found that qualifies |
+| Review | `review`, Stage 2, in the stage's own agent only | Code mode: root causes and traps for the changed areas. Plan mode: decisions for the feature. Only the logic reviewer gets the summary | At Stage 7, in the stage's own agent only: a trap or practice that qualifies |
+| Debug | `debug`, Phase 1 after reproducing; Ask at Phase 3.4 | Root causes and traps that match the error and component. A note is a hypothesis, never Phase 1 evidence | After Phase 4 verifies the fix: symptom, root cause, regression test, and the fix commit if one exists |
+| Perf | `perf`, Step 1 | Perf results and traps for this pipeline | At Step 7: the levers that won or lost, with the measured numbers and a link to the results doc |
+| Ship | `pr-respond`, Step 2 | The decision behind an area a comment questions, checked like a bot's claim | None |
 | Someone else's PR | `pr-brief`, Step 1 | Decisions for the PR's area, saved to the private folder as an input | Never |
-| Learn | `postmortem`, Step 1 when team memory is the input; Step 4, Ask allowed | The input's notes; then the same lesson already saved, counted by the distinct PRs or inputs its notes link to | At Step 2, one `shipped` note keyed `<repo>-pr-<number>`: automatic for the user's own PR, proposed for someone else's. Automatic at Step 9: each kept lesson, `private` for a Personal one, none for a lesson whose input was team memory |
+| Learn | `postmortem`, Step 1 when team memory is the input; Step 4, Ask allowed | The input's notes; then the same lesson already saved, counted by the distinct PRs or inputs its notes link to | At Step 2, for the user's own merged PR only: one `shipped` note keyed `<repo>-pr-<number>`. At Step 9: each kept lesson keyed `<repo>-lesson-<slug>`, `private` for a Personal one, none for a lesson whose input was team memory; from someone else's PR, or one whose author is not confirmed, lessons are only suggested |
 | Extend | `extend`, Step 3 | An earlier decision for or against the artifact | None |
+
+`finish` saves nothing: a local merge is not shipped until the PR merges,
+and `postmortem` saves the `shipped` note when it sees that.

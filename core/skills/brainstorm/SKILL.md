@@ -115,10 +115,7 @@ flowchart TD
 Brainstorm produces no required artifact. When the user has clarity, end the session by:
 
 1. **Summarizing the decisions** — 3-5 bullets in conversation capturing the chosen approach and key trade-offs
-2. **Proposing a memory note** — only once the user calls it decided, and
-   only if team memory is on (`framework/MEMORY.md`): offer one `decision`
-   note with the chosen approach and the rejected ones. Save nothing unasked.
-3. **Asking what's next** — "Want to turn this into a PRD, go straight to a spec, or sit with it?"
+2. **Asking what's next** — "Want to turn this into a PRD, go straight to a spec, or sit with it?"
 
 If the user wants a design doc for archival reasons, save to `{plans-directory}/YYYY-MM-DD-<topic>-brainstorm.md` (read `plans-directory` from `jig.config.md`, default `docs/plans`). This is opt-in, not default.
 

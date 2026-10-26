@@ -129,9 +129,9 @@ brief add `run-1.md` … `run-N.md`, `merged.md` and `brief.md`.
 ### Step 2: Independent review runs
 
 Read `runs` (default 2). Fill the placeholders in `reference/review-prompt.md`:
-`{owner}`, `{repo}`, `{folder}`, `{attention}` (one bullet per
-`attention` item, or `none`), and `{memory}` (`on` when team memory is on,
-else `off`). Dispatch all runs in parallel, each with the
+`{owner}`, `{repo}`, `{folder}` and `{attention}` (one bullet per
+`attention` item, or `none`). When team memory is off, delete its
+`memory.json` bullet. Dispatch all runs in parallel, each with the
 same filled prompt:
 
 ```
