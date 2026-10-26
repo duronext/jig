@@ -38,6 +38,16 @@ promised; only ever suggested, never saved on Jig's own).
 **Topics.** `repo`, plus `feature`, `product`, `customer`, `ticket` and
 `component` where the pack supports them.
 
+**`<repo>`.** The repo's full path on its git host (e.g. `owner/repo`, or
+`group/subgroup/project`), read from the remote that holds the repo's PRs:
+`upstream` when the clone is a fork, else `origin` (see "Extracting
+owner/repo/project identifiers" in `GIT_HOST.md`). Lowercase it, and turn
+`/` and every character other than `a-z`, `0-9`, `.`, `_` and `-` into
+`-`. It is the value of the `repo` topic and the start of every key, so
+two repos with the same short name never share a note. With no such
+remote, there is no `<repo>`: save nothing, and say so in the stage
+summary.
+
 ## When memory is on
 
 Read `memory` and `memory-save` from `## Memory` in `jig.config.md`. They
@@ -129,8 +139,8 @@ list.
   file lists, changelogs, diffs. A similar note already in memory does not
   stop a save; a key replaces the earlier note under it, as the pack scopes
   keys.
-- **Tags.** The category and the `repo` topic always; other topics only when
-  Connect listed their value.
+- **Tags.** The category and the `repo` topic (`<repo>`, above) always;
+  other topics only when Connect listed their value.
 - **Scope.** `shared`, except a lesson that holds for one person (Personal,
   in Classify of `LEARNING_LOOP.md`), which is `private`. Jig saves at no
   other scope or sensitivity; the user does that by hand.

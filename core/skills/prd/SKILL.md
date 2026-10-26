@@ -180,8 +180,9 @@ Skip to Step 9 if `prd-publish: file` or the platform cannot publish artifacts.
 3. With team memory on, once the PRD passed `review:prd` (Step 7) or the
    user approved it, save one `decision` note: the scope, what was cut, and
    why. Key it `<repo>-<PRD stem>` (`framework/MEMORY.md`, Saving). Never
-   from a draft. Customer context from the interview is only suggested
-   (Suggestions).
+   from a draft. With no repo open (e.g. Claude.ai), there is no `<repo>`
+   or stem: save nothing and say so in the summary. Customer context from
+   the interview is only suggested (Suggestions).
 4. Give the user, in three lines or fewer: the page link, what it covers, and
    what still needs a decision or a sign-off.
 5. Offer the next step: "Ready for engineering? `/jig:spec <link>` turns the
