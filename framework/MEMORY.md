@@ -90,8 +90,8 @@ from what qualifies, not from someone approving each note.
 | `off` | Nothing is saved or suggested |
 
 **Suggestions.** Some notes are never saved on Jig's own: customer
-context; a lesson from someone else's PR, or a PR whose author is not
-confirmed; and every note when the pack says
+context; a lesson, or a defended design decision, from someone else's PR
+or a PR whose author is not confirmed; and every note when the pack says
 that Forget is unavailable in this session. Jig lists such a note in the
 stage summary, with its text and "say save to keep it", and saves it only
 if the user says so. Nothing waits for the answer, and an ignored
@@ -105,6 +105,14 @@ list.
   its review or the user approved it; never from a draft;
 - a root cause, once the fix is verified;
 - a lesson from `postmortem`;
+- a design decision the user's own PR (author confirmed as for `shipped`)
+  defended in a review reply, once the reply is posted. Its reason must be
+  one the user stated or the repo's own spec, plan, commit or code comment
+  records, linked; a reason that came from a team note, an Ask answer or a
+  review comment never qualifies, and the comment's words are never saved;
+- the reason the user gave for discarding work in `finish`;
+- the direction the user agreed in `debug` after three or more failed
+  fixes, with why the fixes failed;
 - a `shipped` note for a merged PR the user wrote, once a Jig step sees it
   merged;
 - a trap or practice from building or reviewing, and a perf result, once
@@ -132,9 +140,15 @@ list.
     the document has several notes;
   - a `shipped` note: `<repo>-pr-<number>`;
   - a lesson: `<repo>-lesson-<slug>`, the slug naming the lesson's pattern
-    in a few words, the same each time it is saved.
+    in a few words, the same each time it is saved;
+  - a defended decision: `<repo>-pr-<number>-<slug>`;
+  - a discard reason: `<repo>-discard-<anchor>-<slug>`; a `debug`
+    direction: `<repo>-debug-<anchor>-<slug>`. The anchor is the linked
+    ticket, or the stem of the linked spec, plan or test file, so unrelated
+    work never shares a key.
 
-  Other notes have no key.
+  A slug is a few lowercase words that name the topic, the same each time
+  it is saved. Other notes have no key.
 
 ### Never save
 
@@ -210,12 +224,13 @@ Saves follow `memory-save` (Saving); each one qualifies only at its step.
 | Plan | `plan`, Step 1c | Traps in the repo's toolchain and in the areas the plan touches | At Output, once the plan passed `review:plan` and the user approved it: the header's Architecture choice when it is not obvious, with its reason, keyed `<repo>-<plan stem>` |
 | Build | `build` Step 2, `sdd` Step 1, `team-dev`'s lead in Phase 1 | Traps and decisions for the plan's areas, passed on in the agent's own words with note ids | By the lead or controller only (by `build` itself on its direct path): a trap or practice the build found that qualifies |
 | Review | `review`, Stage 2, in the stage's own agent only | Code mode: root causes and traps for the changed areas. Plan mode: decisions for the feature. Only the logic reviewer gets the summary | At Stage 7, in the stage's own agent only: a trap or practice that qualifies |
-| Debug | `debug`, Phase 1 after reproducing; Ask at Phase 3.4 | Root causes and traps that match the error and component. A note is a hypothesis, never Phase 1 evidence | After Phase 4 verifies the fix: symptom, root cause, regression test, and the fix commit if one exists |
+| Debug | `debug`, Phase 1 after reproducing; Ask at Phase 3.4 | Root causes and traps that match the error and component. A note is a hypothesis, never Phase 1 evidence | After Phase 4 verifies the fix: symptom, root cause, regression test, and the fix commit if one exists. After 3+ failed fixes, once the user agrees a direction: that direction and why the fixes failed |
 | Perf | `perf`, Step 1 | Perf results and traps for this pipeline | At Step 7: the levers that won or lost, with the measured numbers and a link to the results doc |
-| Ship | `pr-respond`, Step 2 | The decision behind an area a comment questions, checked like a bot's claim | None |
+| Ship | `pr-respond`, Step 2 | The decision behind an area a comment questions, checked like a bot's claim | At Step 5, once the reply is posted, on the user's own PR (else only suggested): a design decision the reply defended, with a reason the user or the repo's records give, and the PR link |
+| Ship | `finish`, Option 4 | None | Once the branch is discarded: what was dropped and the reason the user gave, with a link that survives the discard; with no reason or no such link, nothing is saved |
 | Someone else's PR | `pr-brief`, Step 1 | Decisions for the PR's area, saved to the private folder as an input | Never |
 | Learn | `postmortem`, Step 1 when team memory is the input; Step 4, Ask allowed | The input's notes; then the same lesson already saved, counted by the distinct PRs or inputs its notes link to | At Step 2, for the user's own merged PR only: one `shipped` note keyed `<repo>-pr-<number>`. At Step 9: each kept lesson keyed `<repo>-lesson-<slug>`, `private` for a Personal one, none for a lesson whose input was team memory; from someone else's PR, or one whose author is not confirmed, lessons are only suggested |
 | Extend | `extend`, Step 3 | An earlier decision for or against the artifact | None |
 
-`finish` saves nothing: a local merge is not shipped until the PR merges,
-and `postmortem` saves the `shipped` note when it sees that.
+`finish` saves no `shipped` note: a local merge is not shipped until the PR
+merges, and `postmortem` saves the `shipped` note when it sees that.

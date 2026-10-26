@@ -248,6 +248,10 @@ You MUST complete each phase before proceeding to the next.
 
    This is NOT a failed hypothesis -- this is a wrong architecture.
 
+   Once the user agrees a direction and team memory is on, save a
+   `decision` note (`framework/MEMORY.md`, Saving): the direction, why the
+   fixes failed, and the failing test or ticket.
+
 ---
 
 ## Red Flags Table

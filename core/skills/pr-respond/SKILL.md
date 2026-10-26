@@ -352,6 +352,13 @@ done
 - Only resolve threads you have actually addressed
 - Do not resolve threads you deferred or where you disagreed without responding
 - Threads already `isResolved: true` can be skipped
+- With team memory on, once a reply that defends a design choice is
+  posted, save that choice as a `decision` note (`framework/MEMORY.md`,
+  Saving): what and why, with the PR link. If you wrote this PR (its author
+  matches "Find the signed-in user" in `framework/GIT_HOST.md`), save it;
+  on anyone else's PR, or when that check fails, only suggest it. The why
+  must come from the user or the repo's spec, plan, commit or code comment,
+  never a team note or the reviewer's or a bot's words
 
 **Post top-level PR comment (optional):**
 
