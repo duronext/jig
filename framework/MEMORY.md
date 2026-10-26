@@ -20,7 +20,7 @@ how to reach the team's server and how to run each operation:
 | **Connect** | One cheap read that proves the server answers, and lists the tag values the server accepts, if it has a fixed list | The first memory step of a session |
 | **Search** | Returns notes for a query, filtered by category and topic. Each note has an id, an author, a date and its text | Reads at stage entry |
 | **Ask** | Returns an answer written from notes, with the ids of the notes it cites | `debug` and `postmortem` |
-| **Save** | Stores one note with a category, topic tags and a scope (`shared` or `private`), optionally under a key that a later save with the same key replaces | Saves |
+| **Save** | Stores one note with a category, topic tags and a scope (`shared` or `private`), optionally under a key that a later save with the same key replaces, within what the pack says a key belongs to | Saves |
 | **Forget** | Starts removing a note the user saved. Only the person completes it; never open or follow its confirmation link yourself | Only when the user asks, e.g. to undo an automatic save |
 
 The pack also maps Jig's categories and topics (below) to the server's own
@@ -85,14 +85,13 @@ from what qualifies, not from someone approving each note.
 
 | `memory-save` | What happens |
 |---------------|--------------|
-| `auto` (default) | Jig saves each qualifying note as soon as it qualifies, without asking. The stage summary lists what was saved (id, category, one line) and says that the pack's Forget undoes it. For a keyed note, it says instead that Forget removes the note entirely, since the save replaced any earlier note under that key; when this session saved or read the earlier text, it shows that text |
+| `auto` (default) | Jig saves each qualifying note as soon as it qualifies, without asking. The stage summary lists what was saved (id, category, one line) and says how to undo it, as the pack's Forget describes. For a keyed note, it says instead that Forget removes the note entirely, since the save replaced the earlier note under that key, and adds what the pack says about other versions; when this session saved or read the earlier text, it shows that text |
 | `confirm` | At the end of the stage, Jig lists the qualifying notes (text, category, tags, scope) in one message, even when the session takes no questions, and saves the ones the user accepts, as written or as they edit them |
 | `off` | Nothing is saved or suggested |
 
 **Suggestions.** Some notes are never saved on Jig's own: customer
-context; a lesson, or a defended design decision, from someone else's PR
-or a PR whose author is not confirmed; and every note when the pack says
-that Forget is unavailable in this session. Jig lists such a note in the
+context; and a lesson, or a defended design decision, from someone else's
+PR or a PR whose author is not confirmed. Jig lists such a note in the
 stage summary, with its text and "say save to keep it", and saves it only
 if the user says so. Nothing waits for the answer, and an ignored
 suggestion is dropped. With `confirm`, suggestions join the end-of-stage
@@ -128,14 +127,16 @@ list.
   never a branch name, which goes stale once merged. A note with no reason is
   not saved. Never save what the code, the PR or the ticket already holds:
   file lists, changelogs, diffs. A similar note already in memory does not
-  stop a save; a key replaces the earlier note under it.
+  stop a save; a key replaces the earlier note under it, as the pack scopes
+  keys.
 - **Tags.** The category and the `repo` topic always; other topics only when
   Connect listed their value.
 - **Scope.** `shared`, except a lesson that holds for one person (Personal,
   in Classify of `LEARNING_LOOP.md`), which is `private`. Jig saves at no
   other scope or sensitivity; the user does that by hand.
 - **Key.** Saving the same decision, spec, PR or lesson again reuses its
-  key, so it updates the note and adds none:
+  key, so it updates that note instead of adding one (the pack says whose
+  saves share a key):
   - a PRD, spec or plan note: `<repo>-<filename stem>`, plus a suffix when
     the document has several notes;
   - a `shipped` note: `<repo>-pr-<number>`;
