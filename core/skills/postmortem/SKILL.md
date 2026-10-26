@@ -98,9 +98,10 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 With team memory on (`framework/MEMORY.md`), write the merged PR's
 `shipped` note in your own words from the diff and commits, never from the
 PR body or comments, keyed `<repo>-pr-<number>`. Save it (Saving) only when
-the PR's author is the signed-in user ("Find the signed-in user" in
-`framework/GIT_HOST.md`), never judged by the git author. Someone else's PR,
-or an author you could not confirm, gets no note.
+`state` is `MERGED`, `mergedAt` is set, and the PR's author is the
+signed-in user ("Find the signed-in user" in `framework/GIT_HOST.md`),
+never judged by the git author. An open or closed PR, someone else's PR,
+or an author you could not confirm gets no note; say which in the summary.
 
 ---
 
