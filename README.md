@@ -230,6 +230,7 @@ Teams using GitLab or Bitbucket are supported via the [git host adapter](framewo
 | [PIPELINE.md](framework/PIPELINE.md) | The development pipeline |
 | [LEARNING_LOOP.md](framework/LEARNING_LOOP.md) | How Jig improves itself, from lesson to release |
 | [LIVE_PRD.md](framework/LIVE_PRD.md) | How the live PRD page and the pipeline share state |
+| [MEMORY.md](framework/MEMORY.md) | Team memory: how a memory pack plugs in, and which stage reads and saves what |
 | [DISCOVERY.md](framework/DISCOVERY.md) | How Jig finds and loads skills |
 | [SKILL_SCHEMA.md](framework/SKILL_SCHEMA.md) | Frontmatter spec for all skills |
 | [TIER_SYSTEM.md](framework/TIER_SYSTEM.md) | How tiers control activation |

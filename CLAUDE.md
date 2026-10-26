@@ -102,6 +102,8 @@ Packs live in `packs/`. Each ships a `pack.json` declaring its skills and specia
 
 See each pack's `pack.json` and `README.md` for what it ships.
 
+A **memory pack** connects Jig to a team's memory server. It ships outside this repo as a skill named `team-memory`; `framework/MEMORY.md` is its contract.
+
 ## Self-Hosting Model
 
 Jig eats its own dogfood. This repo installs itself as a plugin via `.claude/settings.json` — the same way any consumer project would. Skills and agents all come from the plugin. No symlinks, no special treatment.
@@ -114,7 +116,7 @@ When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/
 
 ```
 jig/
-├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, harness capabilities, stacked PRs)
+├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, harness capabilities, stacked PRs, team memory)
 ├── core/
 │   ├── skills/          Pipeline skills (one dir per skill)
 │   ├── agents/          Core agents
@@ -227,6 +229,7 @@ Core and pack changes reach installed copies only after a release.
 - `framework/PIPELINE.md` — the development pipeline
 - `framework/LEARNING_LOOP.md` — how Jig improves itself, from lesson to release
 - `framework/LIVE_PRD.md` — how the live PRD page and the pipeline share state
+- `framework/MEMORY.md` — team memory: the memory pack's contract, and which stage reads and saves what
 - `framework/DISCOVERY.md` — how Jig finds and loads skills
 - `framework/SKILL_SCHEMA.md` — frontmatter spec for all skills
 - `framework/TIER_SYSTEM.md` — how tiers control activation
