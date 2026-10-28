@@ -67,6 +67,8 @@ Read the plan file. Extract:
 - **Task count** — total number of tasks
 - **Independent tasks** — tasks with no unresolved blockers at the start
 
+**Team memory.** If it is on (`framework/MEMORY.md`), you, not a subagent, search traps and decisions for the areas the plan touches, unless this session already did. Pass what you checked to the strategy in your own words, citing each note id.
+
 ### Step 3: Choose Execution Strategy
 
 Read `jig.config.md` for:
@@ -149,6 +151,10 @@ If the plan references a PRD (`> **PRD:**`, a page link or a `*-prd.md`) and has
 - **When the plan finishes**, add one `build` entry summarizing what landed and what is left for `finish`.
 
 If a write is refused, or the PRD cannot be found, carry on and say once, in the final summary, that the PRD was not updated and why. Never block the build on a PRD write.
+
+### Team memory at the end
+
+On the direct path (1-2 tasks), if team memory is on, save a `trap` or `practice` this build found that qualifies (`framework/MEMORY.md`, Saving), before Step 5 hands off to `finish`. `sdd` and `team-dev` save their own.
 
 ---
 

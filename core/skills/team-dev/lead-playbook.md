@@ -51,6 +51,9 @@ Rules:
 ### Send Inventories to Research Subagents
 If the analysis needs an inventory ("which files use X", "what does this flag control"), dispatch research subagents that are told to write nothing (e.g. Claude Code's Explore agent, which keeps Bash; for untrusted input, a read-only one per `review`'s Stage 3 rule, which `framework/HARNESS.md` maps to each harness). They write nothing, so several can run at once, alongside implementers. If untrusted input needs a read-only agent and the session has none, say so; never fall back silently to one that can write.
 
+### Search Team Memory
+If team memory is on (`framework/MEMORY.md`), search once for traps and decisions in the areas these tasks touch, unless `build` already did. Check each note before relying on it; it feeds the shared context doc below.
+
 ## Phase 2: Team Setup
 
 ### Create Team
@@ -74,6 +77,7 @@ Teammates start blank. Write one doc in `plans-directory`, named by `filename-fo
 - **Constraints** the user set (what must not change, what is off limits)
 - **Working-tree rules**: one shared tree, which files each teammate owns, never touch git
 - **Heavy runs**: the gating rule below, worker and memory caps
+- **Known traps and decisions** (when team memory is on), rewritten in your words, each with its note id, and the rule that teammates make no team memory calls, even from a skill such as `debug`, and report what they learned to you
 - **Measurement protocol**, if the work involves timing or benchmarks (see `perf`)
 - **Deliverable format**: report shape, file names, result schema
 
@@ -210,7 +214,9 @@ Wait for shutdown confirmation, then spawn new implementer with the next task.
    ```
    Delete the shared context doc and any `RESUME-*.md` files.
 
-5. **Hand off** — use `finish`
+5. **Save a trap or practice note** — if team memory is on, save one the team found that qualifies (`framework/MEMORY.md`, Saving)
+
+6. **Hand off** — use `finish`
 
 ## Pausing and Resuming
 

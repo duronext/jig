@@ -115,6 +115,7 @@ When Classify says pack or core, never scaffold into `team/`. Work in a Jig chec
 2. **Search specialists**: Scan `team/specialists/`, `packs/*/specialists/`, and `core/specialists/` for specialists covering the same concern
 3. **Search agents**: Scan `team/agents/`, `packs/*/agents/`, and `core/agents/`
 4. **Read candidates**: For each potential overlap, read the file and check if the pattern is already documented
+5. **Check team memory** (when on; see `framework/MEMORY.md`): Search for an earlier decision for or against this artifact. Extend saves nothing there.
 
 **If overlap is found:**
 

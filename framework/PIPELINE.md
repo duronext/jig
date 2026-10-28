@@ -16,6 +16,10 @@ Three documents, three readers:
 | **Spec** | Engineers and the spec reviewer | What exactly must the system do? (API, data, rules, UI states, acceptance checklist) | `spec` |
 | **Plan** | Implementers (human or agent) | In what order, in which files, with which tests? | `plan` |
 
+Team memory runs across the stages when a memory pack is installed: a stage
+searches it on entry, and saves the decisions, root causes and lessons it
+produced. `MEMORY.md` says which stage reads and saves what.
+
 ## Stages
 
 ### 1. Discover

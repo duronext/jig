@@ -87,6 +87,7 @@ The brief stays private; I post nothing."
 - Name a person as the one who must approve or decide. Name a role.
 - Auto-select a next step.
 - Delete the private folder unless the user says so.
+- Save to team memory. Its notes are a read-only input (`framework/MEMORY.md`).
 
 ---
 
@@ -119,6 +120,7 @@ builds the private folder (`$TMPDIR` without a trailing `/`, else `/tmp`):
 <tmp>/jig-pr-brief/<owner>-<repo>-<number>-<head-sha-7>/
   pr.json  diff.patch  threads.json  ticket.json  owners.json
   docs_authors.json  sources.md  commits.txt  *.z  areas/  linked/  tree/
+  memory.json  (only when team memory is on)
 ```
 
 `tree/` is a detached worktree at the PR head. The runs, the merge and the
@@ -127,8 +129,9 @@ brief add `run-1.md` … `run-N.md`, `merged.md` and `brief.md`.
 ### Step 2: Independent review runs
 
 Read `runs` (default 2). Fill the placeholders in `reference/review-prompt.md`:
-`{owner}`, `{repo}`, `{folder}`, and `{attention}` (one bullet per
-`attention` item, or `none`). Dispatch all runs in parallel, each with the
+`{owner}`, `{repo}`, `{folder}` and `{attention}` (one bullet per
+`attention` item, or `none`). When team memory is off, delete its
+`memory.json` bullet. Dispatch all runs in parallel, each with the
 same filled prompt:
 
 ```

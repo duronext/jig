@@ -116,6 +116,16 @@ default-strategy: team-dev
 teammate-mode: tmux
 ```
 
+## Memory
+
+Team memory turns on when a memory pack (a `team-memory` skill) is
+installed. See `framework/MEMORY.md`.
+
+```yaml
+# memory: on              # on | off. off: no team memory calls in this repo
+# memory-save: auto       # auto | confirm | off. confirm: ask once per stage; off: search only
+```
+
 ## Commit
 
 ```yaml

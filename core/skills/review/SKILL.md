@@ -68,6 +68,8 @@ Check `jig.config.md` for the appropriate tier config:
 
 ### Stage 2: PREPARE the Input
 
+**Team memory.** In code and plan modes, when Stage 5 will run and this skill runs in the stage's own agent (not as a subagent, such as the `code-review` agent), search team memory once if it is on (`framework/MEMORY.md`): root causes and traps for the changed areas in code mode, decisions for the feature in plan mode. Write a short summary in your own words with note ids. It goes only to the logic reviewer; swarm specialists and fast-pass get none.
+
 #### Mode: code
 
 Obtain the diff based on the caller:
@@ -236,6 +238,7 @@ After collecting swarm findings, dispatch the code logic reviewer:
    - The logic reviewer's body (everything below frontmatter)
    - The full diff (all changed files — NOT filtered by globs)
    - The swarm findings collected in Stage 4 (so it knows what's already caught)
+   - The team notes summary from Stage 2, if any
 3. Dispatch a single Agent with:
    - `model: opus` (or `deep-review-model` from `jig.config.md`)
    - Full tool access: Read, Grep, Glob, Agent (the logic reviewer explores the codebase and can spawn sub-agents)
@@ -256,6 +259,7 @@ After collecting swarm findings, dispatch the code logic reviewer:
    - The full implementation plan
    - The spec (if exists)
    - The swarm findings from Stage 4 (so it knows what's already caught)
+   - The team notes summary from Stage 2, if any
 3. Dispatch a single Agent with:
    - `model: opus` (or `plan-deep-review-model` from `jig.config.md`)
    - Full tool access: Read, Grep, Glob, Agent
@@ -344,6 +348,8 @@ The rest of the report format is identical across modes:
 - **Clean** = specialist ran, found relevant code, but no issues
 - **Out of scope** = a specialist the caller did not name ran and answered `Out of scope:` (e.g. `framework-fit` on a team's own `framework/`); counted with N/A
 - **Error** = the specialist could not review what it was given (not found, or a specialist the caller named answering `Out of scope:`); never clean
+
+**Team memory.** If it is on (`framework/MEMORY.md`) and this skill runs in the stage's own agent (never as a subagent, such as `code-review`), save a `trap` or `practice` that qualifies, per its Saving section. The report text never does.
 
 ---
 

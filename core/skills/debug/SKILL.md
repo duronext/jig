@@ -73,6 +73,10 @@ You MUST complete each phase before proceeding to the next.
    - Does it happen every time?
    - If not reproducible, gather more data -- do not guess
 
+   **Team memory:** if it is on (`framework/MEMORY.md`), now search root
+   causes and traps that match this error and component. A match is only a
+   candidate for Phase 3; it is never Phase 1 evidence. The Iron Law holds.
+
 3. **Check Recent Changes**
    - What changed that could cause this?
    - Git diff, recent commits
@@ -190,6 +194,7 @@ You MUST complete each phase before proceeding to the next.
    - Do not pretend to know
    - Ask for help
    - Research more
+   - If team memory is on, an Ask may come before you ask the user
 
 ---
 
@@ -215,6 +220,10 @@ You MUST complete each phase before proceeding to the next.
    - No other tests broken?
    - Issue actually resolved?
    - **REQUIRED**: Use `verify` skill before claiming the fix works
+   - **Once verified**, if team memory is on, save a `root-cause` note
+     (`framework/MEMORY.md`, Saving): symptom, root cause, the regression
+     test path, and the fix commit if one exists. Never
+     commit just to get a SHA. No logs or stack traces.
 
 4. **If Fix Does Not Work**
    - STOP
@@ -238,6 +247,10 @@ You MUST complete each phase before proceeding to the next.
    **Discuss with the user before attempting more fixes.**
 
    This is NOT a failed hypothesis -- this is a wrong architecture.
+
+   Once the user agrees a direction and team memory is on, save a
+   `decision` note (`framework/MEMORY.md`, Saving): the direction, why the
+   fixes failed, and the failing test or ticket.
 
 ---
 

@@ -76,7 +76,7 @@ If not found, ask:
 
 > Which PR would you like to run a postmortem on? Provide a PR number or URL -- or describe the lesson and where it came from.
 
-**Other inputs** (see Capture in `framework/LEARNING_LOOP.md`): skip the PR fetch in Step 2 and the filter in Step 3. Gather the evidence that input calls for, keep lessons backed by a fix, failure, or correction, and fill Step 3's fields with the input in place of the reviewer. Then go to Step 4.
+**Other inputs** (see Capture in `framework/LEARNING_LOOP.md`): skip the PR fetch in Step 2 and the filter in Step 3. Gather the evidence that input calls for, keep lessons backed by a fix, failure, or correction, and fill Step 3's fields with the input in place of the reviewer. When the input is team memory, Search it here, per `framework/MEMORY.md`. Then go to Step 4.
 
 ---
 
@@ -86,7 +86,7 @@ Run in parallel. Extract owner/repo from the git remote -- do not hardcode.
 
 ```bash
 # PR metadata
-gh pr view {number} --json title,body,state,mergedAt,headRefName,files
+gh pr view {number} --json title,body,state,mergedAt,headRefName,files,author
 
 # All inline review comments (paginated)
 gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate
@@ -94,6 +94,14 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate
 # Review summaries (paginated)
 gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 ```
+
+With team memory on (`framework/MEMORY.md`), write the merged PR's
+`shipped` note in your own words from the diff and commits, never from the
+PR body or comments, keyed `<repo>-pr-<number>`. Save it (Saving) only when
+`state` is `MERGED`, `mergedAt` is set, and the PR's author is the
+signed-in user ("Find the signed-in user" in `framework/GIT_HOST.md`),
+never judged by the git author. An open or closed PR, someone else's PR,
+or an author you could not confirm gets no note; say which in the summary.
 
 ---
 
@@ -131,7 +139,7 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 
 ## Step 4: Cross-Reference Existing Skills
 
-First classify each pattern's level -- personal, harness, team, pack, or core -- per Classify in `framework/LEARNING_LOOP.md`. Personal lessons, and harness lessons not tied to this project, leave the repo: give them to the user for their own harness config, and stop there for them.
+First classify each pattern's level -- personal, harness, team, pack, or core -- per Classify in `framework/LEARNING_LOOP.md`. Personal lessons, and harness lessons not tied to this project, leave the repo: give them to the user for their own harness config, and stop there for them. With team memory on, Step 9 also saves a Personal lesson as a `private` note.
 
 For the rest, scan the project's skills and specialists directories to find relevant files. For each pattern group:
 
@@ -146,6 +154,12 @@ For the rest, scan the project's skills and specialists directories to find rele
 | **Already covered** | Skill documents this but agent ignored it | Flag -- may need stronger wording or examples |
 | **Gap** | Relevant skill exists but does not cover this pattern | Add to that skill |
 | **No home** | No relevant skill covers this domain | Add to a specialist or project-level config |
+
+With team memory on, Search for each kept lesson to see whether the team
+already saved it; Ask may help too. For the 3+ occurrence rule under
+Logic Reviewer Diagnosis, count the distinct PRs or inputs the notes link
+to, each checked against its source: never raw notes, and one author's
+notes once.
 
 ---
 
@@ -269,6 +283,13 @@ Run the fit review (Fit Review in `framework/LEARNING_LOOP.md`) on the paths you
 
 If the merged work has a live PRD (`> **PRD:**` in its plan or spec), add one `learn` entry to its log naming the one or two lessons that changed a skill or specialist, in plain words. See `framework/LIVE_PRD.md`.
 
+With team memory on, save each kept lesson as a `trap` or `practice` (scope
+`private` for a Personal one) per `framework/MEMORY.md` (Saving), keyed
+`<repo>-lesson-<slug>`, where the slug names the lesson's pattern in a few
+words, the same each time. When the input was someone else's PR, or Step 2
+could not confirm its author, only suggest them. Skip a lesson whose input was team memory:
+it is already there. Never save review comment bodies or reviewer names.
+
 Present a structured summary:
 
 ```markdown
@@ -294,6 +315,9 @@ Present a structured summary:
 ### Fit Review
 - framework-fit: rounds run, findings fixed, and any left standing with why
 - security (if the artifact handles untrusted input): findings fixed, and any left standing with why
+
+### Team memory (when on)
+- memory: N notes read; saved: id, category, one line each; suggested: ...
 
 ### Items Needing Human Judgment
 - [Anything ambiguous or subjective]

@@ -131,6 +131,13 @@ teammate-mode: tmux
 # post-create: []          # auto-detects install if omitted
 ```
 
+## Memory
+
+```yaml
+# memory: on              # on | off. off: no team memory calls in this repo
+# memory-save: auto       # auto | confirm | off. confirm: ask once per stage; off: search only
+```
+
 ## Commit
 
 ```yaml

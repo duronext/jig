@@ -180,6 +180,12 @@ git checkout <base-branch>
 git branch -D <feature-branch>
 ```
 
+With team memory on, record why this work was dropped, in the user's own
+reason, as a `decision` note that links the work's ticket, or a spec or
+plan that outlives the branch (on the base branch or a published page)
+(`framework/MEMORY.md`, Saving). If the user gave no reason, or there is
+nothing to link, skip it.
+
 Then: Cleanup worktree (Step 5)
 
 ### Step 5: Cleanup Worktree

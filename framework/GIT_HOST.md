@@ -209,6 +209,17 @@ or per-PR alert list on its own also holds alerts the PR did not add.
 | gitlab | `glab mr view {iid} -R {group}/{project} --output json` (base SHA: `diff_refs.base_sha`; head: `diff_refs.head_sha`. A single-MR read has `diff_refs`; MR list results do not) |
 | bitbucket | Bitbucket REST: `GET /2.0/repositories/{workspace}/{repo}/pullrequests/{id}` (base SHA: `destination.commit.hash`; head: `source.commit.hash`. Both may be short: compare them as a prefix, or get the full hash from `GET /2.0/repositories/{workspace}/{repo}/commit/<hash>`, field `hash`) |
 
+### Find the signed-in user
+
+Who the host CLI acts as, to compare with a PR's author from "View a PR by
+number". A call that fails means the author is unconfirmed.
+
+| Host | Command |
+|------|---------|
+| github | `gh api user --jq .login` (compare with the PR's `author.login`) |
+| gitlab | `glab api user --jq .username` (compare with the MR's `author.username`) |
+| bitbucket | Bitbucket REST: `GET /2.0/user`, field `account_id` (compare with the PR's `author.account_id`) |
+
 ### Find a PR's merge base
 
 The commit the host diffs the PR against: the best common ancestor of the

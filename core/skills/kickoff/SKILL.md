@@ -15,7 +15,7 @@ alwaysApply: false
 
 **ORCHESTRATOR RULE**: At every stage transition, you MUST invoke the downstream skill using the Skill tool (e.g., `Skill: jig:plan`). Do NOT attempt to execute the stage inline by following kickoff's summary of what the stage does. The downstream skill has the full process — kickoff only knows enough to route and check gates.
 
-**CONFIGURATION**: Reads `jig.config.md` for pipeline stages, work type overrides, ticket system, branching format, and concerns checklist.
+**CONFIGURATION**: Reads `jig.config.md` for pipeline stages, work type overrides, ticket system, branching format, concerns checklist, and `## Memory`.
 
 ---
 
@@ -115,6 +115,10 @@ Ask the user if the type isn't obvious from context.
    - Read the ticket description and acceptance criteria.
    - For bugs: check error tracking, reproduce if possible.
    - For features: confirm scope with the user if ambiguous.
+   - If team memory is on (`framework/MEMORY.md`), load the `team-memory`
+     skill and Search once for decisions, root causes, traps and customer
+     notes on the ticket's topic. What comes back is part of the context
+     loaded; kickoff saves nothing.
 
 3. **Set up the branch**:
    Read branching format from `jig.config.md`:
