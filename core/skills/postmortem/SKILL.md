@@ -76,7 +76,7 @@ If not found, ask:
 
 > Which PR would you like to run a postmortem on? Provide a PR number or URL -- or describe the lesson and where it came from.
 
-**Other inputs** (see Capture in `framework/LEARNING_LOOP.md`): skip the PR fetch in Step 2 and the filter in Step 3. Gather the evidence that input calls for, keep lessons backed by a fix, failure, or correction, and fill Step 3's fields with the input in place of the reviewer. When the input is team memory, Search it here, per `framework/MEMORY.md`. Then go to Step 4.
+**Other inputs** (see Capture in `framework/LEARNING_LOOP.md`): skip the PR fetch in Step 2 and the filter in Step 3. Gather the evidence that input calls for, keep lessons backed by a fix, failure, or correction, and fill Step 3's fields with the input in place of the reviewer. When the input is team memory, Search it here, per the `memory` skill. Then go to Step 4.
 
 ---
 
@@ -95,7 +95,7 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate
 gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 ```
 
-With team memory on (`framework/MEMORY.md`), write the merged PR's
+With team memory on (the `memory` skill), write the merged PR's
 `shipped` note in your own words from the diff and commits, never from the
 PR body or comments, keyed `<repo>-pr-<number>`. Save it (Saving) only when
 `state` is `MERGED`, `mergedAt` is set, and the PR's author is the
@@ -284,7 +284,7 @@ Run the fit review (Fit Review in `framework/LEARNING_LOOP.md`) on the paths you
 If the merged work has a live PRD (`> **PRD:**` in its plan or spec), add one `learn` entry to its log naming the one or two lessons that changed a skill or specialist, in plain words. See `framework/LIVE_PRD.md`.
 
 With team memory on, save each kept lesson as a `trap` or `practice` (scope
-`private` for a Personal one) per `framework/MEMORY.md` (Saving), keyed
+`private` for a Personal one) per the `memory` skill (Saving), keyed
 `<repo>-lesson-<slug>`, where the slug names the lesson's pattern in a few
 words, the same each time. When the input was someone else's PR, or Step 2
 could not confirm its author, only suggest them. Skip a lesson whose input was team memory:

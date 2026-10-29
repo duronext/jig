@@ -73,7 +73,7 @@ You MUST complete each phase before proceeding to the next.
    - Does it happen every time?
    - If not reproducible, gather more data -- do not guess
 
-   **Team memory:** if it is on (`framework/MEMORY.md`), now search root
+   **Team memory:** if it is on (the `memory` skill), now search root
    causes and traps that match this error and component. A match is only a
    candidate for Phase 3; it is never Phase 1 evidence. The Iron Law holds.
 
@@ -221,7 +221,7 @@ You MUST complete each phase before proceeding to the next.
    - Issue actually resolved?
    - **REQUIRED**: Use `verify` skill before claiming the fix works
    - **Once verified**, if team memory is on, save a `root-cause` note
-     (`framework/MEMORY.md`, Saving): symptom, root cause, the regression
+     (the `memory` skill, Saving): symptom, root cause, the regression
      test path, and the fix commit if one exists. Never
      commit just to get a SHA. No logs or stack traces.
 
@@ -249,7 +249,7 @@ You MUST complete each phase before proceeding to the next.
    This is NOT a failed hypothesis -- this is a wrong architecture.
 
    Once the user agrees a direction and team memory is on, save a
-   `decision` note (`framework/MEMORY.md`, Saving): the direction, why the
+   `decision` note (the `memory` skill, Saving): the direction, why the
    fixes failed, and the failing test or ticket.
 
 ---

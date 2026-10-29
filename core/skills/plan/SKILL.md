@@ -96,7 +96,7 @@ Plus tests for every non-trivial file.
 
 This list becomes the `## File Structure` table in the plan document.
 
-If team memory is on (`framework/MEMORY.md`), Search for traps in the repo's
+If team memory is on (the `memory` skill), Search for traps in the repo's
 toolchain and in these files' areas. Use what you checked to get the plan's
 commands right for self-review. The plan's one note is saved at Plan Output.
 
@@ -330,7 +330,7 @@ If `plan-sync` is configured in `jig.config.md`, also push to the configured rem
 With team memory on, once the plan passed `review:plan` and the user
 approved it, save the header's Architecture choice as a `decision` note with
 its reason, unless the choice is obvious. Key it `<repo>-<plan stem>`
-(`framework/MEMORY.md`, Saving).
+(the `memory` skill, Saving).
 
 ---
 

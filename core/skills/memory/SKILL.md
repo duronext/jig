@@ -1,13 +1,21 @@
+---
+name: memory
+description: Use when a memory pack (a `team-memory` skill) is installed and a Jig skill reaches a team memory step (Connect, Search, Ask, Save or Forget), or when the pack asks for Jig's memory contract
+tier: workflow
+---
+
 # Team Memory
 
 Team memory is a store that every teammate's agent can search and save to.
 A decision, a root cause or a lesson found in one session then reaches the
 next person's session. Jig ships no memory server and names none: a memory
-pack connects it to the team's. With no pack installed, nothing in this file
-applies and no skill mentions memory.
+pack connects it to the team's. With no pack installed, nothing in this
+skill applies and no skill mentions memory.
 
-This file is the contract between the memory pack and every skill that reads
-or saves.
+This skill is the contract between the memory pack and every skill that
+reads or saves. Load it, then the pack, once a session before the first
+memory step, the way the harness loads skills: in Claude Code that is the
+Skill tool, never Read on the skill's file.
 
 ## The memory pack
 
@@ -39,14 +47,15 @@ promised; only ever suggested, never saved on Jig's own).
 `component` where the pack supports them.
 
 **`<repo>`.** The repo's full path on its git host (e.g. `owner/repo`, or
-`group/subgroup/project`), read from the remote that holds the repo's PRs:
-`upstream` when the clone is a fork, else `origin` (see "Extracting
-owner/repo/project identifiers" in `GIT_HOST.md`). Lowercase it, and turn
-`/` and every character other than `a-z`, `0-9`, `.`, `_` and `-` into
-`-`. It is the value of the `repo` topic and the start of every key, so
-two repos with the same short name never share a note. With no such
-remote, there is no `<repo>`: save nothing, and say so in the stage
-summary.
+`group/subgroup/project`), read from the URL of the remote that holds the
+repo's PRs: `upstream` when the clone is a fork, else `origin`. List the
+remotes with exactly `git remote -v`, run in the repo: no `-C`, and no
+other command chained to it, since a harness can ask before either.
+Lowercase the path, and turn `/` and every character other than `a-z`,
+`0-9`, `.`, `_` and `-` into `-`. It is the value of the `repo` topic and
+the start of every key, so two repos with the same short name never share
+a note. With no such remote, there is no `<repo>`: save nothing, and say
+so in the stage summary.
 
 ## When memory is on
 
@@ -132,7 +141,8 @@ list.
   whatever a test then shows.
 
 - **Content.** One note per fact, at most about 1,200 characters, in your
-  own words and the plain voice of `core/skills/prd/reference/voice.md`. It
+  own words: short plain sentences, one idea each, that a reader who never
+  opens the code follows, with no code or function names in the text. It
   says what and why, and links its PR, spec, ticket, commit or test file,
   never a branch name, which goes stale once merged. A note with no reason is
   not saved. Never save what the code, the PR or the ticket already holds:
@@ -141,9 +151,9 @@ list.
   keys.
 - **Tags.** The category and the `repo` topic (`<repo>`, above) always;
   other topics only when Connect listed their value.
-- **Scope.** `shared`, except a lesson that holds for one person (Personal,
-  in Classify of `LEARNING_LOOP.md`), which is `private`. Jig saves at no
-  other scope or sensitivity; the user does that by hand.
+- **Scope.** `shared`, except a lesson that holds for one person (the
+  Personal level of Jig's learning loop), which is `private`. Jig saves at
+  no other scope or sensitivity; the user does that by hand.
 - **Key.** Saving the same decision, spec, PR or lesson again reuses its
   key, so it updates that note instead of adding one (the pack says whose
   saves share a key):

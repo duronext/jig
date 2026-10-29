@@ -115,10 +115,11 @@ Ask the user if the type isn't obvious from context.
    - Read the ticket description and acceptance criteria.
    - For bugs: check error tracking, reproduce if possible.
    - For features: confirm scope with the user if ambiguous.
-   - If team memory is on (`framework/MEMORY.md`), load the `team-memory`
-     skill and Search once for decisions, root causes, traps and customer
-     notes on the ticket's topic. What comes back is part of the context
-     loaded; kickoff saves nothing.
+   - If a memory pack (a `team-memory` skill) is installed, load the
+     `memory` skill, then `team-memory`. If memory is on, Search once for
+     decisions, root causes, traps and customer notes on the ticket's
+     topic. What comes back is part of the context loaded; kickoff saves
+     nothing.
 
 3. **Set up the branch**:
    Read branching format from `jig.config.md`:

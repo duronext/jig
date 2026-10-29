@@ -18,7 +18,7 @@ Three documents, three readers:
 
 Team memory runs across the stages when a memory pack is installed: a stage
 searches it on entry, and saves the decisions, root causes and lessons it
-produced. `MEMORY.md` says which stage reads and saves what.
+produced. The `memory` skill says which stage reads and saves what.
 
 ## Stages
 

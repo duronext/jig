@@ -73,7 +73,7 @@ possible", "no assertion changes", "no removing checks from the pipeline",
 "no new runtime dependencies". Constraints rule out options; learning them
 after the probes ran wastes the probes.
 
-If team memory is on (`framework/MEMORY.md`), search it for perf results and
+If team memory is on (the `memory` skill), search it for perf results and
 traps on this pipeline before planning probes; a lever someone already
 measured is a starting point, to be checked, not a result.
 
@@ -140,7 +140,7 @@ what is worth doing next.
   description once the levers ship.
 - Keep the harness and scripts in the repo, not in a temp directory, so the
   next person can rerun them.
-- If team memory is on, save a `perf-result` note (`framework/MEMORY.md`,
+- If team memory is on, save a `perf-result` note (the `memory` skill,
   Saving): the levers that won or lost, with their measured numbers and a
   link to the results doc.
 

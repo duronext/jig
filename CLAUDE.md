@@ -70,6 +70,7 @@ Run `find core/skills -name SKILL.md` for the current list; this table summarize
 | `finish` | Branch completion — merge, PR, keep, or discard |
 | `worktree` | Create/remove provisioned worktrees for parallel dev |
 | `pr-brief` | Private reviewer brief for someone else's PR — independent review runs, merged and re-verified; never posts |
+| `memory` | Team memory contract — loaded with a memory pack: who reads and saves what, and how to treat notes |
 | `extend` | Framework extension assistant — scaffolds new skills, specialists, packs |
 
 ### Core Agents
@@ -102,7 +103,7 @@ Packs live in `packs/`. Each ships a `pack.json` declaring its skills and specia
 
 See each pack's `pack.json` and `README.md` for what it ships.
 
-A **memory pack** connects Jig to a team's memory server. It ships outside this repo as a skill named `team-memory`; `framework/MEMORY.md` is its contract.
+A **memory pack** connects Jig to a team's memory server. It ships outside this repo as a skill named `team-memory`; the `memory` skill (`core/skills/memory/SKILL.md`) is its contract. The contract is a skill, not a framework doc, so a pack can load it with no prompt (Reads Jig's own files in `framework/HARNESS.md`).
 
 ## Self-Hosting Model
 
@@ -116,7 +117,7 @@ When developing Jig, edit the source in `core/`. After pushing to GitHub, run `/
 
 ```
 jig/
-├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, harness capabilities, stacked PRs, team memory)
+├── framework/           How Jig works (pipeline, schema, tiers, discovery, checklist, git host adapters, harness capabilities, stacked PRs)
 ├── core/
 │   ├── skills/          Pipeline skills (one dir per skill)
 │   ├── agents/          Core agents
@@ -224,12 +225,11 @@ Core and pack changes reach installed copies only after a release.
 
 ### Key documents to read first
 - `framework/GIT_HOST.md` — git host adapter (GitHub/GitLab/Bitbucket command mapping)
-- `framework/HARNESS.md` — what each agent harness can do (subagents, tool limits, read-only agent)
+- `framework/HARNESS.md` — what each agent harness can do (subagents, tool limits, read-only agent, reading Jig's own files)
 - `framework/STACKED_PRS.md` — building, retargeting and merging chains of dependent PRs (read by `pr-create`, `finish`, `pr-respond`)
 - `framework/PIPELINE.md` — the development pipeline
 - `framework/LEARNING_LOOP.md` — how Jig improves itself, from lesson to release
 - `framework/LIVE_PRD.md` — how the live PRD page and the pipeline share state
-- `framework/MEMORY.md` — team memory: the memory pack's contract, and which stage reads and saves what
 - `framework/DISCOVERY.md` — how Jig finds and loads skills
 - `framework/SKILL_SCHEMA.md` — frontmatter spec for all skills
 - `framework/TIER_SYSTEM.md` — how tiers control activation

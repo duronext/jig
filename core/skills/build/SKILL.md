@@ -67,7 +67,7 @@ Read the plan file. Extract:
 - **Task count** — total number of tasks
 - **Independent tasks** — tasks with no unresolved blockers at the start
 
-**Team memory.** If it is on (`framework/MEMORY.md`), you, not a subagent, search traps and decisions for the areas the plan touches, unless this session already did. Pass what you checked to the strategy in your own words, citing each note id.
+**Team memory.** If it is on (the `memory` skill), you, not a subagent, search traps and decisions for the areas the plan touches, unless this session already did. Pass what you checked to the strategy in your own words, citing each note id.
 
 ### Step 3: Choose Execution Strategy
 
@@ -154,7 +154,7 @@ If a write is refused, or the PRD cannot be found, carry on and say once, in the
 
 ### Team memory at the end
 
-On the direct path (1-2 tasks), if team memory is on, save a `trap` or `practice` this build found that qualifies (`framework/MEMORY.md`, Saving), before Step 5 hands off to `finish`. `sdd` and `team-dev` save their own.
+On the direct path (1-2 tasks), if team memory is on, save a `trap` or `practice` this build found that qualifies (the `memory` skill, Saving), before Step 5 hands off to `finish`. `sdd` and `team-dev` save their own.
 
 ---
 

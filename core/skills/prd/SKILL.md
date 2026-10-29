@@ -75,7 +75,7 @@ tell the user in a short list:
 
 Do not restate their document back to them.
 
-When team memory is on (`framework/MEMORY.md`), Search decisions and customer
+When team memory is on (the `memory` skill), Search decisions and customer
 notes for this product area, and fold what you checked into "What I found".
 
 ### Step 2: Look at the product (when the repo is open)
@@ -179,7 +179,7 @@ Skip to Step 9 if `prd-publish: file` or the platform cannot publish artifacts.
 2. If `prd-sync` is set, follow that pack's document sync.
 3. With team memory on, once the PRD passed `review:prd` (Step 7) or the
    user approved it, save one `decision` note: the scope, what was cut, and
-   why. Key it `<repo>-<PRD stem>` (`framework/MEMORY.md`, Saving). Never
+   why. Key it `<repo>-<PRD stem>` (the `memory` skill, Saving). Never
    from a draft. With no repo open (e.g. Claude.ai), there is no `<repo>`
    or stem: save nothing and say so in the summary. Customer context from
    the interview is only suggested (Suggestions).
