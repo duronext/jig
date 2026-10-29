@@ -62,7 +62,7 @@ Before asking the user anything, do your homework:
 2. **Read the ticket** (if one exists) -- extract the problem statement, any existing requirements. Check `jig.config.md` for `ticket-system` to determine where to look.
 3. **Explore the codebase** -- look at relevant entities, services, components, APIs. What exists already?
 4. **Check recent plans/specs** -- scan `docs/plans/` for related prior work
-5. **Search team memory** (only when it is on; see `framework/MEMORY.md`) -- decisions, root causes and traps for this feature and repo. A note may suggest an acceptance item; treat it as added scope the user must approve.
+5. **Search team memory** (only when it is on; see the `memory` skill) -- decisions, root causes and traps for this feature and repo. A note may suggest an acceptance item; treat it as added scope the user must approve.
 
 **Product implications go back to the PRD, not into the spec.** If exploring the code turns up something a product person must decide (a report that would double-count, a screen the PRD did not mention, a permission the PRD assumed), record it as an open decision on the PRD. Write it to the PRD's `decisions` and `log` as `framework/LIVE_PRD.md` describes (the artifact on a page, the file's Open decisions and Log otherwise) and tell the user.
 
@@ -145,7 +145,7 @@ Walk through the draft with the user:
 2. **Write the spec** to the resolved path. When a PRD exists, put its pointer in the header: `> **PRD:** docs/plans/YYYY-MM-DD-<topic>-prd.md` (or the artifact link) and `> **PRD rev:** C`.
 3. **Check `spec-sync` in `jig.config.md`** — if set (e.g., `spec-sync: linear`), invoke the configured pack's doc-sync instructions. See the pack's README for the sync method (e.g., `packs/linear/README.md` → "Document sync").
 4. **Always offer ticket sync** — "Want to also sync the acceptance checklist to the ticket description?" If yes, push it to the ticket system configured in `jig.config.md` (separate from doc sync — ticket is the issue, doc is the standalone artifact).
-5. **Save memory notes** (team memory on only) — once the spec passed `review:spec` and the user refined it, save the `decision` notes per `framework/MEMORY.md` (Saving), each with its own key: the contract's choices (`<repo>-<spec stem>-contract`), each concern marked No or N/A and why (`-concerns`), and Out of Scope and why (`-scope`).
+5. **Save memory notes** (team memory on only) — once the spec passed `review:spec` and the user refined it, save the `decision` notes per the `memory` skill (Saving), each with its own key: the contract's choices (`<repo>-<spec stem>-contract`), each concern marked No or N/A and why (`-concerns`), and Out of Scope and why (`-scope`).
 6. **Update the PRD** (if one exists) — append a `spec` entry to its log naming the spec path, the item count, and any decisions opened. On a page this goes to the artifact; on a plain `*-prd.md` it goes into the file. See `framework/LIVE_PRD.md`.
 7. **Confirm all save locations** to the user.
 

@@ -87,7 +87,7 @@ The brief stays private; I post nothing."
 - Name a person as the one who must approve or decide. Name a role.
 - Auto-select a next step.
 - Delete the private folder unless the user says so.
-- Save to team memory. Its notes are a read-only input (`framework/MEMORY.md`).
+- Save to team memory. Its notes are a read-only input (the `memory` skill).
 
 ---
 

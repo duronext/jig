@@ -80,7 +80,7 @@ Read the plan file once. Extract ALL tasks with their full text, noting:
 - File paths per task
 - Dependencies between tasks
 - Context that implementers will need (architecture decisions, conventions, etc.)
-- Team notes: if team memory is on, the controller searches traps and decisions for the plan's areas once (`framework/MEMORY.md`), unless `build` already did
+- Team notes: if team memory is on, the controller searches traps and decisions for the plan's areas once (the `memory` skill), unless `build` already did
 
 ### Step 2: Per-Task Execution Loop
 
@@ -170,7 +170,7 @@ After all tasks are complete, dispatch a final review of the entire implementati
 
 ### Step 4: Finish
 
-If team memory is on, the controller first saves a `trap` or `practice` this run found that qualifies, per `framework/MEMORY.md` (Saving).
+If team memory is on, the controller first saves a `trap` or `practice` this run found that qualifies, per the `memory` skill (Saving).
 
 After the final review passes, delete the shared context doc and any resume files left in the working tree, then invoke `finish` to present completion options (merge, PR, keep, discard).
 

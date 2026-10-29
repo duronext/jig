@@ -119,7 +119,7 @@ teammate-mode: tmux
 ## Memory
 
 Team memory turns on when a memory pack (a `team-memory` skill) is
-installed. See `framework/MEMORY.md`.
+installed. See Jig's `memory` skill.
 
 ```yaml
 # memory: on              # on | off. off: no team memory calls in this repo

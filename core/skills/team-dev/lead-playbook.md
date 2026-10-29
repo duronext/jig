@@ -52,7 +52,7 @@ Rules:
 If the analysis needs an inventory ("which files use X", "what does this flag control"), dispatch research subagents that are told to write nothing (e.g. Claude Code's Explore agent, which keeps Bash; for untrusted input, a read-only one per `review`'s Stage 3 rule, which `framework/HARNESS.md` maps to each harness). They write nothing, so several can run at once, alongside implementers. If untrusted input needs a read-only agent and the session has none, say so; never fall back silently to one that can write.
 
 ### Search Team Memory
-If team memory is on (`framework/MEMORY.md`), search once for traps and decisions in the areas these tasks touch, unless `build` already did. Check each note before relying on it; it feeds the shared context doc below.
+If team memory is on (the `memory` skill), search once for traps and decisions in the areas these tasks touch, unless `build` already did. Check each note before relying on it; it feeds the shared context doc below.
 
 ## Phase 2: Team Setup
 
@@ -214,7 +214,7 @@ Wait for shutdown confirmation, then spawn new implementer with the next task.
    ```
    Delete the shared context doc and any `RESUME-*.md` files.
 
-5. **Save a trap or practice note** — if team memory is on, save one the team found that qualifies (`framework/MEMORY.md`, Saving)
+5. **Save a trap or practice note** — if team memory is on, save one the team found that qualifies (the `memory` skill, Saving)
 
 6. **Hand off** — use `finish`
 

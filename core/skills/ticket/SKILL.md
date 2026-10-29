@@ -47,7 +47,7 @@ Then load the tracker-specific pack from `packs/{ticket-system}/` for tool calls
 
 Check if there's relevant session context. Use it to pre-fill the interview — don't ask for things you already know.
 
-If team memory is on (`framework/MEMORY.md`), Search for a decision already
+If team memory is on (the `memory` skill), Search for a decision already
 made, or a likely duplicate, on this topic. Use what you checked to pre-fill
 Background, citing note ids, unless the tracker is public; this skill saves
 no notes.

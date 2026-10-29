@@ -17,7 +17,7 @@ CAPTURE → CLASSIFY → ROUTE → DRAFT → FIT REVIEW → PR → RELEASE → C
 | Project retrospectives | "Next time we would…" | Each item, with the work it came from |
 | Another harness's notes or skills | A rule that held across the work | The rule and the work it held on, minus that harness's own mechanics |
 | Direct requests | "Jig should do X" | The request and the incident behind it |
-| Team memory | Traps, root causes and lessons teammates saved (`MEMORY.md`), e.g. the same trap from several people | The notes' ids, each checked against its source |
+| Team memory | Traps, root causes and lessons teammates saved (the `memory` skill), e.g. the same trap from several people | The notes' ids, each checked against its source |
 | Fit-review findings | The same divergence flagged again (e.g. "forgot to update PIPELINE.md") | The `framework-fit` findings from 3+ PRs |
 
 Keep a lesson only when something happened: a fix, a failure, a correction. A guess about what might go wrong is not a lesson. A pattern seen once is still a lesson; postmortem's 3+ occurrence threshold decides when it becomes a specialist or checklist item.

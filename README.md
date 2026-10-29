@@ -122,6 +122,7 @@ Jig ships as a plugin with core skills, agents, and review specialists. Your tea
 | `ticket` | Ticket creation | Interviews you, writes the ticket, files it in your configured tracker (Linear, Jira, GitHub Issues), and sets up the branch. |
 | `worktree` | Parallel workspaces | Creates or removes provisioned git worktrees, syncing env files and dependencies, for isolated parallel development. |
 | `pr-brief` | Reviewer brief | Briefs you on someone else's PR before you review it. Runs independent read-only reviews (two by default), merges them, re-verifies every item in the code, and shows you a private brief. Never posts; asks what to do next. |
+| `memory` | Team memory contract | Loaded when a memory pack (a `team-memory` skill) connects Jig to your team's memory server: when memory is on, which stage reads and saves what, and how to treat a teammate's note. |
 | `finish` | Branch completion | Verifies tests pass, then presents 4 options: merge locally, create PR, keep branch as-is, or discard. Handles worktree cleanup. |
 | `extend` | Framework extension | The meta-skill. Interviews you about what you need, determines the right artifact (skill, specialist, agent, pack, or config change), scaffolds it with valid frontmatter, and wires it into discovery. |
 
@@ -230,13 +231,12 @@ Teams using GitLab or Bitbucket are supported via the [git host adapter](framewo
 | [PIPELINE.md](framework/PIPELINE.md) | The development pipeline |
 | [LEARNING_LOOP.md](framework/LEARNING_LOOP.md) | How Jig improves itself, from lesson to release |
 | [LIVE_PRD.md](framework/LIVE_PRD.md) | How the live PRD page and the pipeline share state |
-| [MEMORY.md](framework/MEMORY.md) | Team memory: how a memory pack plugs in, and which stage reads and saves what |
 | [DISCOVERY.md](framework/DISCOVERY.md) | How Jig finds and loads skills |
 | [SKILL_SCHEMA.md](framework/SKILL_SCHEMA.md) | Frontmatter spec for all skills |
 | [TIER_SYSTEM.md](framework/TIER_SYSTEM.md) | How tiers control activation |
 | [CONCERNS_CHECKLIST.md](framework/CONCERNS_CHECKLIST.md) | Configurable concerns checklist for specs |
 | [GIT_HOST.md](framework/GIT_HOST.md) | GitHub/GitLab/Bitbucket command mapping |
-| [HARNESS.md](framework/HARNESS.md) | What each agent harness can do: subagents, tool limits, read-only agent |
+| [HARNESS.md](framework/HARNESS.md) | What each agent harness can do: subagents, tool limits, read-only agent, reading Jig's own files |
 | [STACKED_PRS.md](framework/STACKED_PRS.md) | Building, retargeting and merging stacked PRs |
 | [Init Experience](docs/init-experience.md) | Interactive setup flow |
 | [Jig 2.0](docs/releases/2.0.md) | What changed in 2.0, upgrading, and the concessions made |

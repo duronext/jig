@@ -1,6 +1,6 @@
 {
   "name": "jig",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "The AI engineering workflow framework for teams — full lifecycle from ticket to post-mortem with quality gates at every stage",
   "author": {
     "name": "Duro Labs",
@@ -30,6 +30,7 @@
     "./core/skills/extend",
     "./core/skills/worktree",
     "./core/skills/pr-brief",
+    "./core/skills/memory",
     "./core/skills/init",
     "./packs/engineering/skills/eng-copywriting",
     "./packs/engineering/skills/eng-logging",
