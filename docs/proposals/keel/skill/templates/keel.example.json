@@ -1,0 +1,53 @@
+{
+  "feature": "Example feature",
+  "ticket": "ENG-0000",
+  "repo": "/path/to/repo",
+  "worktree": "/path/to/repo/.worktrees/eng-0000",
+  "branchPrefix": "you/eng-",
+  "gitAuthority": "local-commits-only",
+  "schedule": {
+    "cron": ["17 7 * * *", "17 15 * * *"],
+    "tz": "America/Los_Angeles"
+  },
+  "sources": {
+    "prd": { "kind": "gdoc", "fileId": "<google-doc-id>" },
+    "figma": [
+      {
+        "name": "Feature designs",
+        "short": "feat",
+        "source": "figma",
+        "fileKey": "<figma-file-key>",
+        "pages": ["<page-node-id>"],
+        "ignoreLayerNames": ["<shared chrome layer present in every frame>"]
+      }
+    ],
+    "linear": { "ids": ["ENG-0000", "ENG-0001"] },
+    "code": {
+      "githubRepo": "<org>/<repo>",
+      "schemaPath": "<path/to/schema.graphql>",
+      "watchPaths": ["<backend service dir>", "<path/to/schema.graphql>"]
+    },
+    "inbox": { "dir": "inbox" }
+  },
+  "budgets": {
+    "maxRebuildsPerPRPerDay": 2,
+    "note": "Build the whole stack; ticks detect changes and rebuild what they affect."
+  },
+  "stack": {
+    "noisePaths": ["<files the dev services rewrite at boot>"],
+    "dev": {
+      "start": "<command the engineer runs in a terminal to start the dev environment>",
+      "health": "<command that exits 0 when the app and its services are up>"
+    },
+    "postSync": {
+      "<lockfile changed>": "<install command>",
+      "<packages changed>": "<package build command>"
+    },
+    "gate": ["<typecheck command>", "<unit test command>"],
+    "verify": ["<typecheck>", "<targeted test command with {paths}>", "<lint on touched files>"],
+    "uat": {
+      "baseUrl": "http://localhost:<port>",
+      "ready": "<command that proves the served app reflects the checked-out branch>"
+    }
+  }
+}
