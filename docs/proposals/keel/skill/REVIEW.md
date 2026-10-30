@@ -39,12 +39,18 @@ and line, frame id, ticket text or schema line), and a verdict:
 ## Full review procedure
 1. Refresh sources first (TICK Phase 1–2) so reviewers see today's designs, tickets and schema.
 2. Reviewers: group plans in stack order in groups of three (neighbors review contracts
-   together). Write `reviews/plan-<group>-TS.md`.
+   together). Write `reviews/plan-<group>-TS.md`, ending with one record per plan for the
+   exact version read: `KEEL-REVIEW <plan-id> <sha256 first 16> clear|blocker` (`blocker` while
+   any blocker finding is unresolved).
 3. Fixers: one fresh agent per group applies every `fix` verdict, keeps the plan header format,
-   and records each change under `## Review changes TS` at the end of the plan.
+   records each change under `## Review changes TS` at the end of the plan, and appends a new
+   `KEEL-REVIEW` record for the version it leaves.
 4. Consistency pass: one agent re-checks check 6 across all plans after the fixes and updates
-   the plan index, `stubs.md` and `impact-map.json` if facts moved.
-5. Stamp: `bin/stamp-reviewed.py <F>` writes `planHash` = `reviewedPlanHash` and `reviewedAt`.
+   the plan index, `stubs.md` and `impact-map.json` if facts moved. Any plan it edits gets a
+   new `KEEL-REVIEW` record.
+5. Stamp: `bin/stamp-reviewed.py <F> <plan-id> ...` stamps a plan only when its newest record
+   names its current hash and says `clear`; it refuses the rest and exits 1. A refused plan is
+   re-reviewed, never stamped by hand.
 6. Summary for the engineer: `reviews/SUMMARY-TS.md`: counts by verdict, every `engineer` item
    with its default, plans whose scope or estimate changed, and ticket acceptance edits to make.
    Keel never edits the tracker; it lists the edits.

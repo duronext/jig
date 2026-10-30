@@ -70,8 +70,9 @@ changes a plan, in `ledger.md` Decisions as `agent`.
 
 ## Phase 3b: Re-review changed plans (≤20 min)
 Follow `REVIEW.md` "Re-review" for every plan whose hash differs from `reviewedPlanHash`: one
-fresh reviewer per plan plus its stack neighbors, a fresh fixer for `fix` verdicts, then stamp
-with `S/bin/stamp-reviewed.py`. A plan with an unresolved blocker stays unbuildable this tick.
+fresh reviewer per plan plus its stack neighbors, a fresh fixer for `fix` verdicts (each writes
+a `KEEL-REVIEW` record for the version it leaves), then `S/bin/stamp-reviewed.py F <plan-ids>`.
+It stamps only at a recorded, `clear` hash. A refused or blocked plan stays unbuildable this tick.
 
 ## Phase 3c: Follow main (≤30 min, every tick)
 Keeps every stack branch on the latest main so the stack never drifts.
@@ -101,7 +102,8 @@ build above an unbuilt base, never from an unreviewed plan. Blocked PRs are buil
    the plan says `complexity: high`; on a credit or capacity error retry once with the session
    model and log it.
 2. **Contract sync**: when a PR reaches level 1, built names win over plan text. A fresh agent
-   corrects every unbuilt plan that imports from it and re-stamps it.
+   corrects every unbuilt plan that imports from it, writes a `KEEL-REVIEW` record for each
+   plan it changed, and re-stamps them.
 3. After each builder: check its evidence, update `state.json` (`level: 1` only after Phase 5).
 4. Missing design alone means a design stub (shared layout patterns, real data, a visible "design
    pending" marker in dev only), registered as a design gap. Pipeline: evaluate PR N while PR
